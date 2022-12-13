@@ -1,0 +1,30 @@
+{
+  "name": "musictradebot",
+  "version": "1.0.0",
+  "description": "A music trading bot for the Rubber Duckies Discord server",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Test successful\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LeftistTachyon/musictradebot.git"
+  },
+  "keywords": [
+    "music",
+    "trade",
+    "discord",
+    "bot"
+  ],
+  "author": "LeftistTachyon",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/LeftistTachyon/musictradebot/issues"
+  },
+  "homepage": "https://github.com/LeftistTachyon/musictradebot#readme",
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "mongodb": "^4.12.1",
+    "typescript": "^4.9.4"
+  }
+}
