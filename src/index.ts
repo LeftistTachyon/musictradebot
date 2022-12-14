@@ -1,52 +1,14 @@
-import { Long, ObjectID } from "bson";
 import { config } from "dotenv";
-import { MongoClient, ServerApiVersion } from "mongodb";
+import { Long, MongoClient, ObjectId, ServerApiVersion } from "mongodb";
+import { Server, Trade, User } from "./types";
 
 config();
 
-const client = new MongoClient(process.env.MONGO_URI || "", {
+const client = new MongoClient(process.env.MONGO_URI || "missing-uri", {
   //   useNewUrlParser: true,
   //   useUnifiedTopology: true,
   serverApi: ServerApiVersion.v1,
 });
-
-type Server = {
-  uid: Long;
-  name: string;
-  users: {
-    id: ObjectID; // User
-    nickname?: string;
-    optedIn: boolean;
-  }[];
-  announcementsChannel: Long; // channel ID
-  reminderPeriod: number; // duration in minutes
-  commentPeriod: number; // duration in minutes
-};
-type Trade = {
-  name: string;
-  server: ObjectID; // Server
-  users: ObjectID[]; // User[]
-  trades: {
-    from: ObjectID; // User
-    to: ObjectID;
-    song?: { song: string; comments?: string };
-    response?: { rating: number; comments?: string };
-  }[];
-  start: Date;
-  end: Date;
-};
-type User = {
-  uid: Long;
-  name: string;
-  bio?: string;
-  likedGenres?: string;
-  dislikedGenres?: string;
-  artists?: string;
-  favoriteSongs?: string;
-  newlyDiscovered?: string;
-  favouriteSounds?: string;
-  instruments?: string;
-};
 
 async function run() {
   try {
@@ -56,6 +18,17 @@ async function run() {
     const servers = musicDB.collection<Server>("servers"),
       users = musicDB.collection<User>("users"),
       trades = musicDB.collection<Trade>("trades");
+
+    // users.insertOne({ uid: new Long("1"), name: "Jeffery" });
+    await trades.insertOne({
+      end: new Date(),
+      name: "correct horse battery staple",
+      server: new ObjectId("123456789ABCDEF012345678"),
+      start: new Date(),
+      trades: [],
+      users: [],
+    });
+    await trades.createIndex({ name: 1 }, { unique: true });
   } finally {
     await client.close();
   }
