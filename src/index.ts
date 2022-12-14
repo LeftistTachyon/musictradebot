@@ -10,40 +10,52 @@ const client = new MongoClient(process.env.MONGO_URI || "", {
   serverApi: ServerApiVersion.v1,
 });
 
+type Server = {
+  uid: Long;
+  name: string;
+  users: {
+    id: ObjectID; // User
+    nickname?: string;
+    optedIn: boolean;
+  }[];
+  announcementsChannel: Long; // channel ID
+  reminderPeriod: number; // duration in minutes
+  commentPeriod: number; // duration in minutes
+};
+type Trade = {
+  name: string;
+  server: ObjectID; // Server
+  users: ObjectID[]; // User[]
+  trades: {
+    from: ObjectID; // User
+    to: ObjectID;
+    song?: { song: string; comments?: string };
+    response?: { rating: number; comments?: string };
+  }[];
+  start: Date;
+  end: Date;
+};
+type User = {
+  uid: Long;
+  name: string;
+  bio?: string;
+  likedGenres?: string;
+  dislikedGenres?: string;
+  artists?: string;
+  favoriteSongs?: string;
+  newlyDiscovered?: string;
+  favouriteSounds?: string;
+  instruments?: string;
+};
+
 async function run() {
   try {
     await client.connect();
 
-    const musicbot = client.db("musicbot");
-    const servers = musicbot.collection("servers"),
-      users = musicbot.collection("users");
-
-    const result1 = await servers.insertOne({
-      uid: new Long("521073512568586241"),
-      name: "Glowing Guacamole",
-    });
-    console.dir(result1);
-
-    const result2 = await users.insertMany([
-      {
-        uid: new Long("935723523819839489"),
-        name: "時雨",
-        tag: "時雨#0941",
-      },
-      {
-        uid: new Long("518196574052941857"),
-        name: "LeftistTachyon",
-        tag: "LeftistTachyon#0279",
-      },
-    ]);
-    console.dir(result2);
-
-    const result3 = await Promise.all([
-      servers.createIndex({ uid: 1 }, { unique: true }),
-      users.createIndex({ uid: 1 }, { unique: true }),
-    ]);
-    console.log("Successfully parallelized operation:");
-    console.dir(result3);
+    const musicDB = client.db("musicbot");
+    const servers = musicDB.collection<Server>("servers"),
+      users = musicDB.collection<User>("users"),
+      trades = musicDB.collection<Trade>("trades");
   } finally {
     await client.close();
   }
