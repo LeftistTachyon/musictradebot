@@ -1,4 +1,4 @@
-import { Long, ObjectID } from "bson";
+import { Long } from "bson";
 
 // ! SCHEMA TYPES !
 /**
@@ -7,14 +7,19 @@ import { Long, ObjectID } from "bson";
 export type Server = {
   uid: Long;
   name: string;
-  users: {
-    id: ObjectID; // User
-    nickname?: string;
-    optedIn: boolean;
-  }[];
+  users: ServerUser[];
   announcementsChannel: Long; // channel ID
   reminderPeriod: number; // duration in minutes
   commentPeriod: number; // duration in minutes
+};
+
+/**
+ * An object that is contained within Server that represents a single user in a server
+ */
+export type ServerUser = {
+  uid: Long; // User UID
+  nickname?: string;
+  optedIn: boolean;
 };
 
 /**
@@ -22,11 +27,11 @@ export type Server = {
  */
 export type Trade = {
   name: string;
-  server: ObjectID; // Server
-  users: ObjectID[]; // User[]
+  server: Long; // Server UID
+  users: Long[]; // User UID[]
   trades: {
-    from: ObjectID; // User
-    to: ObjectID;
+    from: Long; // User UID
+    to: Long;
     song?: { song: string; comments?: string };
     response?: { rating: number; comments?: string };
   }[];

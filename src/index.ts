@@ -1,16 +1,34 @@
 import { Long } from "mongodb";
-import init, { close, deleteUser, fetchUser } from "./mongo";
+import init, {
+  addServer,
+  addServerUser,
+  close,
+  deleteUser,
+  fetchUser,
+} from "./mongo";
+import { Server, ServerUser } from "./types";
 
 async function run() {
   try {
     await init;
 
-    const me = await fetchUser(new Long("518196574052941857"));
-    console.dir(me);
-    console.log("UID:", me?.uid.toString());
+    const server: Server = {
+      uid: new Long("521073512568586241"),
+      name: "Glowing Guacamole",
+      users: [],
+      announcementsChannel: new Long("861805901434454018"),
+      reminderPeriod: 24 * 60,
+      commentPeriod: 48 * 60,
+    };
+    console.log(await addServer(server));
 
-    const del = await deleteUser(new Long("518196574052941857"));
-    console.dir(del);
+    const serverUser: ServerUser = {
+      uid: new Long("518196574052941857"),
+      optedIn: false,
+    };
+    console.log(
+      await addServerUser(new Long("521073512568586241"), serverUser)
+    );
   } finally {
     await close();
   }
