@@ -1,6 +1,9 @@
 import { Long, ObjectID } from "bson";
 
-// Schema types
+// ! SCHEMA TYPES !
+/**
+ * An object in the servers database
+ */
 export type Server = {
   uid: Long;
   name: string;
@@ -13,6 +16,10 @@ export type Server = {
   reminderPeriod: number; // duration in minutes
   commentPeriod: number; // duration in minutes
 };
+
+/**
+ * An object in the trades database
+ */
 export type Trade = {
   name: string;
   server: ObjectID; // Server
@@ -26,6 +33,10 @@ export type Trade = {
   start: Date;
   end: Date;
 };
+
+/**
+ * An object in the users database
+ */
 export type User = {
   uid: Long;
   name: string;

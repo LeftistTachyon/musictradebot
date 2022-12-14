@@ -1,36 +1,18 @@
-import { config } from "dotenv";
-import { Long, MongoClient, ObjectId, ServerApiVersion } from "mongodb";
-import { Server, Trade, User } from "./types";
-
-config();
-
-const client = new MongoClient(process.env.MONGO_URI || "missing-uri", {
-  //   useNewUrlParser: true,
-  //   useUnifiedTopology: true,
-  serverApi: ServerApiVersion.v1,
-});
+import { Long } from "mongodb";
+import init, { close, deleteUser, fetchUser } from "./mongo";
 
 async function run() {
   try {
-    await client.connect();
+    await init;
 
-    const musicDB = client.db("musicbot");
-    const servers = musicDB.collection<Server>("servers"),
-      users = musicDB.collection<User>("users"),
-      trades = musicDB.collection<Trade>("trades");
+    const me = await fetchUser(new Long("518196574052941857"));
+    console.dir(me);
+    console.log("UID:", me?.uid.toString());
 
-    // users.insertOne({ uid: new Long("1"), name: "Jeffery" });
-    await trades.insertOne({
-      end: new Date(),
-      name: "correct horse battery staple",
-      server: new ObjectId("123456789ABCDEF012345678"),
-      start: new Date(),
-      trades: [],
-      users: [],
-    });
-    await trades.createIndex({ name: 1 }, { unique: true });
+    const del = await deleteUser(new Long("518196574052941857"));
+    console.dir(del);
   } finally {
-    await client.close();
+    await close();
   }
 }
 
