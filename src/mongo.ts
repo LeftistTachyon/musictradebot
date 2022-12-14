@@ -1,11 +1,6 @@
 import { config } from "dotenv";
-import {
-  Collection,
-  Long,
-  MongoClient,
-  ObjectId,
-  ServerApiVersion,
-} from "mongodb";
+import { Long } from "bson";
+import { Collection, MongoClient, ServerApiVersion } from "mongodb";
 import { Server, ServerUser, Trade, User } from "./types";
 
 // ! INITIALIZATION ROUTINE !
@@ -242,7 +237,7 @@ export async function createTrade(trade: Trade) {
 
   if (result.acknowledged) {
     await servers.updateOne({ uid: trade.server }, [
-      { $set: { trades: { $concatArray: ["$trades", [trade]] } } },
+      { $set: { trades: { $concatArray: ["$trades", [trade.name]] } } },
     ]);
 
     return result.insertedId;
@@ -255,30 +250,20 @@ export async function createTrade(trade: Trade) {
  * @param name the name of the trade to find
  * @returns the trade with the given name, if found
  */
-export async function fetchTradeByName(name: string) {
+export async function fetchTrade(name: string) {
   return await trades.findOne({ name });
-}
-
-/**
- * Finds a trade with the given object ID and returns it
- *
- * @param id the object ID of the trade to find
- * @returns the trade with the given ID, if found
- */
-export async function fetchTrade(id: ObjectId) {
-  return await trades.findOne({ _id: id });
 }
 
 /**
  * Sets the directed graph of trades for the given trade object.
  * Each user must have one edge coming out and one edge coming in.
  *
- * @param id the ID of the trade to change
+ * @param name the name of the trade to change
  * @param graph the [from, to] pairs of user UIDs to set as the directed graph of trades. Each from must be necessarily unique, and same with to.
- * @returns whether teh operation was successful
+ * @returns whether the operation was successful
  */
-export async function setTradeGraph(id: ObjectId, graph: [Long, Long][]) {
-  const result = await trades.updateOne({ _id: id }, [
+export async function setTradeGraph(name: string, graph: [Long, Long][]) {
+  const result = await trades.updateOne({ name }, [
     {
       $set: {
         trades: graph.map(([from, to]) => ({
@@ -295,32 +280,32 @@ export async function setTradeGraph(id: ObjectId, graph: [Long, Long][]) {
 /**
  * Sets a new end date for the trade.
  *
- * @param id the ID of the trade to change
+ * @param name the name of the trade to change
  * @param date the new ending date to set for the trade
  * @returns whether the operation was successful
  */
-export async function setTradeEndDate(id: ObjectId, date: Date) {
-  const result = await trades.updateOne({ _id: id }, [{ $set: { date } }]);
+export async function setTradeEndDate(name: string, date: Date) {
+  const result = await trades.updateOne({ name }, [{ $set: { date } }]);
   return result.acknowledged && result.modifiedCount == 1;
 }
 
 /**
  * Sets the song + optional comments sent for a certain two-person trade, characterized by a JS object.
- * The two-person trade (or an edge in the trade graph) is characterized by the ID of the trade
+ * The two-person trade (or an edge in the trade graph) is characterized by the name of the trade
  * and the UID of the user sending the song
  *
- * @param tradeID the ID of the trade to add comments to
+ * @param tradeName the name of the trade to add comments to
  * @param fromUID the person sending the song (song "from")
  * @param song the song + optional comments that the user sent in
  * @returns whether the operation was successful
  */
 export async function setTradeSong(
-  tradeID: ObjectId,
+  tradeName: string,
   fromUID: Long,
   song: { song: string; comments?: string }
 ) {
   const result = await trades.updateOne(
-    { _id: tradeID, "trades.from": fromUID },
+    { name: tradeName, "trades.from": fromUID },
     [{ $set: { trades: { song } } }]
   );
 
@@ -329,22 +314,23 @@ export async function setTradeSong(
 
 /**
  * Sets the rating + optional comments for a certain two-person trade, characterized by a JS object.
- * The two-person trade (or an edge in the trade graph) is characterized by the ID of the trade
+ * The two-person trade (or an edge in the trade graph) is characterized by the name of the trade
  * and the UID of the user recieving the song
  *
- * @param tradeID the ID of the trade to add a response to
+ * @param tradeName the name of the trade to add a response to
  * @param toUID the person sending back the comments (song "to")
  * @param response the rating + optional comments that the user responded with
  * @returns whether the operation was successful
  */
 export async function setTradeResponse(
-  tradeID: ObjectId,
+  tradeName: string,
   toUID: Long,
   response: { rating: number; comments?: string }
 ) {
-  const result = await trades.updateOne({ _id: tradeID, "trades.to": toUID }, [
-    { $set: { trades: { response } } },
-  ]);
+  const result = await trades.updateOne(
+    { name: tradeName, "trades.to": toUID },
+    [{ $set: { trades: { response } } }]
+  );
 
   return result.acknowledged && result.modifiedCount == 1;
 }
