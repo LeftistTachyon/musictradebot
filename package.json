@@ -6,7 +6,9 @@
   "scripts": {
     "test": "echo \"Test successful\"",
     "build": "tsc",
-    "start": "ts-node src/index.ts"
+    "start": "ts-node -r dotenv/config src/index.ts",
+    "deploy": "ts-node -r dotenv/config src/deploy-commands.ts false",
+    "deploy:global": "ts-node -r dotenv/config src/deploy-commands.ts true"
   },
   "repository": {
     "type": "git",

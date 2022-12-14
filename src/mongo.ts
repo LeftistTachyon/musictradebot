@@ -1,11 +1,8 @@
-import { config } from "dotenv";
 import { Long } from "bson";
 import { Collection, MongoClient, ServerApiVersion } from "mongodb";
 import { Server, ServerUser, Trade, User } from "./types";
 
 // ! ============== INITIALIZATION ROUTINE ============== !
-config();
-
 const client = new MongoClient(process.env.MONGO_URI || "missing-uri", {
   //   useNewUrlParser: true,
   //   useUnifiedTopology: true,

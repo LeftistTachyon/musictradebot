@@ -1,44 +1,51 @@
-import { Long } from "mongodb";
-import init, {
-  addServer,
-  addServerUser,
-  close,
-  deleteUser,
-  fetchUser,
-  setOpt,
-} from "./mongo";
-import { Server, ServerUser } from "./types";
+import { Client, Events, GatewayIntentBits } from "discord.js";
+import init, { close } from "./mongo";
+import commands from "./commands";
+import { DateTime } from "luxon";
 
 async function run() {
   try {
     await init;
-
-    // const server: Server = {
-    //   uid: new Long("521073512568586241"),
-    //   name: "Glowing Guacamole",
-    //   users: [],
-    //   announcementsChannel: new Long("861805901434454018"),
-    //   reminderPeriod: 24 * 60,
-    //   commentPeriod: 48 * 60,
-    // };
-    // console.log(await addServer(server));
-
-    // const serverUser: ServerUser = {
-    //   uid: new Long("518196574052941857"),
-    //   optedIn: false,
-    // };
-    // console.log(
-    //   await addServerUser(new Long("521073512568586241"), serverUser)
-    // );
-
-    // await setOpt(
-    //   new Long("521073512568586241"),
-    //   new Long("518196574052941857"),
-    //   true
-    // );
   } finally {
     await close();
   }
 }
 
 run().catch(console.dir);
+
+const client: Client = new Client({ intents: [GatewayIntentBits.Guilds] });
+
+client.on(Events.InteractionCreate, async (interaction) => {
+  if (!interaction.isChatInputCommand()) return;
+
+  // console.dir(interaction);
+  // console.log(
+  //   DateTime.fromMillis(
+  //     (Number(interaction.id) >> 22) + 1420070400000
+  //   ).toString()
+  // );
+  // I tried :(
+
+  const command = commands.get(interaction.commandName);
+
+  if (!command) {
+    console.error(`No command matching ${interaction.commandName} was found.`);
+    return;
+  }
+
+  try {
+    await command.execute(interaction);
+  } catch (error) {
+    console.error(error);
+    await interaction.reply({
+      content: "Therew as an error while executing this command!",
+      ephemeral: true,
+    });
+  }
+});
+
+client.once(Events.ClientReady, (c) => {
+  console.log(`Ready! Logged in as ${c.user.tag}`);
+});
+
+client.login(process.env.DISCORD_TOKEN);
