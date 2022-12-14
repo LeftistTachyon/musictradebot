@@ -1,3 +1,3 @@
-# Music Trade Bot
-## I'll think of a more creative name later
+# Music Trader 2000
+
 A music trading bot for the Rubber Duckies Discord server
