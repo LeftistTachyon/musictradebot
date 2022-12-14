@@ -11,6 +11,7 @@ export type Server = {
   announcementsChannel: Long; // channel ID
   reminderPeriod: number; // duration in minutes
   commentPeriod: number; // duration in minutes
+  pingableRole?: Long; // role UID
 };
 
 /**

@@ -1,5 +1,12 @@
 import { config } from "dotenv";
-import { Collection, Long, MongoClient, ServerApiVersion } from "mongodb";
+import {
+  Collection,
+  Long,
+  MongoClient,
+  ObjectId,
+  ServerApiVersion,
+} from "mongodb";
+import { format } from "path";
 import { Server, ServerUser, Trade, User } from "./types";
 
 // ! INITIALIZATION ROUTINE !
@@ -93,14 +100,10 @@ export async function addServer(server: Server) {
  * Finds the server with the given UID and returns it.
  *
  * @param uid the UID of the server to fetch
- * @returns the server with the given UID
- * @throws InvalidServerError if an invalid (or unregistered) server UID is given
+ * @returns the server with the given UID, if it exists. Otherwise, null.
  */
-async function getServer(uid: Long) {
-  const output = await servers.findOne({ uid });
-  if (!output)
-    throw new InvalidServerError(`Server ${uid.toString()} not found!`);
-  return output;
+export async function getServer(uid: Long) {
+  return await servers.findOne({ uid });
 }
 
 /**
@@ -129,7 +132,7 @@ export async function updateServerSettings(
     commentPeriod?: number;
   }
 ) {
-  const result = await servers.updateOne({ uid }, { $set: settings });
+  const result = await servers.updateOne({ uid }, [{ $set: settings }]);
   return result.acknowledged && result.modifiedCount == 1;
 }
 
@@ -144,19 +147,26 @@ export async function updateServerAnnounceCh(
   uid: Long,
   announcementsChannel: Long
 ) {
-  const result = await servers.updateOne(
-    { uid },
-    { $set: { announcementsChannel } }
-  );
+  const result = await servers.updateOne({ uid }, [
+    { $set: { announcementsChannel } },
+  ]);
+
+  return result.acknowledged && result.modifiedCount == 1;
+}
+
+/**
+ * Updates the pingable role for the given server.
+ *
+ * @param uid the UID of the server to update
+ * @param pingableRole the new pingable role for the server
+ * @returns whether the operation was successful
+ */
+export async function updateServerPingableRole(uid: Long, pingableRole: Long) {
+  const result = await servers.updateOne({ uid }, [{ $set: { pingableRole } }]);
   return result.acknowledged && result.modifiedCount == 1;
 }
 
 // no delete function, as that information will persist unless manually deleted by a bot maintainer
-
-/**
- * An error that shows that a server was attempted to be found when it is not in the database
- */
-class InvalidServerError extends Error {}
 
 // ! SERVER-SPECIFIC USER CR[U]D !
 /**
@@ -167,10 +177,10 @@ class InvalidServerError extends Error {}
  * @returns whether the operation was successful
  */
 export async function addServerUser(serverUID: Long, user: ServerUser) {
-  const result = await servers.updateOne(
-    { uid: serverUID },
-    { $concatArrays: { users: [user] } }
-  );
+  const result = await servers.updateOne({ uid: serverUID }, [
+    { $set: { users: { $concatArrays: ["$users", [user]] } } },
+  ]);
+
   return result.acknowledged && result.modifiedCount == 1;
 }
 
@@ -185,10 +195,154 @@ export async function addServerUser(serverUID: Long, user: ServerUser) {
 export async function setOpt(serverUID: Long, userUID: Long, optedIn: boolean) {
   const result = await servers.updateOne(
     { uid: serverUID, "users.uid": userUID },
-    { $set: { opt: optedIn } }
+    [{ $set: { users: { optedIn } } }]
   );
+
   return result.acknowledged && result.modifiedCount == 1;
 }
+
+/**
+ * Changes the given user's nickname in the given server, if possible.
+ *
+ * @param serverUID the UID of the server to change the nickname in
+ * @param userUID the UID of the user to change the nickname of
+ * @param nickname the new nickname for the user
+ * @returns whether the operation was successful
+ */
+export async function setNickname(
+  serverUID: Long,
+  userUID: Long,
+  nickname: string
+) {
+  const result = await servers.updateOne(
+    { uid: serverUID, "users.uid": userUID },
+    [
+      {
+        $set: {
+          users: {
+            nickname: nickname.toLowerCase() == "none" ? undefined : nickname,
+          },
+        },
+      },
+    ]
+  );
+
+  return result.acknowledged && result.modifiedCount == 1;
+}
+
+// ! TRADE [CRU]D !
+/**
+ * Inserts the given trade into the trades database
+ *
+ * @param trade the trade to insert into the database
+ * @returns the inserted trade's ID, if successful. If not, null.
+ */
+export async function createTrade(trade: Trade) {
+  const result = await trades.insertOne(trade);
+  return result.acknowledged ? result.insertedId : null;
+}
+
+/**
+ * Finds a trade with the given name and returns it
+ *
+ * @param name the name of the trade to find
+ * @returns the trade with the given name, if found
+ */
+export async function fetchTradeByName(name: string) {
+  return await trades.findOne({ name });
+}
+
+/**
+ * Finds a trade with the given object ID and returns it
+ *
+ * @param id the object ID of the trade to find
+ * @returns the trade with the given ID, if found
+ */
+export async function fetchTrade(id: ObjectId) {
+  return await trades.findOne({ _id: id });
+}
+
+/**
+ * Sets the directed graph of trades for the given trade object.
+ * Each user must have one edge coming out and one edge coming in.
+ *
+ * @param id the ID of the trade to change
+ * @param graph the [from, to] pairs of user UIDs to set as the directed graph of trades. Each from must be necessarily unique, and same with to.
+ * @returns whether teh operation was successful
+ */
+export async function setTradeGraph(id: ObjectId, graph: [Long, Long][]) {
+  const result = await trades.updateOne({ _id: id }, [
+    {
+      $set: {
+        trades: graph.map(([from, to]) => ({
+          from,
+          to,
+        })),
+      },
+    },
+  ]);
+
+  return result.acknowledged && result.modifiedCount == 1;
+}
+
+/**
+ * Sets a new end date for the trade.
+ *
+ * @param id the ID of the trade to change
+ * @param date the new ending date to set for the trade
+ * @returns whether the operation was successful
+ */
+export async function setTradeEndDate(id: ObjectId, date: Date) {
+  const result = await trades.updateOne({ _id: id }, [{ $set: { date } }]);
+  return result.acknowledged && result.modifiedCount == 1;
+}
+
+/**
+ * Sets the song + optional comments sent for a certain two-person trade, characterized by a JS object.
+ * The two-person trade (or an edge in the trade graph) is characterized by the ID of the trade
+ * and the UID of the user sending the song
+ *
+ * @param tradeID the ID of the trade to add comments to
+ * @param fromUID the person sending the song (song "from")
+ * @param song the song + optional comments that the user sent in
+ * @returns whether the operation was successful
+ */
+export async function setTradeSong(
+  tradeID: ObjectId,
+  fromUID: Long,
+  song: { song: string; comments?: string }
+) {
+  const result = await trades.updateOne(
+    { _id: tradeID, "trades.from": fromUID },
+    [{ $set: { trades: { song } } }]
+  );
+
+  return result.acknowledged && result.modifiedCount == 1;
+}
+
+/**
+ * Sets the rating + optional comments for a certain two-person trade, characterized by a JS object.
+ * The two-person trade (or an edge in the trade graph) is characterized by the ID of the trade
+ * and the UID of the user recieving the song
+ *
+ * @param tradeID the ID of the trade to add a response to
+ * @param toUID the person sending back the comments (song "to")
+ * @param response the rating + optional comments that the user responded with
+ * @returns whether the operation was successful
+ */
+export async function setTradeResponse(
+  tradeID: ObjectId,
+  toUID: Long,
+  response: { rating: number; comments?: string }
+) {
+  const result = await trades.updateOne({ _id: tradeID, "trades.to": toUID }, [
+    { $set: { trades: { response } } },
+  ]);
+
+  return result.acknowledged && result.modifiedCount == 1;
+}
+
+// no delete, as these will be retained perpetually
 
 // ! CLEANUP FUNCTIONS !
 /**
