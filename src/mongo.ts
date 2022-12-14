@@ -6,7 +6,6 @@ import {
   ObjectId,
   ServerApiVersion,
 } from "mongodb";
-import { format } from "path";
 import { Server, ServerUser, Trade, User } from "./types";
 
 // ! INITIALIZATION ROUTINE !
@@ -232,14 +231,22 @@ export async function setNickname(
 
 // ! TRADE [CRU]D !
 /**
- * Inserts the given trade into the trades database
+ * Inserts the given trade into the trades database.
+ * Also links to the given server. If no server exists, this will fail silently.
  *
  * @param trade the trade to insert into the database
  * @returns the inserted trade's ID, if successful. If not, null.
  */
 export async function createTrade(trade: Trade) {
   const result = await trades.insertOne(trade);
-  return result.acknowledged ? result.insertedId : null;
+
+  if (result.acknowledged) {
+    await servers.updateOne({ uid: trade.server }, [
+      { $set: { trades: { $concatArray: ["$trades", [trade]] } } },
+    ]);
+
+    return result.insertedId;
+  } else return null;
 }
 
 /**

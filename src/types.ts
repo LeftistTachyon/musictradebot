@@ -1,4 +1,4 @@
-import { Long } from "bson";
+import { Long, ObjectId } from "bson";
 
 // ! SCHEMA TYPES !
 /**
@@ -8,7 +8,8 @@ export type Server = {
   uid: Long;
   name: string;
   users: ServerUser[];
-  announcementsChannel: Long; // channel ID
+  trades: ObjectId[]; // trade IDs
+  announcementsChannel: Long; // channel UID
   reminderPeriod: number; // duration in minutes
   commentPeriod: number; // duration in minutes
   pingableRole?: Long; // role UID
