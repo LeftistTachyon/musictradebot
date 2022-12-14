@@ -1,6 +1,6 @@
 import { Long } from "bson";
 
-// ! SCHEMA TYPES !
+// ! =================== SCHEMA TYPES =================== !
 /**
  * An object in the servers database
  */

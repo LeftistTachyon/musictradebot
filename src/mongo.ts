@@ -3,7 +3,7 @@ import { Long } from "bson";
 import { Collection, MongoClient, ServerApiVersion } from "mongodb";
 import { Server, ServerUser, Trade, User } from "./types";
 
-// ! INITIALIZATION ROUTINE !
+// ! ============== INITIALIZATION ROUTINE ============== !
 config();
 
 const client = new MongoClient(process.env.MONGO_URI || "missing-uri", {
@@ -29,7 +29,7 @@ export default (async () => {
   trades = musicDB.collection<Trade>("trades");
 })();
 
-// ! USER CRUD !
+// ! ==================== USER CRUD ===================== !
 /**
  * Updates or, if it cannot find a match, inserts the given user into the database
  *
@@ -79,7 +79,7 @@ export async function deleteUser(uid: Long) {
   return result.acknowledged && result.deletedCount == 1;
 }
 
-// ! SERVER [CRU]D !
+// ! ================== SERVER [CRU]D =================== !
 /**
  * Adds a new server into the database
  *
@@ -162,7 +162,7 @@ export async function updateServerPingableRole(uid: Long, pingableRole: Long) {
 
 // no delete function, as that information will persist unless manually deleted by a bot maintainer
 
-// ! SERVER-SPECIFIC USER CR[U]D !
+// ! =========== SERVER-SPECIFIC USER CR[U]D ============ !
 /**
  * Adds a user to the list of users of the given server
  *
@@ -224,7 +224,7 @@ export async function setNickname(
   return result.acknowledged && result.modifiedCount == 1;
 }
 
-// ! TRADE [CRU]D !
+// ! =================== TRADE [CRU]D =================== !
 /**
  * Inserts the given trade into the trades database.
  * Also links to the given server. If no server exists, this will fail silently.
@@ -337,7 +337,7 @@ export async function setTradeResponse(
 
 // no delete, as these will be retained perpetually
 
-// ! CLEANUP FUNCTIONS !
+// ! ================ CLEANUP FUNCTIONS ================= !
 /**
  * Closes the Mongo client.
  */
