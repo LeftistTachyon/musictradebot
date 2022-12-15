@@ -7,33 +7,73 @@ import { profileString } from "../util";
 const profile: DiscordCommand = {
   data: new SlashCommandBuilder()
     .setName("profile")
-    .addUserOption((option) =>
-      option.setName("user").setDescription("The user to pull the profile of")
+    .setDescription("Create, update, or find a music profile")
+    .addSubcommand((builder) =>
+      builder
+        .setName("find")
+        .setDescription("Fetch your own or somebody else's music profile")
+        .addUserOption((option) =>
+          option
+            .setName("user")
+            .setDescription("The user to pull the profile of")
+        )
     )
-    .setDescription("Fetch your own or somebody else's music profile"),
+    .addSubcommand((builder) =>
+      builder
+        .setName("create")
+        .setDescription("Lets you create a new music profile")
+    )
+    .addSubcommand((builder) =>
+      builder
+        .setName("update")
+        .setDescription("Lets you update your existing music profile")
+    )
+    .setDMPermission(true),
 
   async execute(interaction) {
     if (interaction.guildId) {
-      await interaction.deferReply();
+      const subCommand = interaction.options.getSubcommand();
 
-      const u = interaction.options.getUser("user", false) || interaction.user,
-        userUID = new Long(u.id);
-      const userProfile = await fetchUser(userUID);
+      if (subCommand == "create") {
+        // create "create profile" button
+        interaction.reply({
+          content: "(Create button here)",
+          ephemeral: true,
+        });
+      } else if (subCommand == "update") {
+        // create "update profile" button
+        interaction.reply({
+          content: "(Update button here)",
+          ephemeral: true,
+        });
+      } else if (subCommand == "find") {
+        await interaction.deferReply();
 
-      if (userProfile) {
-        const serverUserProfile = await fetchServerUser(
-          new Long(interaction.guildId),
-          userUID
-        );
+        const u =
+            interaction.options.getUser("user", false) || interaction.user,
+          userUID = new Long(u.id);
+        const userProfile = await fetchUser(userUID);
 
-        const name = serverUserProfile?.nickname ?? userProfile.name;
-        interaction.editReply(
-          `**${name}'s Music Profile**:${profileString(userProfile)}`
-        );
+        if (userProfile) {
+          const serverUserProfile = await fetchServerUser(
+            new Long(interaction.guildId),
+            userUID
+          );
+
+          const name = serverUserProfile?.nickname ?? userProfile.name;
+          interaction.editReply(
+            `**${name}'s Music Profile**:${profileString(userProfile)}`
+          );
+        } else {
+          interaction.editReply(
+            `Sorry, ${u.username} does not have a music profile.`
+          );
+        }
       } else {
-        interaction.editReply(
-          `Sorry, ${u.username} does not have a music profile.`
-        );
+        interaction.reply({
+          content: "How did you even call a subcommand that doesn't exist!?",
+          ephemeral: true,
+        });
       }
     } else
       interaction.reply({
