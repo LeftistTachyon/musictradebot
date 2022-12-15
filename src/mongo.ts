@@ -113,6 +113,22 @@ export async function getServer(uid: Long) {
 }
 
 /**
+ * Finds the server-user profile from the given server and user and returns it.
+ *
+ * @param serverUID the UID of the server to find the user in
+ * @param userUID the UID of the user to find in the given server
+ * @returns the server-user profile, if it exsists. Otherwise, null.
+ */
+export async function fetchServerUser(serverUID: Long, userUID: Long) {
+  const server = await servers.findOne({
+    uid: serverUID,
+    "users.uid": userUID,
+  });
+
+  return server?.users[0];
+}
+
+/**
  * Updates the name for the given server.
  *
  * @param uid the UID of the server to update

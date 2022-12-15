@@ -3,7 +3,7 @@ import { randomInt } from "crypto";
 import { DateTime } from "luxon";
 import adjectives from "../data/adjectives.json";
 import nouns from "../data/nouns.json";
-import { Server, Trade } from "./types";
+import { Server, Trade, User } from "./types";
 
 // ! ==================== DATA UTIL ===================== !
 /**
@@ -80,6 +80,30 @@ export function extendDeadline(trade: Trade, extendBy: number): Trade {
     .toJSDate();
 
   return trade;
+}
+
+/**
+ * Generates a music profile printout for the given user.
+ *
+ * @param u the user to generate the profile printout for
+ * @returns the profile printout
+ */
+export function profileString(u: User) {
+  let output = u.bio ? `*${u.bio}*` : "";
+  if (u.likedGenres) output += `\n\n__Liked Genres__:\n\`${u.likedGenres}\``;
+  if (u.dislikedGenres)
+    output += `\n\n__Disliked Genres__:\n\`${u.dislikedGenres}\``;
+  if (u.artists)
+    output += `\n\n__Artists Mostly Listened To__:\n\`${u.artists}\``;
+  if (u.favoriteSongs)
+    output += `\n\n__Favorite Songs__:\n\`${u.favoriteSongs}\``;
+  if (u.newlyDiscovered)
+    output += `\n\n__Newly Discovered Artists__:\n\`${u.artists}\``;
+  if (u.favoriteSounds)
+    output += `\n\n__Favorite Sounds__:\n\`${u.favoriteSounds}\``;
+  if (u.instruments) output += `\n\n__Instruments__:\n\`${u.instruments}\``;
+
+  return output;
 }
 
 // ! =================== DISCORD UTIL =================== !
