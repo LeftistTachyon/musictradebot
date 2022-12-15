@@ -6,14 +6,13 @@ import { DiscordCommand } from "../types";
 const setname: DiscordCommand = {
   data: new SlashCommandBuilder()
     .setName("setname")
-    .setDescription("Change your preferred name")
     .addStringOption((option) =>
       option
         .setName("name")
         .setDescription("Your new preferred name")
         .setRequired(true)
     )
-    .setDMPermission(false),
+    .setDescription("Change your preferred name"),
 
   async execute(interaction) {
     await interaction.deferReply({ ephemeral: true });

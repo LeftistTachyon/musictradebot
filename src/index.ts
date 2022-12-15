@@ -1,15 +1,9 @@
 import { Client, Events, GatewayIntentBits } from "discord.js";
-import { Long } from "mongodb";
 import commands from "./commands";
-import init, { addServer, close, upsertUser } from "./mongo";
+import init, { close } from "./mongo";
 
 async function run() {
   await init;
-
-  // upsertUser({
-  //   uid: new Long("518196574052941857"),
-  //   name: "LeftistTachyon",
-  // });
 
   const client: Client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
