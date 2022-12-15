@@ -1,4 +1,8 @@
-import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import {
+  PermissionFlagsBits,
+  PermissionsBitField,
+  SlashCommandBuilder,
+} from "discord.js";
 import { DiscordCommand } from "../types";
 
 const trade: DiscordCommand = {
@@ -9,7 +13,7 @@ const trade: DiscordCommand = {
       builder
         .setName("start")
         .setDescription("Start a song trade")
-        .addNumberOption((option) =>
+        .addIntegerOption((option) =>
           option
             .setName("deadline")
             .setDescription(
@@ -44,7 +48,7 @@ const trade: DiscordCommand = {
             .setAutocomplete(true)
             .setRequired(true)
         )
-        .addNumberOption((option) =>
+        .addIntegerOption((option) =>
           option
             .setName("days")
             .setDescription("The number of days to extend the deadline by")
@@ -56,13 +60,30 @@ const trade: DiscordCommand = {
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   async execute(interaction) {
-    if (interaction.guildId) {
-      await interaction.deferReply({ ephemeral: true });
-    } else
+    if (!interaction.guildId) {
       interaction.reply({
         content: "Sorry, this command only works in servers I'm in!",
         ephemeral: true,
       });
+
+      return;
+    }
+
+    if (
+      !(interaction.member?.permissions as Readonly<PermissionsBitField>).has(
+        PermissionsBitField.Flags.Administrator
+      )
+    ) {
+      interaction.reply({
+        content: "Sorry, this command can only be used by admins!",
+        ephemeral: true,
+      });
+
+      return;
+    }
+
+    await interaction.deferReply({ ephemeral: true });
+    interaction.editReply("hehe should be stuff here but no");
   },
 };
 

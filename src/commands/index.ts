@@ -4,6 +4,7 @@ import optin from "./optin";
 import optout from "./optout";
 import ping from "./ping";
 import profile from "./profile";
+import setchannel from "./setchannel";
 import setname from "./setname";
 import setnickname from "./setnickname";
 import trade from "./trade";
@@ -14,6 +15,7 @@ export const commandList: DiscordCommand[] = [
   optout,
   ping,
   profile,
+  setchannel,
   setname,
   setnickname,
   trade,

@@ -35,13 +35,13 @@ const profile: DiscordCommand = {
       const subCommand = interaction.options.getSubcommand();
 
       if (subCommand == "create") {
-        // create "create profile" button
+        // TODO: create "create profile" button
         interaction.reply({
           content: "(Create button here)",
           ephemeral: true,
         });
       } else if (subCommand == "update") {
-        // create "update profile" button
+        // TODO: create "update profile" button
         interaction.reply({
           content: "(Update button here)",
           ephemeral: true,
