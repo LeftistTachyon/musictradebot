@@ -1,9 +1,13 @@
 import { Client, Events, GatewayIntentBits } from "discord.js";
+import { DateTime } from "luxon";
 import commands from "./commands";
 import init, { close } from "./mongo";
 
+const programStart = DateTime.now();
+
 async function run() {
   await init;
+  console.log(`Database connected in ${-programStart.diffNow().toMillis()} ms`);
 
   const client: Client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
@@ -27,11 +31,17 @@ async function run() {
           ephemeral: true,
         });
       }
+    } else if (interaction.isButton()) {
+      console.dir(interaction);
     }
   });
 
   client.once(Events.ClientReady, (c) => {
-    console.log(`Ready! Logged in as ${c.user.tag}`);
+    console.log(
+      `Ready! Logged in as ${c.user.tag} in ${-programStart
+        .diffNow()
+        .toMillis()} ms`
+    );
   });
 
   client.on(Events.Invalidated, async () => {

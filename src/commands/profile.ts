@@ -1,5 +1,10 @@
-import { SlashCommandBuilder } from "discord.js";
 import { Long } from "bson";
+import {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  SlashCommandBuilder,
+} from "discord.js";
 import { fetchServerUser, fetchUser } from "../mongo";
 import { DiscordCommand } from "../types";
 import { isInServer, profileString } from "../util";
@@ -11,7 +16,7 @@ const profile: DiscordCommand = {
     .addSubcommand((builder) =>
       builder
         .setName("find")
-        .setDescription("Fetch your own or somebody else's music profile")
+        .setDescription("Fetches your own or somebody else's music profile")
         .addUserOption((option) =>
           option
             .setName("user")
@@ -19,14 +24,15 @@ const profile: DiscordCommand = {
         )
     )
     .addSubcommand((builder) =>
-      builder
-        .setName("create")
-        .setDescription("Lets you create a new music profile")
+      builder.setName("create").setDescription("Creates a new music profile")
     )
     .addSubcommand((builder) =>
       builder
         .setName("update")
-        .setDescription("Lets you update your existing music profile")
+        .setDescription("Updates your existing music profile")
+    )
+    .addSubcommand((builder) =>
+      builder.setName("delete").setDescription("Deletes your music profile")
     )
     .setDMPermission(true),
 
@@ -45,6 +51,13 @@ const profile: DiscordCommand = {
       // TODO: create "update profile" button
       interaction.reply({
         content: "(Update button here)",
+        ephemeral: true,
+      });
+    } else if (subCommand === "delete") {
+      // TODO: create "delete profile" button
+      interaction.reply({
+        content: "Are you sure you want to delete your profile?",
+        components: [deleteConfirmation],
         ephemeral: true,
       });
     } else if (subCommand === "find") {
@@ -77,5 +90,16 @@ const profile: DiscordCommand = {
     }
   },
 };
+
+const deleteConfirmation = new ActionRowBuilder<ButtonBuilder>().addComponents(
+  new ButtonBuilder()
+    .setCustomId("confirm")
+    .setLabel("Yes, I'm sure!")
+    .setStyle(ButtonStyle.Danger),
+  new ButtonBuilder()
+    .setCustomId("cancel")
+    .setLabel("No, I'm not.")
+    .setStyle(ButtonStyle.Secondary)
+);
 
 export default profile;
