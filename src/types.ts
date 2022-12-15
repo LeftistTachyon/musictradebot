@@ -1,5 +1,9 @@
 import { Long } from "bson";
-import { SlashCommandBuilder, Interaction, CacheType } from "discord.js";
+import {
+  CacheType,
+  ChatInputCommandInteraction,
+  SlashCommandBuilder,
+} from "discord.js";
 
 // ! =================== SCHEMA TYPES =================== !
 /**
@@ -61,5 +65,7 @@ export type User = {
 // ! ================== DISCORD TYPES =================== !
 export type DiscordCommand = {
   data: SlashCommandBuilder;
-  execute: (interaction: Interaction<CacheType>) => Promise<void>;
+  execute: (
+    interaction: ChatInputCommandInteraction<CacheType>
+  ) => Promise<void>;
 };

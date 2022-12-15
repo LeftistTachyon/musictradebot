@@ -17,6 +17,7 @@ let servers: Collection<Server>,
  * A Promise that returns when the Mongo client is fully initialized
  */
 export default (async () => {
+  console.log("Connecting to music bot DB...");
   await client.connect();
 
   const musicDB = client.db("musicbot");
@@ -25,6 +26,16 @@ export default (async () => {
   users = musicDB.collection<User>("users");
   trades = musicDB.collection<Trade>("trades");
 })();
+
+// ! PING !
+/**
+ * Pings the database.
+ *
+ * @returns the response to the ping
+ */
+export async function pingDB() {
+  return await client.db("admin").command({ ping: 1 });
+}
 
 // ! ==================== USER CRUD ===================== !
 /**
