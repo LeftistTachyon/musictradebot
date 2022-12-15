@@ -190,6 +190,18 @@ export async function updateServerPingableRole(uid: Long, pingableRole: Long) {
 
 // no delete function, as that information will persist unless manually deleted by a bot maintainer
 
+/**
+ * Removes the pingable role for the given server.
+ *
+ * @param uid the UID the server to update
+ * @returns whether the operation was successful
+ */
+export async function removeServerPingableRole(uid: Long) {
+  const result = await servers.updateOne({ uid }, [{ $unset: "pingableRole" }]);
+
+  return result.acknowledged && result.matchedCount == 1;
+}
+
 // ! =========== SERVER-SPECIFIC USER CR[U]D ============ !
 /**
  * Adds a user to the list of users of the given server
