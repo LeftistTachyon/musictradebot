@@ -7,6 +7,7 @@ import profile from "./profile";
 import setchannel from "./setchannel";
 import setname from "./setname";
 import setnickname from "./setnickname";
+import setperiod from "./setperiod";
 import trade from "./trade";
 
 // ! Add any new commands into this list
@@ -18,6 +19,7 @@ export const commandList: DiscordCommand[] = [
   setchannel,
   setname,
   setnickname,
+  setperiod,
   trade,
 ];
 
