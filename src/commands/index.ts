@@ -5,6 +5,7 @@ import optout from "./optout";
 import ping from "./ping";
 import setname from "./setname";
 import setnickname from "./setnickname";
+import trade from "./trade";
 
 // ! Add any new commands into this list
 export const commandList: DiscordCommand[] = [
@@ -13,6 +14,7 @@ export const commandList: DiscordCommand[] = [
   optout,
   setname,
   setnickname,
+  trade,
 ];
 
 // Creating collection of commands
