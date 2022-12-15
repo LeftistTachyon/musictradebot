@@ -49,7 +49,9 @@ const setperiod: DiscordCommand = {
     .addNumberOption((option) =>
       option
         .setName("timeframe")
-        .setDescription("The number of hours to set this setting to")
+        .setDescription(
+          "The number of hours to set this setting to. No value = default value"
+        )
         .setMinValue(1)
     )
     .setDMPermission(false)
@@ -58,7 +60,7 @@ const setperiod: DiscordCommand = {
   async execute(interaction) {
     if (!isInServer(interaction) || !isAdmin(interaction)) return;
 
-    interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ ephemeral: true });
 
     const setting = interaction.options.getString("setting", true),
       timeframe =

@@ -54,7 +54,7 @@ export async function upsertUser(user: User) {
   );
   return (
     result.acknowledged &&
-    (result.modifiedCount == 1 || result.upsertedCount == 1)
+    (result.matchedCount == 1 || result.upsertedCount == 1)
   );
 }
 
@@ -77,7 +77,7 @@ export async function fetchUser(uid: Long) {
  */
 export async function setUserName(uid: Long, name: string) {
   const result = await users.updateOne({ uid }, { $set: { name } });
-  return result.acknowledged && result.modifiedCount == 1;
+  return result.acknowledged && result.matchedCount == 1;
 }
 
 /**
@@ -137,7 +137,7 @@ export async function fetchServerUser(serverUID: Long, userUID: Long) {
  */
 export async function updateServerName(uid: Long, name: string) {
   const result = await servers.updateOne({ uid }, { name });
-  return result.acknowledged && result.modifiedCount == 1;
+  return result.acknowledged && result.matchedCount == 1;
 }
 
 /**
@@ -155,7 +155,7 @@ export async function updateServerSettings(
   }
 ) {
   const result = await servers.updateOne({ uid }, [{ $set: settings }]);
-  return result.acknowledged && result.modifiedCount == 1;
+  return result.acknowledged && result.matchedCount == 1;
 }
 
 /**
@@ -173,7 +173,7 @@ export async function updateServerAnnounceCh(
     { $set: { announcementsChannel } },
   ]);
 
-  return result.acknowledged && result.modifiedCount == 1;
+  return result.acknowledged && result.matchedCount == 1;
 }
 
 /**
@@ -185,7 +185,7 @@ export async function updateServerAnnounceCh(
  */
 export async function updateServerPingableRole(uid: Long, pingableRole: Long) {
   const result = await servers.updateOne({ uid }, [{ $set: { pingableRole } }]);
-  return result.acknowledged && result.modifiedCount == 1;
+  return result.acknowledged && result.matchedCount == 1;
 }
 
 // no delete function, as that information will persist unless manually deleted by a bot maintainer
@@ -203,7 +203,7 @@ export async function addServerUser(serverUID: Long, user: ServerUser) {
     { $set: { users: { $concatArrays: ["$users", [user]] } } },
   ]);
 
-  return result.acknowledged && result.modifiedCount == 1;
+  return result.acknowledged && result.matchedCount == 1;
 }
 
 /**
@@ -220,7 +220,7 @@ export async function setOpt(serverUID: Long, userUID: Long, optedIn: boolean) {
     [{ $set: { users: { optedIn } } }]
   );
 
-  return result.acknowledged && result.modifiedCount == 1;
+  return result.acknowledged && result.matchedCount == 1;
 }
 
 /**
@@ -249,7 +249,7 @@ export async function setNickname(
     ]
   );
 
-  return result.acknowledged && result.modifiedCount == 1;
+  return result.acknowledged && result.matchedCount == 1;
 }
 
 // ! =================== TRADE [CRU]D =================== !
@@ -302,7 +302,7 @@ export async function setTradeGraph(name: string, graph: [Long, Long][]) {
     },
   ]);
 
-  return result.acknowledged && result.modifiedCount == 1;
+  return result.acknowledged && result.matchedCount == 1;
 }
 
 /**
@@ -314,7 +314,7 @@ export async function setTradeGraph(name: string, graph: [Long, Long][]) {
  */
 export async function setTradeEndDate(name: string, date: Date) {
   const result = await trades.updateOne({ name }, [{ $set: { date } }]);
-  return result.acknowledged && result.modifiedCount == 1;
+  return result.acknowledged && result.matchedCount == 1;
 }
 
 /**
@@ -337,7 +337,7 @@ export async function setTradeSong(
     [{ $set: { trades: { song } } }]
   );
 
-  return result.acknowledged && result.modifiedCount == 1;
+  return result.acknowledged && result.matchedCount == 1;
 }
 
 /**
@@ -360,7 +360,7 @@ export async function setTradeResponse(
     [{ $set: { trades: { response } } }]
   );
 
-  return result.acknowledged && result.modifiedCount == 1;
+  return result.acknowledged && result.matchedCount == 1;
 }
 
 // no delete, as these will be retained perpetually
