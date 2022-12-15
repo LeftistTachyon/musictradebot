@@ -10,25 +10,28 @@ const optin: DiscordCommand = {
     .setDMPermission(false),
 
   async execute(interaction) {
-    if (interaction.guildId) {
-      await interaction.deferReply({ ephemeral: true });
-
-      const successful = await setOpt(
-        new Long(interaction.guildId),
-        new Long(interaction.user.id),
-        true
-      );
-
-      interaction.editReply(
-        successful
-          ? `You have successfully opted into ${interaction.guild?.name}'s music trades!`
-          : "Something went horribly wrong! Please let the server owner know that you can't opt into trades!"
-      );
-    } else
+    if (!interaction.guildId) {
       interaction.reply({
         content: "Sorry, this command only works in servers I'm in!",
         ephemeral: true,
       });
+
+      return;
+    }
+
+    await interaction.deferReply({ ephemeral: true });
+
+    const successful = await setOpt(
+      new Long(interaction.guildId),
+      new Long(interaction.user.id),
+      true
+    );
+
+    interaction.editReply(
+      successful
+        ? `You have successfully opted into ${interaction.guild?.name}'s music trades!`
+        : "Something went horribly wrong! Please let the server owner know that you can't opt into trades!"
+    );
   },
 };
 

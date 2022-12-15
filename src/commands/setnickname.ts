@@ -15,26 +15,29 @@ const setnickname: DiscordCommand = {
     )
     .setDMPermission(false),
   async execute(interaction) {
-    if (interaction.guildId) {
-      await interaction.deferReply({ ephemeral: true });
-
-      const newNickname = interaction.options.getString("nickname", true);
-      const successful = await setNickname(
-        new Long(interaction.guildId),
-        new Long(interaction.user.id),
-        newNickname
-      );
-
-      interaction.editReply(
-        successful
-          ? `Successfully changed your nickname in this server to ${newNickname}!`
-          : "Something went horribly wrong! Please let the server owner know that you can't change your nickname!"
-      );
-    } else
+    if (!interaction.guildId) {
       interaction.reply({
         content: "Sorry, this command only works in servers I'm in!",
         ephemeral: true,
       });
+
+      return;
+    }
+
+    await interaction.deferReply({ ephemeral: true });
+
+    const newNickname = interaction.options.getString("nickname", true);
+    const successful = await setNickname(
+      new Long(interaction.guildId),
+      new Long(interaction.user.id),
+      newNickname
+    );
+
+    interaction.editReply(
+      successful
+        ? `Successfully changed your nickname in this server to ${newNickname}!`
+        : "Something went horribly wrong! Please let the server owner know that you can't change your nickname!"
+    );
   },
 };
 
