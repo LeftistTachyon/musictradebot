@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from "discord.js";
 import { Long } from "bson";
 import { fetchServerUser, fetchUser } from "../mongo";
 import { DiscordCommand } from "../types";
-import { profileString } from "../util";
+import { isInServer, profileString } from "../util";
 
 const profile: DiscordCommand = {
   data: new SlashCommandBuilder()
@@ -31,14 +31,7 @@ const profile: DiscordCommand = {
     .setDMPermission(true),
 
   async execute(interaction) {
-    if (!interaction.guildId) {
-      interaction.reply({
-        content: "Sorry, this command only works in servers I'm in!",
-        ephemeral: true,
-      });
-
-      return;
-    }
+    if (!isInServer(interaction)) return;
 
     const subCommand = interaction.options.getSubcommand();
 

@@ -1,5 +1,12 @@
 import { Long } from "bson";
 import { randomInt } from "crypto";
+import {
+  CacheType,
+  ChatInputCommandInteraction,
+  Guild,
+  GuildMember,
+  PermissionsBitField,
+} from "discord.js";
 import { DateTime } from "luxon";
 import adjectives from "../data/adjectives.json";
 import nouns from "../data/nouns.json";
@@ -130,4 +137,44 @@ export function generateTimestamp(
   format: TimestampFormat
 ): string {
   return `<t:${time.toSeconds()}:${format}>`;
+}
+
+/**
+ * Check if a slash command interaction is in a server
+ *
+ * @param interaction the interaction to check
+ * @returns whether the interaction was in a server
+ */
+export function isInServer(
+  interaction: ChatInputCommandInteraction<CacheType>
+): interaction is ChatInputCommandInteraction<CacheType> & { guildId: string } {
+  if (interaction.guildId) return true;
+
+  interaction.reply({
+    content: "Sorry, this command only works in servers I'm in!",
+    ephemeral: true,
+  });
+
+  return false;
+}
+
+/**
+ * Check if a slash command interaction was done by a server admin
+ *
+ * @param interaction the interaciton to check
+ * @returns whether the interaction was done by a server admin
+ */
+export function isAdmin(interaction: ChatInputCommandInteraction<CacheType>) {
+  if (
+    interaction.member instanceof GuildMember &&
+    interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)
+  )
+    return true;
+
+  interaction.reply({
+    content: "Sorry, this command can only be used by (human) admins!",
+    ephemeral: true,
+  });
+
+  return false;
 }

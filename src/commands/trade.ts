@@ -4,6 +4,7 @@ import {
   SlashCommandBuilder,
 } from "discord.js";
 import { DiscordCommand } from "../types";
+import { isAdmin, isInServer } from "../util";
 
 const trade: DiscordCommand = {
   data: new SlashCommandBuilder()
@@ -60,27 +61,7 @@ const trade: DiscordCommand = {
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   async execute(interaction) {
-    if (!interaction.guildId) {
-      interaction.reply({
-        content: "Sorry, this command only works in servers I'm in!",
-        ephemeral: true,
-      });
-
-      return;
-    }
-
-    if (
-      !(interaction.member?.permissions as Readonly<PermissionsBitField>).has(
-        PermissionsBitField.Flags.Administrator
-      )
-    ) {
-      interaction.reply({
-        content: "Sorry, this command can only be used by admins!",
-        ephemeral: true,
-      });
-
-      return;
-    }
+    if (!isInServer(interaction) || !isAdmin(interaction)) return;
 
     await interaction.deferReply({ ephemeral: true });
     interaction.editReply("hehe should be stuff here but no");

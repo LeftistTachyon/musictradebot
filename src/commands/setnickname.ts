@@ -2,6 +2,7 @@ import { SlashCommandBuilder } from "discord.js";
 import { Long } from "bson";
 import { setNickname } from "../mongo";
 import { DiscordCommand } from "../types";
+import { isInServer } from "../util";
 
 const setnickname: DiscordCommand = {
   data: new SlashCommandBuilder()
@@ -14,15 +15,9 @@ const setnickname: DiscordCommand = {
         .setRequired(true)
     )
     .setDMPermission(false),
-  async execute(interaction) {
-    if (!interaction.guildId) {
-      interaction.reply({
-        content: "Sorry, this command only works in servers I'm in!",
-        ephemeral: true,
-      });
 
-      return;
-    }
+  async execute(interaction) {
+    if (!isInServer(interaction)) return;
 
     await interaction.deferReply({ ephemeral: true });
 

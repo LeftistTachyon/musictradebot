@@ -2,6 +2,7 @@ import { SlashCommandBuilder } from "discord.js";
 import { Long } from "bson";
 import { setOpt } from "../mongo";
 import { DiscordCommand } from "../types";
+import { isInServer } from "../util";
 
 const optin: DiscordCommand = {
   data: new SlashCommandBuilder()
@@ -10,14 +11,7 @@ const optin: DiscordCommand = {
     .setDMPermission(false),
 
   async execute(interaction) {
-    if (!interaction.guildId) {
-      interaction.reply({
-        content: "Sorry, this command only works in servers I'm in!",
-        ephemeral: true,
-      });
-
-      return;
-    }
+    if (!isInServer(interaction)) return;
 
     await interaction.deferReply({ ephemeral: true });
 

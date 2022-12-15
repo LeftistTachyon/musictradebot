@@ -6,6 +6,7 @@ import {
 import { Long } from "mongodb";
 import { updateServerAnnounceCh } from "../mongo";
 import { DiscordCommand } from "../types";
+import { isAdmin, isInServer } from "../util";
 
 const setchannel: DiscordCommand = {
   data: new SlashCommandBuilder()
@@ -36,27 +37,7 @@ const setchannel: DiscordCommand = {
     .setDMPermission(false),
 
   async execute(interaction) {
-    if (!interaction.guildId) {
-      interaction.reply({
-        content: "Sorry, this command only works in servers I'm in!",
-        ephemeral: true,
-      });
-
-      return;
-    }
-
-    if (
-      !(interaction.member?.permissions as Readonly<PermissionsBitField>).has(
-        PermissionsBitField.Flags.Administrator
-      )
-    ) {
-      interaction.reply({
-        content: "Sorry, this command can only be used by admins!",
-        ephemeral: true,
-      });
-
-      return;
-    }
+    if (!isInServer(interaction) || !isAdmin(interaction)) return;
 
     const channelID =
       interaction.options.getChannel("channel", false)?.id ||
