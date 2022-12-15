@@ -45,9 +45,13 @@ export async function pingDB() {
  * @returns whether the operation was successful
  */
 export async function upsertUser(user: User) {
-  const result = await users.updateOne({ uid: user.uid }, user, {
-    upsert: true,
-  });
+  const result = await users.updateOne(
+    { uid: user.uid },
+    { $set: user },
+    {
+      upsert: true,
+    }
+  );
   return (
     result.acknowledged &&
     (result.modifiedCount == 1 || result.upsertedCount == 1)
@@ -72,7 +76,7 @@ export async function fetchUser(uid: Long) {
  * @returns wehther the operation was successful
  */
 export async function setUserName(uid: Long, name: string) {
-  const result = await users.updateOne({ uid }, { name });
+  const result = await users.updateOne({ uid }, { $set: { name } });
   return result.acknowledged && result.modifiedCount == 1;
 }
 

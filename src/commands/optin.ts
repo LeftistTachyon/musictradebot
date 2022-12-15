@@ -6,7 +6,8 @@ import { DiscordCommand } from "../types";
 const optin: DiscordCommand = {
   data: new SlashCommandBuilder()
     .setName("optin")
-    .setDescription("Opts in to this server's song trades."),
+    .setDescription("Opts in to this server's song trades.")
+    .setDMPermission(false),
 
   async execute(interaction) {
     if (interaction.guildId) {

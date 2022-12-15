@@ -6,7 +6,8 @@ import { DiscordCommand } from "../types";
 const optout: DiscordCommand = {
   data: new SlashCommandBuilder()
     .setName("optout")
-    .setDescription("Opts out of this server's music trades"),
+    .setDescription("Opts out of this server's music trades")
+    .setDMPermission(false),
 
   async execute(interaction) {
     if (interaction.guildId) {
@@ -15,7 +16,7 @@ const optout: DiscordCommand = {
       const successful = await setOpt(
         new Long(interaction.guildId),
         new Long(interaction.user.id),
-        true
+        false
       );
 
       interaction.editReply(

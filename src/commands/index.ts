@@ -3,9 +3,10 @@ import { DiscordCommand } from "../types";
 import optin from "./optin";
 import optout from "./optout";
 import ping from "./ping";
+import setname from "./setname";
 
 // ! Add any new commands into this list
-export const commandList: DiscordCommand[] = [ping, optin, optout];
+export const commandList: DiscordCommand[] = [ping, optin, optout, setname];
 
 // Creating collection of commands
 const output = new Collection<string, DiscordCommand>();
