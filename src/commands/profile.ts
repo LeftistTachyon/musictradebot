@@ -35,19 +35,19 @@ const profile: DiscordCommand = {
 
     const subCommand = interaction.options.getSubcommand();
 
-    if (subCommand == "create") {
+    if (subCommand === "create") {
       // TODO: create "create profile" button
       interaction.reply({
         content: "(Create button here)",
         ephemeral: true,
       });
-    } else if (subCommand == "update") {
+    } else if (subCommand === "update") {
       // TODO: create "update profile" button
       interaction.reply({
         content: "(Update button here)",
         ephemeral: true,
       });
-    } else if (subCommand == "find") {
+    } else if (subCommand === "find") {
       await interaction.deferReply();
 
       const u = interaction.options.getUser("user", false) || interaction.user,
