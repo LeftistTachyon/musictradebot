@@ -1,8 +1,8 @@
 import { Collection } from "discord.js";
 import { ButtonHandler } from "../types";
-import { profileDeleteCancel, profileDeleteConfirm } from "./profileDelete";
+import { profileDeleteConfirm } from "./profileDelete";
 
-const buttonList: ButtonHandler[] = [profileDeleteCancel, profileDeleteConfirm];
+const buttonList: ButtonHandler[] = [profileDeleteConfirm];
 
 // Creating collection of buttons
 const output = new Collection<string, ButtonHandler>();

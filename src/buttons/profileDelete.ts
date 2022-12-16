@@ -1,10 +1,5 @@
-import {
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-  ChatInputCommandInteraction,
-} from "discord.js";
 import { Long } from "bson";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 import { deleteUser } from "../mongo";
 import { ButtonHandler } from "../types";
 
@@ -23,22 +18,9 @@ export const profileDeleteConfirm: ButtonHandler = {
   },
 };
 
-export const profileDeleteCancel: ButtonHandler = {
-  name: "profileDelete-cancel",
-  async execute(interaction) {
-    // new ChatInputCommandInteraction()
-    // await deleteReply();
-    await interaction.message.delete();
-  },
-};
-
 export const actionRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
   new ButtonBuilder()
     .setCustomId("profileDelete-confirm")
     .setLabel("Yes, I'm sure!")
-    .setStyle(ButtonStyle.Danger),
-  new ButtonBuilder()
-    .setCustomId("profileDelete-cancel")
-    .setLabel("No, I'm not.")
-    .setStyle(ButtonStyle.Secondary)
+    .setStyle(ButtonStyle.Danger)
 );
