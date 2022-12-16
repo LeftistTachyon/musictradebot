@@ -1,6 +1,7 @@
 import { Long } from "bson";
 import { randomInt } from "crypto";
 import {
+  ButtonInteraction,
   CacheType,
   ChatInputCommandInteraction,
   Guild,
@@ -146,8 +147,13 @@ export function generateTimestamp(
  * @returns whether the interaction was in a server
  */
 export function isInServer(
-  interaction: ChatInputCommandInteraction<CacheType>
-): interaction is ChatInputCommandInteraction<CacheType> & { guildId: string } {
+  interaction:
+    | ButtonInteraction<CacheType>
+    | ChatInputCommandInteraction<CacheType>
+): interaction is (
+  | ButtonInteraction<CacheType>
+  | ChatInputCommandInteraction<CacheType>
+) & { guildId: string } {
   if (interaction.guildId) return true;
 
   interaction.reply({
@@ -164,7 +170,11 @@ export function isInServer(
  * @param interaction the interaciton to check
  * @returns whether the interaction was done by a server admin
  */
-export function isAdmin(interaction: ChatInputCommandInteraction<CacheType>) {
+export function isAdmin(
+  interaction:
+    | ButtonInteraction<CacheType>
+    | ChatInputCommandInteraction<CacheType>
+) {
   if (
     interaction.member instanceof GuildMember &&
     interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)

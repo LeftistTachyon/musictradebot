@@ -1,5 +1,8 @@
 import {
+  ActionRowBuilder,
   APIInteractionDataResolvedChannel,
+  ButtonBuilder,
+  ButtonStyle,
   CategoryChannel,
   ChannelType,
   ForumChannel,
@@ -8,6 +11,7 @@ import {
   StageChannel,
   TextBasedChannel,
 } from "discord.js";
+import { actionRow as optActionRow } from "../buttons/optInOut";
 import { DiscordCommand } from "../types";
 import { isAdmin, isInServer } from "../util";
 
@@ -75,9 +79,11 @@ const sendmessage: DiscordCommand = {
 
     switch (interaction.options.getString("type", true)) {
       case "register":
-        await channel.send(
-          "You wanted me to send the register buttons into this channel."
-        );
+        await channel.send({
+          content:
+            "If you would like to register for music trades in this server, click on the button below and fill out the forms.",
+          components: [registerActionRow],
+        });
 
         interaction.editReply(
           `Successfully sent the register button into <#${channel.id}>!`
@@ -85,9 +91,11 @@ const sendmessage: DiscordCommand = {
 
         break;
       case "opt":
-        await channel.send(
-          "You wanted me to send the opt in/out buttons into this channel."
-        );
+        await channel.send({
+          content:
+            "If you would like to opt in or out of the music trades in this server, click on the buttons below.",
+          components: [optActionRow],
+        });
 
         interaction.editReply(
           `Successfully sent the opt in and out buttons into <#${channel.id}>!`
@@ -102,5 +110,12 @@ const sendmessage: DiscordCommand = {
     }
   },
 };
+
+const registerActionRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+  new ButtonBuilder()
+    .setLabel("Create/update profile")
+    .setCustomId("profile-updateCreate")
+    .setStyle(ButtonStyle.Primary)
+);
 
 export default sendmessage;

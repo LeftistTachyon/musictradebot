@@ -133,7 +133,7 @@ export const createUpdateProfile: ButtonHandler = {
 
 export const actionRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
   new ButtonBuilder()
-    .setLabel("Create/Update Profile")
+    .setLabel("Create/update profile")
     .setCustomId("profile-updateCreate")
     .setStyle(ButtonStyle.Primary)
 );
