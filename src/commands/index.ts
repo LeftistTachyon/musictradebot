@@ -1,5 +1,6 @@
 import { Collection } from "discord.js";
 import { DiscordCommand } from "../types";
+import aboutserver from "./aboutserver";
 import optin from "./optin";
 import optout from "./optout";
 import ping from "./ping";
@@ -14,6 +15,7 @@ import trade from "./trade";
 
 // ! Add any new commands into this list
 export const commandList: DiscordCommand[] = [
+  aboutserver,
   optin,
   optout,
   ping,

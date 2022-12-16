@@ -5,6 +5,7 @@ import {
   CacheType,
   ChatInputCommandInteraction,
   EmbedBuilder,
+  Guild,
   GuildMember,
   PermissionsBitField,
 } from "discord.js";
@@ -130,7 +131,7 @@ export function isInServer(
 ): interaction is (
   | ButtonInteraction<CacheType>
   | ChatInputCommandInteraction<CacheType>
-) & { guildId: string } {
+) & { guildId: string; guild: Guild } {
   if (interaction.guildId) return true;
 
   interaction.reply({
