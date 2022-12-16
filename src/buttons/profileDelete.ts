@@ -22,5 +22,10 @@ export const actionRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
   new ButtonBuilder()
     .setCustomId("profileDelete-confirm")
     .setLabel("Yes, I'm sure!")
-    .setStyle(ButtonStyle.Danger)
+    .setStyle(ButtonStyle.Danger),
+  new ButtonBuilder()
+    .setCustomId("profileDelete-cancel")
+    .setLabel("No, I'm not. (Dismiss the message below)")
+    .setStyle(ButtonStyle.Secondary)
+    .setDisabled(true)
 );
