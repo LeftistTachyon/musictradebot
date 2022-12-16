@@ -64,7 +64,7 @@ const sendmessage: DiscordCommand = {
     const channel =
       interaction.options.getChannel("channel", false) || interaction.channel;
     if (!channel || !validateChannel(channel)) {
-      interaction.reply({
+      await interaction.reply({
         content: "Invalid channel! Try a text channel that I can access.",
         ephemeral: true,
       });

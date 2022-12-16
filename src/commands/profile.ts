@@ -1,10 +1,6 @@
 import { Long } from "bson";
-import {
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-  SlashCommandBuilder,
-} from "discord.js";
+import { SlashCommandBuilder } from "discord.js";
+import { actionRow } from "../buttons/profileDelete";
 import { fetchServerUser, fetchUser } from "../mongo";
 import { DiscordCommand } from "../types";
 import { isInServer, profileString } from "../util";
@@ -43,21 +39,21 @@ const profile: DiscordCommand = {
 
     if (subCommand === "create") {
       // TODO: create "create profile" button
-      interaction.reply({
+      await interaction.reply({
         content: "(Create button here)",
         ephemeral: true,
       });
     } else if (subCommand === "update") {
       // TODO: create "update profile" button
-      interaction.reply({
+      await interaction.reply({
         content: "(Update button here)",
         ephemeral: true,
       });
     } else if (subCommand === "delete") {
       // TODO: create "delete profile" button
-      interaction.reply({
+      await interaction.reply({
         content: "Are you sure you want to delete your profile?",
-        components: [deleteConfirmation],
+        components: [actionRow],
         ephemeral: true,
       });
     } else if (subCommand === "find") {
@@ -74,32 +70,21 @@ const profile: DiscordCommand = {
         );
 
         const name = serverUserProfile?.nickname ?? userProfile.name;
-        interaction.editReply(
+        await interaction.editReply(
           `**${name}'s Music Profile**:${profileString(userProfile)}`
         );
       } else {
-        interaction.editReply(
+        await interaction.editReply(
           `Sorry, ${u.username} does not have a music profile.`
         );
       }
     } else {
-      interaction.reply({
+      await interaction.reply({
         content: "How did you even call a subcommand that doesn't exist!?",
         ephemeral: true,
       });
     }
   },
 };
-
-const deleteConfirmation = new ActionRowBuilder<ButtonBuilder>().addComponents(
-  new ButtonBuilder()
-    .setCustomId("confirm")
-    .setLabel("Yes, I'm sure!")
-    .setStyle(ButtonStyle.Danger),
-  new ButtonBuilder()
-    .setCustomId("cancel")
-    .setLabel("No, I'm not.")
-    .setStyle(ButtonStyle.Secondary)
-);
 
 export default profile;

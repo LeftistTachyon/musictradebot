@@ -21,7 +21,7 @@ const optout: DiscordCommand = {
       false
     );
 
-    interaction.editReply(
+    await interaction.editReply(
       successful
         ? `You have successfully opted out of ${interaction.guild?.name}'s music trades!`
         : "Something went horribly wrong! Please let the server owner know that you can't opt out of trades!"

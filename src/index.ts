@@ -1,6 +1,7 @@
 import { Client, Events, GatewayIntentBits } from "discord.js";
 import { DateTime } from "luxon";
 import commands from "./commands";
+import buttons from "./buttons";
 import init, { close } from "./mongo";
 
 const programStart = DateTime.now();
@@ -32,7 +33,22 @@ async function run() {
         });
       }
     } else if (interaction.isButton()) {
-      console.dir(interaction);
+      const buttonHandler = buttons.get(interaction.customId);
+
+      if (!buttonHandler) {
+        console.error(`No command matching ${interaction.customId} was found.`);
+        return;
+      }
+
+      try {
+        await buttonHandler.execute(interaction);
+      } catch (error) {
+        console.error(error);
+        await interaction.reply({
+          content: "There was an error while executing this button press!",
+          ephemeral: true,
+        });
+      }
     }
   });
 

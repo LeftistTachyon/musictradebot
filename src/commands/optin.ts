@@ -21,7 +21,7 @@ const optin: DiscordCommand = {
       true
     );
 
-    interaction.editReply(
+    await interaction.editReply(
       successful
         ? `You have successfully opted into ${interaction.guild?.name}'s music trades!`
         : "Something went horribly wrong! Please let the server owner know that you can't opt into trades!"

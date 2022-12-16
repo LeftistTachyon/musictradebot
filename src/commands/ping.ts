@@ -23,7 +23,7 @@ const ping: DiscordCommand = {
     await pingDB();
 
     const d = beforeNow.diffNow();
-    interaction.editReply(
+    await interaction.editReply(
       `Pong!\nRoundtrip latency: ${
         sent.createdTimestamp - interaction.createdTimestamp
       } ms\nDatabase latency: ${-d.toMillis()} ms`

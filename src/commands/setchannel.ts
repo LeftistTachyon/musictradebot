@@ -61,7 +61,7 @@ const setchannel: DiscordCommand = {
         break;
 
       default:
-        interaction.reply({
+        await interaction.reply({
           content:
             "How were you able to select an option that isn't in the list!?",
           ephemeral: true,

@@ -1,5 +1,6 @@
 import { Long } from "bson";
 import {
+  ButtonInteraction,
   CacheType,
   ChatInputCommandInteraction,
   SlashCommandBuilder,
@@ -63,9 +64,20 @@ export type User = {
 };
 
 // ! ================== DISCORD TYPES =================== !
+/**
+ * Something that represents a slash command
+ */
 export type DiscordCommand = {
   data: SlashCommandBuilder;
   execute: (
     interaction: ChatInputCommandInteraction<CacheType>
   ) => Promise<void>;
+};
+
+/**
+ * Something that handles a button press
+ */
+export type ButtonHandler = {
+  name: string;
+  execute: (interaction: ButtonInteraction<CacheType>) => Promise<void>;
 };
