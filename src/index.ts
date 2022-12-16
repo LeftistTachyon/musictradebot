@@ -1,9 +1,12 @@
+import { Long } from "bson";
 import { Client, Events, GatewayIntentBits } from "discord.js";
 import { DateTime } from "luxon";
-import commands from "./commands";
 import buttons from "./buttons";
+import commands from "./commands";
 import forms from "./forms";
-import init, { close } from "./mongo";
+import init, { addServer, close, getServer, updateServerName } from "./mongo";
+import { Server } from "./types";
+import { getDefaultTimeframes } from "./util";
 
 const programStart = DateTime.now();
 
@@ -12,6 +15,11 @@ async function run() {
   console.log(`Database connected in ${-programStart.diffNow().toMillis()} ms`);
 
   const client: Client = new Client({ intents: [GatewayIntentBits.Guilds] });
+
+  // console.log("Guilds currently installed:");
+  // client.guilds.cache.forEach((guild, snowflake) =>
+  //   console.log(snowflake, guild.id)
+  // );
 
   client.on(Events.InteractionCreate, async (interaction) => {
     if (interaction.isChatInputCommand()) {
@@ -67,6 +75,33 @@ async function run() {
         });
       }
     }
+  });
+
+  client.on(Events.GuildCreate, async (guild) => {
+    if (await getServer(new Long(guild.id))) return;
+
+    const server: Server = {
+      uid: new Long(guild.id),
+      name: guild.name,
+      users: [],
+      trades: [],
+      commentPeriod: getDefaultTimeframes("commentPeriod") * 60,
+      reminderPeriod: getDefaultTimeframes("reminderPeriod") * 60,
+    };
+    if (guild.systemChannelId)
+      server.announcementsChannel = new Long(guild.systemChannelId);
+
+    await addServer(server);
+
+    if (guild.systemChannel) {
+      guild.systemChannel.send(
+        "Hello there! I'm Music Trade 2000, and I help people make music trades!\nTo get started, run `\\help`."
+      );
+    }
+  });
+
+  client.on(Events.GuildUpdate, async (_, newGuild) => {
+    await updateServerName(new Long(newGuild.id), newGuild.name);
   });
 
   client.once(Events.ClientReady, (c) => {

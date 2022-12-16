@@ -1,9 +1,5 @@
-import {
-  ChannelType,
-  PermissionsBitField,
-  SlashCommandBuilder,
-} from "discord.js";
-import { Long } from "mongodb";
+import { Long } from "bson";
+import { ChannelType, SlashCommandBuilder } from "discord.js";
 import { updateServerAnnounceCh } from "../mongo";
 import { DiscordCommand } from "../types";
 import { isAdmin, isInServer } from "../util";

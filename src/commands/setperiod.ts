@@ -1,25 +1,8 @@
 import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
-import { Long } from "mongodb";
+import { Long } from "bson";
 import { updateServerSettings } from "../mongo";
 import { DiscordCommand } from "../types";
-import { isAdmin, isInServer } from "../util";
-
-/**
- * Gets the default setting for the given setting
- *
- * @param setting the setting to fetch
- * @returns the default value for this setting, in hours
- */
-function getDefaultTimeframes(setting: string) {
-  switch (setting) {
-    case "reminderPeriod":
-      return 24;
-    case "commentPeriod":
-      return 48;
-    default:
-      return 0;
-  }
-}
+import { getDefaultTimeframes, isAdmin, isInServer } from "../util";
 
 function getUserString(setting: string) {
   switch (setting) {

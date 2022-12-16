@@ -16,7 +16,7 @@ export type Server = {
   name: string;
   users: ServerUser[];
   trades: string[]; // trade names
-  announcementsChannel: Long; // channel UID
+  announcementsChannel?: Long; // channel UID
   reminderPeriod: number; // duration in minutes
   commentPeriod: number; // duration in minutes
   pingableRole?: Long; // role UID

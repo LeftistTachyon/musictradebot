@@ -146,7 +146,7 @@ export async function fetchServerUser(serverUID: Long, userUID: Long) {
  * @returns whether the operation was successful
  */
 export async function updateServerName(uid: Long, name: string) {
-  const result = await servers.updateOne({ uid }, { name });
+  const result = await servers.updateOne({ uid }, { $set: { name } });
   return result.acknowledged && result.matchedCount === 1;
 }
 
@@ -164,7 +164,7 @@ export async function updateServerSettings(
     commentPeriod?: number;
   }
 ) {
-  const result = await servers.updateOne({ uid }, [{ $set: settings }]);
+  const result = await servers.updateOne({ uid }, { $set: settings });
   return result.acknowledged && result.matchedCount === 1;
 }
 
@@ -179,9 +179,10 @@ export async function updateServerAnnounceCh(
   uid: Long,
   announcementsChannel: Long
 ) {
-  const result = await servers.updateOne({ uid }, [
-    { $set: { announcementsChannel } },
-  ]);
+  const result = await servers.updateOne(
+    { uid },
+    { $set: { announcementsChannel } }
+  );
 
   return result.acknowledged && result.matchedCount === 1;
 }
@@ -194,7 +195,7 @@ export async function updateServerAnnounceCh(
  * @returns whether the operation was successful
  */
 export async function updateServerPingableRole(uid: Long, pingableRole: Long) {
-  const result = await servers.updateOne({ uid }, [{ $set: { pingableRole } }]);
+  const result = await servers.updateOne({ uid }, { $set: { pingableRole } });
   return result.acknowledged && result.matchedCount === 1;
 }
 
@@ -335,7 +336,7 @@ export async function setTradeGraph(name: string, graph: [Long, Long][]) {
  * @returns whether the operation was successful
  */
 export async function setTradeEndDate(name: string, date: Date) {
-  const result = await trades.updateOne({ name }, [{ $set: { date } }]);
+  const result = await trades.updateOne({ name }, { $set: { date } });
   return result.acknowledged && result.matchedCount === 1;
 }
 

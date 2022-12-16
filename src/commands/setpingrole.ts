@@ -1,5 +1,5 @@
 import { PermissionFlagsBits, Role, SlashCommandBuilder } from "discord.js";
-import { Long } from "mongodb";
+import { Long } from "bson";
 import { removeServerPingableRole, updateServerPingableRole } from "../mongo";
 import { DiscordCommand } from "../types";
 import { isAdmin, isInServer } from "../util";

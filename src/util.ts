@@ -54,9 +54,15 @@ export function createTrade(server: Server, duration: number): Trade {
     toUnchosen = users.slice(),
     trades: { from: Long; to: Long }[] = [];
   while (fromUnchosen.length > 0) {
+    let fromIdx, toIdx;
+    do {
+      fromIdx = randomInt(fromUnchosen.length);
+      toIdx = randomInt(toUnchosen.length);
+    } while (fromUnchosen[fromIdx] === toUnchosen[toIdx]);
+
     trades.push({
-      from: fromUnchosen.splice(randomInt(fromUnchosen.length), 1)[0],
-      to: toUnchosen.splice(randomInt(toUnchosen.length), 1)[0],
+      from: fromUnchosen.splice(fromIdx, 1)[0],
+      to: toUnchosen.splice(toIdx, 1)[0],
     });
   }
 
@@ -90,6 +96,23 @@ export function extendDeadline(trade: Trade, extendBy: number): Trade {
     .toJSDate();
 
   return trade;
+}
+
+/**
+ * Gets the default setting for the given setting
+ *
+ * @param setting the setting to fetch
+ * @returns the default value for this setting, in hours
+ */
+export function getDefaultTimeframes(setting: string) {
+  switch (setting) {
+    case "reminderPeriod":
+      return 24;
+    case "commentPeriod":
+      return 48;
+    default:
+      return 0;
+  }
 }
 
 // ! =================== DISCORD UTIL =================== !
