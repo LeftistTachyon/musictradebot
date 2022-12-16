@@ -1,6 +1,7 @@
 import { Long } from "bson";
 import { SlashCommandBuilder } from "discord.js";
-import { actionRow } from "../buttons/profileDelete";
+import { actionRow as cuProfileActionRow } from "../buttons/createUpdateProfile";
+import { actionRow as dProfileActionRow } from "../buttons/profileDelete";
 import { fetchServerUser, fetchUser } from "../mongo";
 import { DiscordCommand } from "../types";
 import { isInServer, profileString } from "../util";
@@ -24,8 +25,8 @@ const profile: DiscordCommand = {
     )
     .addSubcommand((builder) =>
       builder
-        .setName("update")
-        .setDescription("Updates your existing music profile")
+        .setName("edit")
+        .setDescription("Edits your existing music profile")
     )
     .addSubcommand((builder) =>
       builder.setName("delete").setDescription("Deletes your music profile")
@@ -37,23 +38,16 @@ const profile: DiscordCommand = {
 
     const subCommand = interaction.options.getSubcommand();
 
-    if (subCommand === "create") {
-      // TODO: create "create profile" button
+    if (subCommand === "create" || subCommand === "edit") {
       await interaction.reply({
-        content: "(Create button here)",
-        ephemeral: true,
-      });
-    } else if (subCommand === "update") {
-      // TODO: create "update profile" button
-      await interaction.reply({
-        content: "(Update button here)",
+        content: "To create a new account or edit, click the button below.",
+        components: [cuProfileActionRow],
         ephemeral: true,
       });
     } else if (subCommand === "delete") {
-      // TODO: create "delete profile" button
       await interaction.reply({
         content: "Are you sure you want to delete your profile?",
-        components: [actionRow],
+        components: [dProfileActionRow],
         ephemeral: true,
       });
     } else if (subCommand === "find") {

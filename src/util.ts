@@ -101,10 +101,10 @@ export function profileString(u: User) {
   if (u.dislikedGenres)
     output += `\n\n__Disliked Genres__:\n\`${u.dislikedGenres}\``;
   if (u.artists)
-    output += `\n\n__Artists Mostly Listened To__:\n\`${u.artists}\``;
+    output += `\n\n__Artists Most Listened To__:\n\`${u.artists}\``;
   if (u.favoriteSongs)
     output += `\n\n__Favorite Songs__:\n\`${u.favoriteSongs}\``;
-  if (u.newlyDiscovered)
+  if (u.newArtists)
     output += `\n\n__Newly Discovered Artists__:\n\`${u.artists}\``;
   if (u.favoriteSounds)
     output += `\n\n__Favorite Sounds__:\n\`${u.favoriteSounds}\``;

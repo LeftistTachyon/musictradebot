@@ -58,7 +58,7 @@ export type User = {
   dislikedGenres?: string;
   artists?: string;
   favoriteSongs?: string;
-  newlyDiscovered?: string;
+  newArtists?: string;
   favoriteSounds?: string;
   instruments?: string;
 };
