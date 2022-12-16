@@ -87,8 +87,18 @@ export async function setUserName(uid: Long, name: string) {
  * @returns whether the operation was successful or not
  */
 export async function deleteUser(uid: Long) {
-  const result = await users.deleteOne({ uid });
-  return result.acknowledged && result.deletedCount === 1;
+  const result1 = await users.deleteOne({ uid });
+  const result2 = await servers.updateMany(
+    { "users.uid": uid },
+    { $pull: { users: { uid } } }
+  );
+
+  return (
+    result1.acknowledged &&
+    result1.deletedCount === 1 &&
+    result2.acknowledged &&
+    result2.matchedCount === result2.modifiedCount
+  );
 }
 
 // ! ================== SERVER [CRU]D =================== !
