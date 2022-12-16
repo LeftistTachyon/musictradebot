@@ -45,11 +45,20 @@ const profile: DiscordCommand = {
         ephemeral: true,
       });
     } else if (subCommand === "delete") {
-      await interaction.reply({
-        content: "Are you sure you want to delete your profile?",
-        components: [dProfileActionRow],
-        ephemeral: true,
-      });
+      const user = await fetchUser(new Long(interaction.user.id));
+
+      if (user) {
+        await interaction.reply({
+          content: "Are you sure you want to delete your profile?",
+          components: [dProfileActionRow],
+          ephemeral: true,
+        });
+      } else {
+        await interaction.reply({
+          content: "You don't have an account to delete!",
+          ephemeral: true,
+        });
+      }
     } else if (subCommand === "find") {
       await interaction.deferReply();
 
