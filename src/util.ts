@@ -4,14 +4,14 @@ import {
   ButtonInteraction,
   CacheType,
   ChatInputCommandInteraction,
-  Guild,
+  EmbedBuilder,
   GuildMember,
   PermissionsBitField,
 } from "discord.js";
 import { DateTime } from "luxon";
 import adjectives from "../data/adjectives.json";
 import nouns from "../data/nouns.json";
-import { setOpt } from "./mongo";
+import { addServerUser, fetchServerUser, fetchUser, setOpt } from "./mongo";
 import { Server, Trade, User } from "./types";
 
 // ! ==================== DATA UTIL ===================== !
@@ -98,19 +98,36 @@ export function extendDeadline(trade: Trade, extendBy: number): Trade {
  * @returns the profile printout
  */
 export function profileString(u: User) {
-  let output = u.bio ? `*${u.bio}*` : "";
-  if (u.likedGenres) output += `\n\n__Liked Genres__:\n\`${u.likedGenres}\``;
+  let output = u.bio ? `${u.bio}\n\n` : "\n";
+  if (u.likedGenres)
+    output += `__Liked Genres__:\n\`${u.likedGenres.replace("`", "")}\`\n\n`;
   if (u.dislikedGenres)
-    output += `\n\n__Disliked Genres__:\n\`${u.dislikedGenres}\``;
+    output += `__Disliked Genres__:\n\`${u.dislikedGenres.replace(
+      "`",
+      ""
+    )}\`\n\n`;
   if (u.artists)
-    output += `\n\n__Artists Most Listened To__:\n\`${u.artists}\``;
+    output += `__Artists Most Listened To__:\n\`${u.artists.replace(
+      "`",
+      ""
+    )}\`\n\n`;
   if (u.favoriteSongs)
-    output += `\n\n__Favorite Songs__:\n\`${u.favoriteSongs}\``;
+    output += `__Favorite Songs__:\n\`${u.favoriteSongs.replace(
+      "`",
+      ""
+    )}\`\n\n`;
   if (u.newArtists)
-    output += `\n\n__Newly Discovered Artists__:\n\`${u.artists}\``;
+    output += `__Newly Discovered Artists__:\n\`${u.newArtists.replace(
+      "`",
+      ""
+    )}\`\n\n`;
   if (u.favoriteSounds)
-    output += `\n\n__Favorite Sounds__:\n\`${u.favoriteSounds}\``;
-  if (u.instruments) output += `\n\n__Instruments__:\n\`${u.instruments}\``;
+    output += `__Favorite Sounds__:\n\`${u.favoriteSounds.replace(
+      "`",
+      ""
+    )}\`\n\n`;
+  if (u.instruments)
+    output += `__Instruments__:\n\`${u.instruments.replace("`", "")}\`\n\n`;
 
   return output;
 }
@@ -205,13 +222,18 @@ export async function optIn(
 
   await interaction.deferReply({ ephemeral: true });
 
-  // TODO: if not registered, tell them to do that first
-  // TODO: if registered but first time opting, do not fail
-  const successful = await setOpt(
-    new Long(interaction.guildId),
-    new Long(interaction.user.id),
-    true
-  );
+  const serverID = new Long(interaction.guildId),
+    userID = new Long(interaction.user.id);
+  const user = await fetchUser(userID);
+  if (!user) {
+    await interaction.editReply(
+      "You don't have an account yet! Register first before trying to opt into music trades."
+    );
+  }
+
+  const successful = (await fetchServerUser(serverID, userID)) // if server user exists
+    ? await setOpt(serverID, userID, true)
+    : addServerUser(serverID, { uid: userID, optedIn: true });
 
   await interaction.editReply(
     successful
@@ -235,17 +257,91 @@ export async function optOut(
 
   await interaction.deferReply({ ephemeral: true });
 
-  // TODO: if not registered, tell them to do that first
-  // TODO: if registered but first time opting, do not fail (see profile delete)
-  const successful = await setOpt(
-    new Long(interaction.guildId),
-    new Long(interaction.user.id),
-    false
-  );
+  const serverID = new Long(interaction.guildId),
+    userID = new Long(interaction.user.id);
+  const user = await fetchUser(userID);
+  if (!user) {
+    await interaction.editReply(
+      "You don't have an account yet! Register first before trying to opt out of music trades."
+    );
+  }
+
+  const successful = (await fetchServerUser(serverID, userID)) // if server user exists
+    ? await setOpt(serverID, userID, false)
+    : addServerUser(serverID, { uid: userID, optedIn: false });
 
   await interaction.editReply(
     successful
       ? `You have successfully opted out of ${interaction.guild?.name}'s music trades!`
       : "Something went horribly wrong! Please let the server owner know that you can't opt out of trades!"
   );
+}
+
+/**
+ * Creates an embed that represents the profile for a user
+ *
+ * @param user the user to create the profile embed for
+ * @returns the created embed, if possible. Otherwise, null.
+ */
+export function createProfileEmbed(user: User) {
+  const output = new EmbedBuilder();
+
+  let populated = false;
+  if (user.likedGenres) {
+    output.addFields({
+      name: "Liked Genres",
+      value: "`" + user.likedGenres.replace("`", "") + "`",
+    });
+    populated = true;
+  }
+
+  if (user.dislikedGenres) {
+    output.addFields({
+      name: "Disliked Genres",
+      value: "`" + user.dislikedGenres.replace("`", "") + "`",
+    });
+    populated = true;
+  }
+
+  if (user.artists) {
+    output.addFields({
+      name: "Artists Most Listened To",
+      value: "`" + user.artists.replace("`", "") + "`",
+    });
+    populated = true;
+  }
+
+  if (user.favoriteSongs) {
+    output.addFields({
+      name: "Favorite Songs",
+      value: "`" + user.favoriteSongs.replace("`", "") + "`",
+    });
+    populated = true;
+  }
+
+  if (user.newArtists) {
+    output.addFields({
+      name: "Newly Discovered Artists",
+      value: "`" + user.newArtists.replace("`", "") + "`",
+    });
+    populated = true;
+  }
+
+  if (user.favoriteSounds) {
+    output.addFields({
+      name: "Favourite Sounds",
+      value: "`" + user.favoriteSounds.replace("`", "") + "`",
+    });
+    populated = true;
+  }
+
+  if (user.instruments) {
+    output.addFields({
+      name: "Instruments",
+      value: "`" + user.instruments.replace("`", "") + "`",
+    });
+    populated = true;
+  }
+
+  return populated ? output : null;
 }

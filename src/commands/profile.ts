@@ -4,7 +4,7 @@ import { defaultActionRow as cuProfileActionRow } from "../buttons/createUpdateP
 import { actionRow as dProfileActionRow } from "../buttons/profileDelete";
 import { fetchServerUser, fetchUser } from "../mongo";
 import { DiscordCommand } from "../types";
-import { isInServer, profileString } from "../util";
+import { createProfileEmbed, isInServer, profileString } from "../util";
 
 const profile: DiscordCommand = {
   data: new SlashCommandBuilder()
@@ -74,8 +74,12 @@ const profile: DiscordCommand = {
         );
 
         const name = serverUserProfile?.nickname ?? userProfile.name;
+        const embed = createProfileEmbed(userProfile);
+        let content = `**${name}'s Music Profile**`;
+        if (userProfile.bio) content += ":\n" + userProfile.bio;
+
         await interaction.editReply(
-          `**${name}'s Music Profile**:${profileString(userProfile)}`
+          embed ? { content, embeds: [embed] } : { content }
         );
       } else {
         await interaction.editReply(
