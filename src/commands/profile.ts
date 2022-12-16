@@ -40,7 +40,8 @@ const profile: DiscordCommand = {
 
     if (subCommand === "create" || subCommand === "edit") {
       await interaction.reply({
-        content: "To create a new account or edit, click the button below.",
+        content:
+          "To create a new account or edit your existing one, click the button below.",
         components: [cuProfileActionRow],
         ephemeral: true,
       });

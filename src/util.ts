@@ -11,6 +11,7 @@ import {
 import { DateTime } from "luxon";
 import adjectives from "../data/adjectives.json";
 import nouns from "../data/nouns.json";
+import { setOpt } from "./mongo";
 import { Server, Trade, User } from "./types";
 
 // ! ==================== DATA UTIL ===================== !
@@ -187,4 +188,64 @@ export function isAdmin(
   });
 
   return false;
+}
+
+/**
+ * Opts the user in to the interaction server's song trades given an interaction
+ *
+ * @param interaction the interaction to respond to
+ * @returns a blank Promise that resolves when this interaction is complete
+ */
+export async function optIn(
+  interaction:
+    | ChatInputCommandInteraction<CacheType>
+    | ButtonInteraction<CacheType>
+) {
+  if (!isInServer(interaction)) return;
+
+  await interaction.deferReply({ ephemeral: true });
+
+  // TODO: if not registered, tell them to do that first
+  // TODO: if registered but first time opting, do not fail
+  const successful = await setOpt(
+    new Long(interaction.guildId),
+    new Long(interaction.user.id),
+    true
+  );
+
+  await interaction.editReply(
+    successful
+      ? `You have successfully opted into ${interaction.guild?.name}'s music trades!`
+      : "Something went horribly wrong! Please let the server owner know that you can't opt into trades!"
+  );
+}
+
+/**
+ * Opts the user out of the interaction server's song trades given an interaction
+ *
+ * @param interaction the interaction to respond to
+ * @returns a blank Promise that respolves when this interaction is complete
+ */
+export async function optOut(
+  interaction:
+    | ChatInputCommandInteraction<CacheType>
+    | ButtonInteraction<CacheType>
+) {
+  if (!isInServer(interaction)) return;
+
+  await interaction.deferReply({ ephemeral: true });
+
+  // TODO: if not registered, tell them to do that first
+  // TODO: if registered but first time opting, do not fail (see profile delete)
+  const successful = await setOpt(
+    new Long(interaction.guildId),
+    new Long(interaction.user.id),
+    false
+  );
+
+  await interaction.editReply(
+    successful
+      ? `You have successfully opted out of ${interaction.guild?.name}'s music trades!`
+      : "Something went horribly wrong! Please let the server owner know that you can't opt out of trades!"
+  );
 }
