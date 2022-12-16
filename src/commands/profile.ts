@@ -1,6 +1,6 @@
 import { Long } from "bson";
 import { SlashCommandBuilder } from "discord.js";
-import { actionRow as cuProfileActionRow } from "../buttons/createUpdateProfile";
+import { defaultActionRow as cuProfileActionRow } from "../buttons/createUpdateProfile";
 import { actionRow as dProfileActionRow } from "../buttons/profileDelete";
 import { fetchServerUser, fetchUser } from "../mongo";
 import { DiscordCommand } from "../types";

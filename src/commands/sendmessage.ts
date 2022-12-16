@@ -11,6 +11,7 @@ import {
   StageChannel,
   TextBasedChannel,
 } from "discord.js";
+import { registerActionRow } from "../buttons/createUpdateProfile";
 import { actionRow as optActionRow } from "../buttons/optInOut";
 import { DiscordCommand } from "../types";
 import { isAdmin, isInServer } from "../util";
@@ -110,12 +111,5 @@ const sendmessage: DiscordCommand = {
     }
   },
 };
-
-const registerActionRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
-  new ButtonBuilder()
-    .setLabel("Create/update profile")
-    .setCustomId("profile-updateCreate")
-    .setStyle(ButtonStyle.Primary)
-);
 
 export default sendmessage;

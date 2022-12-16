@@ -44,7 +44,7 @@ export async function pingDB() {
  * @param user the User object to update or insert into the database
  * @returns whether the operation was successful
  */
-export async function upsertUser(user: User) {
+export async function upsertUser(user: Partial<User>) {
   const result = await users.updateOne(
     { uid: user.uid },
     { $set: user },

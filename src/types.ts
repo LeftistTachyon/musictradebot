@@ -3,6 +3,7 @@ import {
   ButtonInteraction,
   CacheType,
   ChatInputCommandInteraction,
+  ModalSubmitInteraction,
   SlashCommandBuilder,
 } from "discord.js";
 
@@ -80,4 +81,12 @@ export type DiscordCommand = {
 export type ButtonHandler = {
   name: string;
   execute: (interaction: ButtonInteraction<CacheType>) => Promise<void>;
+};
+
+/**
+ * Something that handles a form submission
+ */
+export type FormHandler = {
+  name: string;
+  execute: (interaction: ModalSubmitInteraction<CacheType>) => Promise<void>;
 };

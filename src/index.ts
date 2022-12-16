@@ -2,6 +2,7 @@ import { Client, Events, GatewayIntentBits } from "discord.js";
 import { DateTime } from "luxon";
 import commands from "./commands";
 import buttons from "./buttons";
+import forms from "./forms";
 import init, { close } from "./mongo";
 
 const programStart = DateTime.now();
@@ -36,7 +37,7 @@ async function run() {
       const buttonHandler = buttons.get(interaction.customId);
 
       if (!buttonHandler) {
-        console.error(`No command matching ${interaction.customId} was found.`);
+        console.error(`No button matching ${interaction.customId} was found.`);
         return;
       }
 
@@ -46,6 +47,22 @@ async function run() {
         console.error(error);
         await interaction.reply({
           content: "There was an error while executing this button press!",
+          ephemeral: true,
+        });
+      }
+    } else if (interaction.isModalSubmit()) {
+      const formHandler = forms.get(interaction.customId);
+
+      if (!formHandler) {
+        console.error(`No form matching ${interaction.customId} was found.`);
+        return;
+      }
+
+      try {
+        await formHandler.execute(interaction);
+      } catch (error) {
+        await interaction.reply({
+          content: "There was an error while submitting this form!",
           ephemeral: true,
         });
       }

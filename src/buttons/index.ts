@@ -1,11 +1,15 @@
 import { Collection } from "discord.js";
 import { ButtonHandler } from "../types";
-import { createUpdateProfile } from "./createUpdateProfile";
+import {
+  createUpdateProfile1,
+  createUpdateProfile2,
+} from "./createUpdateProfile";
 import { optIn, optOut } from "./optInOut";
 import { profileDeleteConfirm } from "./profileDelete";
 
 const buttonList: ButtonHandler[] = [
-  createUpdateProfile,
+  createUpdateProfile1,
+  createUpdateProfile2,
   optIn,
   optOut,
   profileDeleteConfirm,
