@@ -4,7 +4,7 @@ import { defaultActionRow as cuProfileActionRow } from "../buttons/createUpdateP
 import { actionRow as dProfileActionRow } from "../buttons/profileDelete";
 import { fetchServerUser, fetchUser } from "../mongo";
 import { DiscordCommand } from "../types";
-import { createProfileEmbed, isInServer, profileString } from "../util";
+import { createProfileEmbed, isInServer } from "../util";
 
 const profile: DiscordCommand = {
   data: new SlashCommandBuilder()

@@ -91,47 +91,6 @@ export function extendDeadline(trade: Trade, extendBy: number): Trade {
   return trade;
 }
 
-/**
- * Generates a music profile printout for the given user.
- *
- * @param u the user to generate the profile printout for
- * @returns the profile printout
- */
-export function profileString(u: User) {
-  let output = u.bio ? `${u.bio}\n\n` : "\n";
-  if (u.likedGenres)
-    output += `__Liked Genres__:\n\`${u.likedGenres.replace("`", "")}\`\n\n`;
-  if (u.dislikedGenres)
-    output += `__Disliked Genres__:\n\`${u.dislikedGenres.replace(
-      "`",
-      ""
-    )}\`\n\n`;
-  if (u.artists)
-    output += `__Artists Most Listened To__:\n\`${u.artists.replace(
-      "`",
-      ""
-    )}\`\n\n`;
-  if (u.favoriteSongs)
-    output += `__Favorite Songs__:\n\`${u.favoriteSongs.replace(
-      "`",
-      ""
-    )}\`\n\n`;
-  if (u.newArtists)
-    output += `__Newly Discovered Artists__:\n\`${u.newArtists.replace(
-      "`",
-      ""
-    )}\`\n\n`;
-  if (u.favoriteSounds)
-    output += `__Favorite Sounds__:\n\`${u.favoriteSounds.replace(
-      "`",
-      ""
-    )}\`\n\n`;
-  if (u.instruments)
-    output += `__Instruments__:\n\`${u.instruments.replace("`", "")}\`\n\n`;
-
-  return output;
-}
-
 // ! =================== DISCORD UTIL =================== !
 /**
  * The various formats of Discord timestamps.
