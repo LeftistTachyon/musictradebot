@@ -1,6 +1,7 @@
 import {
+  CacheType,
+  ChatInputCommandInteraction,
   PermissionFlagsBits,
-  PermissionsBitField,
   SlashCommandBuilder,
 } from "discord.js";
 import { DiscordCommand } from "../types";
@@ -63,9 +64,40 @@ const trade: DiscordCommand = {
   async execute(interaction) {
     if (!isInServer(interaction) || !isAdmin(interaction)) return;
 
-    await interaction.deferReply({ ephemeral: true });
-    interaction.editReply("hehe should be stuff here but no");
+    switch (interaction.options.getSubcommand()) {
+      case "start":
+        await tradeStart(interaction);
+        return;
+
+      case "stop":
+        await tradeStop(interaction);
+        return;
+
+      case "extend":
+        await tradeExtend(interaction);
+        return;
+
+      default:
+        interaction.reply({
+          content: "How did you call a subcommand that doesn't exist!?",
+          ephemeral: true,
+        });
+    }
   },
 };
 
 export default trade;
+
+async function tradeStart(interaction: ChatInputCommandInteraction<CacheType>) {
+  await interaction.deferReply({ ephemeral: true });
+}
+
+async function tradeStop(interaction: ChatInputCommandInteraction<CacheType>) {
+  await interaction.deferReply({ ephemeral: true });
+}
+
+async function tradeExtend(
+  interaction: ChatInputCommandInteraction<CacheType>
+) {
+  await interaction.deferReply({ ephemeral: true });
+}
