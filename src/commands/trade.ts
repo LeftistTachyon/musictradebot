@@ -1,9 +1,13 @@
 import {
   CacheType,
   ChatInputCommandInteraction,
+  Guild,
   PermissionFlagsBits,
   SlashCommandBuilder,
 } from "discord.js";
+import { DateTime } from "luxon";
+import { Long } from "mongodb";
+import { fetchTrade, setTradeEndDate } from "../mongo";
 import { DiscordCommand } from "../types";
 import { isAdmin, isInServer } from "../util";
 
@@ -88,16 +92,55 @@ const trade: DiscordCommand = {
 
 export default trade;
 
-async function tradeStart(interaction: ChatInputCommandInteraction<CacheType>) {
+async function tradeStart(
+  interaction: ChatInputCommandInteraction<CacheType> & {
+    guildId: string;
+    guild: Guild;
+  }
+) {
   await interaction.deferReply({ ephemeral: true });
 }
 
-async function tradeStop(interaction: ChatInputCommandInteraction<CacheType>) {
+async function tradeStop(
+  interaction: ChatInputCommandInteraction<CacheType> & {
+    guildId: string;
+    guild: Guild;
+  }
+) {
   await interaction.deferReply({ ephemeral: true });
 }
 
 async function tradeExtend(
-  interaction: ChatInputCommandInteraction<CacheType>
+  interaction: ChatInputCommandInteraction<CacheType> & {
+    guildId: string;
+    guild: Guild;
+  }
 ) {
   await interaction.deferReply({ ephemeral: true });
+
+  const name = interaction.options.getString("name", true);
+  const trade = await fetchTrade(name);
+
+  if (!trade) {
+    interaction.editReply("That trade doesn't exist!");
+    return;
+  }
+  if (trade.server !== new Long(interaction.guildId)) {
+    interaction.editReply(
+      "You don't have permission to edit this interaction!"
+    );
+    return;
+  }
+
+  const days = Math.floor(interaction.options.getNumber("days", true));
+  const success = await setTradeEndDate(
+    name,
+    DateTime.fromJSDate(trade.end).plus({ days }).toJSDate()
+  );
+
+  await interaction.editReply(
+    success
+      ? `Successfully extended the deadline of ${name} by ${days} days!`
+      : "Something went horribly wrong! Please let the server owner know that you can't extend deadlines of trades!"
+  );
 }
