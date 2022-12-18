@@ -10,6 +10,7 @@ import {
   PermissionsBitField,
 } from "discord.js";
 import { DateTime } from "luxon";
+import { client } from ".";
 import adjectives from "../data/adjectives.json";
 import nouns from "../data/nouns.json";
 import { addServerUser, fetchServerUser, fetchUser, setOpt } from "./mongo";
@@ -53,7 +54,7 @@ export function createTrade(server: Server, duration: number): Trade {
   const fromUnchosen = users.slice(),
     toUnchosen = users.slice(),
     trades: { from: Long; to: Long }[] = [];
-  while (fromUnchosen.length > 0) {
+  while (fromUnchosen.length > 1) {
     let fromIdx, toIdx;
     do {
       fromIdx = randomInt(fromUnchosen.length);
@@ -65,6 +66,7 @@ export function createTrade(server: Server, duration: number): Trade {
       to: toUnchosen.splice(toIdx, 1)[0],
     });
   }
+  trades.push({ from: fromUnchosen[0], to: toUnchosen[0] });
 
   // calculate start and end times
   const start = DateTime.now().startOf("day"),
@@ -138,7 +140,7 @@ export function generateTimestamp(
   time: DateTime,
   format: TimestampFormat
 ): string {
-  return `<t:${time.toSeconds()}:${format}>`;
+  return `<t:${Math.floor(time.toSeconds())}:${format}>`;
 }
 
 /**
@@ -264,12 +266,27 @@ export async function optOut(
  * Creates an embed that represents the profile for a user
  *
  * @param user the user to create the profile embed for
+ * @param nickname the nickname to use for this user
  * @returns the created embed, if possible. Otherwise, null.
  */
-export function createProfileEmbed(user: User) {
-  const output = new EmbedBuilder();
+export function createProfileEmbed(user: User, nickname = user.name) {
+  const output = new EmbedBuilder().setTitle(nickname + "'s Music Profile");
+
+  const u = client.users.cache.get(user.uid.toString()),
+    avatarURL = u?.avatarURL();
+  if (avatarURL) {
+    output.setThumbnail(avatarURL);
+  }
+  if (u?.accentColor) {
+    output.setColor(u.accentColor);
+  }
 
   let populated = false;
+  if (user.bio) {
+    output.setDescription(user.bio);
+    populated = true;
+  }
+
   if (user.likedGenres) {
     output.addFields({
       name: "Liked Genres",

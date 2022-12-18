@@ -7,9 +7,23 @@ import {
 } from "discord.js";
 import { DateTime } from "luxon";
 import { Long } from "mongodb";
-import { fetchTrade, setTradeEndDate } from "../mongo";
-import { DiscordCommand } from "../types";
-import { isAdmin, isInServer } from "../util";
+import { client } from "..";
+import {
+  addTrade,
+  fetchServerUser,
+  fetchTrade,
+  fetchUser,
+  getServer,
+  setTradeEndDate,
+} from "../mongo";
+import { DiscordCommand, Trade } from "../types";
+import {
+  createProfileEmbed,
+  createTrade,
+  generateTimestamp,
+  isAdmin,
+  isInServer,
+} from "../util";
 
 const trade: DiscordCommand = {
   data: new SlashCommandBuilder()
@@ -92,6 +106,12 @@ const trade: DiscordCommand = {
 
 export default trade;
 
+/**
+ * Handles the "trade start" subcommand
+ *
+ * @param interaction the interaction to handle
+ * @returns a Promise that resolves when the interaction has been completed
+ */
 async function tradeStart(
   interaction: ChatInputCommandInteraction<CacheType> & {
     guildId: string;
@@ -99,8 +119,116 @@ async function tradeStart(
   }
 ) {
   await interaction.deferReply({ ephemeral: true });
+
+  // create server object
+  const server = await getServer(new Long(interaction.guildId));
+  if (!server) {
+    await interaction.editReply(
+      "Something went horribly wrong! Please let the server owner know that the bot set up the server wrong!"
+    );
+    return;
+  }
+  if (!server.users.length) {
+    await interaction.editReply(
+      "There are no opted-in users! A song trade can't happen without people wanting to do it."
+    );
+    return;
+  }
+
+  // create and add trade object
+  const trade: Trade = createTrade(
+    server,
+    interaction.options.getInteger("deadline", true)
+  );
+
+  const newID = await addTrade(trade);
+
+  await interaction.editReply(
+    newID
+      ? `Started a new trade, "${trade.name}"!`
+      : "Something went horribly wrong! Please let the server owner know that you can't start trades!"
+  );
+
+  // loop invariates
+  const endTime = DateTime.fromJSDate(trade.end),
+    timestamp = generateTimestamp(endTime, "F"),
+    relTimestamp = generateTimestamp(endTime, "R");
+
+  // message all needed people
+  for (const edge of trade.trades) {
+    const { from, to } = edge;
+
+    // ensure user exists before DM
+    const user = client.users.cache.get(from.toString());
+    if (!user) {
+      console.warn(`User ${from} doesn't exist!`);
+      continue;
+    }
+
+    // ensure opposing user exists
+    const toProfile = await fetchUser(to);
+    if (!toProfile) {
+      console.warn(`User ${to} doesn't exist!`);
+      continue;
+    }
+    const toServerProfile = await fetchServerUser(trade.server, to);
+    if (!toServerProfile) {
+      console.warn(
+        `User ${to} doesn't hasn't opted in (ever) to ${trade.server}!`
+      );
+      continue;
+    }
+    const nickname = toServerProfile.nickname ?? toProfile.name;
+
+    const embed = createProfileEmbed(toProfile, nickname);
+    await user.send(
+      embed
+        ? {
+            content: `Hello there! For the new song trade (${trade.name}), you have been given ${nickname}.
+You have until ${timestamp} (${relTimestamp}) to send your song suggestion through the form below.
+
+Here is their music profile:`,
+            embeds: [embed.setFooter({ text: "Happy Trading!" })],
+          }
+        : {
+            content: `Hello there! For the new song trade (${trade.name}), you have been given ${nickname}.
+You have until ${timestamp} (${relTimestamp}) to send your song suggestion through the form below.
+
+Unfortunately, it seems that ${nickname} hasn't set up their music profile, so try your best to pick out what you think they would like! Good luck, and happy trading!`,
+          }
+    );
+  }
+  if (server.announcementsChannel) {
+    const channel = client.channels.cache.get(
+      server.announcementsChannel.toString()
+    );
+
+    if (channel?.isTextBased()) {
+      const mention = server.pingableRole
+        ? `<@&${server.pingableRole}>`
+        : "everyone";
+      await channel.send(
+        `_Trade ${trade.name}_
+
+Hey, ${mention}! A new song trade is starting!
+Those of you who have opted in should have recieved a DM that tells you who you have and what kind of music they're looking for.
+Make sure you send over the songs by ${timestamp}!
+        
+**Happy trading!**`
+      );
+    } else
+      console.warn(
+        `Channel ${server.announcementsChannel.toString()} isn't a valid channel!`
+      );
+  }
 }
 
+/**
+ * Handles the "trade stop" subcommand
+ *
+ * @param interaction the interaction to handle
+ * @returns a Promise that resolves when the interaction has been completed
+ */
 async function tradeStop(
   interaction: ChatInputCommandInteraction<CacheType> & {
     guildId: string;
@@ -110,6 +238,12 @@ async function tradeStop(
   await interaction.deferReply({ ephemeral: true });
 }
 
+/**
+ * Handles the "trade extend" subcommand
+ *
+ * @param interaction the interaction to handle
+ * @returns a Promise that resolves when the interaction has been handled
+ */
 async function tradeExtend(
   interaction: ChatInputCommandInteraction<CacheType> & {
     guildId: string;
@@ -132,7 +266,7 @@ async function tradeExtend(
     return;
   }
 
-  const days = Math.floor(interaction.options.getNumber("days", true));
+  const days = Math.floor(interaction.options.getInteger("days", true));
   const success = await setTradeEndDate(
     name,
     DateTime.fromJSDate(trade.end).plus({ days }).toJSDate()

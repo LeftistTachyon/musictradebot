@@ -10,11 +10,13 @@ import { getDefaultTimeframes } from "./util";
 
 const programStart = DateTime.now();
 
+export const client: Client = new Client({
+  intents: [GatewayIntentBits.Guilds],
+});
+
 async function run() {
   await init;
   console.log(`Database connected in ${-programStart.diffNow().toMillis()} ms`);
-
-  const client: Client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
   // console.log("Guilds currently installed:");
   // client.guilds.cache.forEach((guild, snowflake) =>
@@ -95,7 +97,7 @@ async function run() {
 
     if (guild.systemChannel) {
       guild.systemChannel.send(
-        "Hello there! I'm Music Trade 2000, and I help people make music trades!\nTo get started, run `\\help`."
+        "Hello there! I'm Music Trade 2000, and I help people make music trades!\nTo get started, run `/help`."
       );
     }
   });

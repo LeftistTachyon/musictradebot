@@ -74,12 +74,12 @@ const profile: DiscordCommand = {
         );
 
         const name = serverUserProfile?.nickname ?? userProfile.name;
-        const embed = createProfileEmbed(userProfile);
-        let content = `**${name}'s Music Profile**`;
-        if (userProfile.bio) content += ":\n" + userProfile.bio;
+        const embed = createProfileEmbed(userProfile, name);
 
         await interaction.editReply(
-          embed ? { content, embeds: [embed] } : { content }
+          embed
+            ? { embeds: [embed] }
+            : "This user has not set up a music profile."
         );
       } else {
         await interaction.editReply(

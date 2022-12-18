@@ -283,12 +283,12 @@ export async function setNickname(
  * @param trade the trade to insert into the database
  * @returns the inserted trade's ID, if successful. If not, null.
  */
-export async function createTrade(trade: Trade) {
+export async function addTrade(trade: Trade) {
   const result = await trades.insertOne(trade);
 
   if (result.acknowledged) {
     await servers.updateOne({ uid: trade.server }, [
-      { $set: { trades: { $concatArray: ["$trades", [trade.name]] } } },
+      { $set: { trades: { $concatArrays: ["$trades", [trade.name]] } } },
     ]);
 
     return result.insertedId;
