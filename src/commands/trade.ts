@@ -8,6 +8,7 @@ import {
 import { DateTime } from "luxon";
 import { Long } from "mongodb";
 import { client } from "..";
+import { getActionRow } from "../buttons/sendSong";
 import {
   addTrade,
   fetchServerUser,
@@ -189,12 +190,14 @@ You have until ${timestamp} (${relTimestamp}) to send your song suggestion throu
 
 Here is their music profile:`,
             embeds: [embed.setFooter({ text: "Happy Trading!" })],
+            components: [getActionRow(trade.name)],
           }
         : {
             content: `Hello there! For the new song trade (${trade.name}), you have been given ${nickname}.
 You have until ${timestamp} (${relTimestamp}) to send your song suggestion through the form below.
 
 Unfortunately, it seems that ${nickname} hasn't set up their music profile, so try your best to pick out what you think they would like! Good luck, and happy trading!`,
+            components: [getActionRow(trade.name)],
           }
     );
   }

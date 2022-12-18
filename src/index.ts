@@ -44,10 +44,14 @@ async function run() {
         });
       }
     } else if (interaction.isButton()) {
-      const buttonHandler = buttons.get(interaction.customId);
+      const customId = interaction.customId.includes(" ")
+        ? interaction.customId.substring(0, interaction.customId.indexOf(" "))
+        : interaction.customId;
+      console.log("button press:", interaction.customId, "=>", customId);
+      const buttonHandler = buttons.get(customId);
 
       if (!buttonHandler) {
-        console.error(`No button matching ${interaction.customId} was found.`);
+        console.error(`No button matching ${customId} was found.`);
         return;
       }
 
@@ -61,10 +65,13 @@ async function run() {
         });
       }
     } else if (interaction.isModalSubmit()) {
-      const formHandler = forms.get(interaction.customId);
+      const customId = interaction.customId.includes(" ")
+        ? interaction.customId.substring(0, interaction.customId.indexOf(" "))
+        : interaction.customId;
+      const formHandler = forms.get(customId);
 
       if (!formHandler) {
-        console.error(`No form matching ${interaction.customId} was found.`);
+        console.error(`No form matching ${customId} was found.`);
         return;
       }
 
