@@ -18,7 +18,12 @@ export const createUpdateProfile2: ButtonHandler = {
   async execute(interaction) {
     const user = await fetchUser(new Long(interaction.user.id));
 
-    await interaction.showModal(generateProfileForm2(user));
+    await interaction.showModal(
+      generateProfileForm2(
+        user,
+        interaction.customId.substring(interaction.customId.indexOf(" ") + 1)
+      )
+    );
   },
 };
 
@@ -38,10 +43,11 @@ export const registerActionRow =
       .setStyle(ButtonStyle.Primary)
   );
 
-export const continueActionRow =
-  new ActionRowBuilder<ButtonBuilder>().addComponents(
+export function createContinueActionRow(isNew: boolean) {
+  return new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
       .setLabel("Continue")
-      .setCustomId("profile-updateCreate2")
+      .setCustomId("profile-updateCreate2 " + (isNew ? "Create" : "Edit"))
       .setStyle(ButtonStyle.Secondary)
   );
+}

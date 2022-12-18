@@ -5,8 +5,8 @@ import {
   TextInputBuilder,
   TextInputStyle,
 } from "discord.js";
-import { continueActionRow } from "../buttons/createUpdateProfile";
-import { upsertUser } from "../mongo";
+import { createContinueActionRow } from "../buttons/createUpdateProfile";
+import { fetchUser, upsertUser } from "../mongo";
 import { FormHandler, User } from "../types";
 
 export const handleProfileForm1: FormHandler = {
@@ -15,9 +15,13 @@ export const handleProfileForm1: FormHandler = {
   async execute(interaction) {
     await interaction.deferReply({ ephemeral: true });
 
+    // check if is new
+    const uid = new Long(interaction.user.id),
+      isNew = !Boolean(await fetchUser(uid));
+
     // write known new data
     const newUser: User = {
-      uid: new Long(interaction.user.id),
+      uid,
       name: interaction.fields.getTextInputValue("name"),
     };
 
@@ -35,9 +39,10 @@ export const handleProfileForm1: FormHandler = {
 
     if (success) {
       await interaction.editReply({
-        content:
-          "Continue creating or editing your profile by clicking the button below.",
-        components: [continueActionRow],
+        content: isNew
+          ? "Continue creating your profile by clicking the button below."
+          : "Continue editing your profile by clicking the button below.",
+        components: [createContinueActionRow(isNew)],
       });
     } else {
       await interaction.editReply(
@@ -142,7 +147,7 @@ export function generateProfileForm1(user: User | null) {
     );
 }
 
-export function generateProfileForm2(user: User | null) {
+export function generateProfileForm2(user: User | null, verb = "Create/Edit") {
   const favoriteSongsInput = new TextInputBuilder()
     .setCustomId("favoriteSongs")
     .setLabel("Favorite Songs")
@@ -185,7 +190,7 @@ export function generateProfileForm2(user: User | null) {
 
   return new ModalBuilder()
     .setCustomId("profile-form2")
-    .setTitle("Create/Edit Your Profile (Part 2)")
+    .setTitle(verb + " Your Profile (Part 2)")
     .addComponents(
       new ActionRowBuilder<TextInputBuilder>().addComponents(
         favoriteSongsInput
