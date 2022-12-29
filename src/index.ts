@@ -83,6 +83,9 @@ async function run() {
           ephemeral: true,
         });
       }
+    } else if (interaction.isAutocomplete()) {
+      console.log("Autocomplete interaction event:");
+      console.dir(interaction);
     }
   });
 

@@ -1,6 +1,6 @@
 import { Long } from "bson";
 import { Collection, MongoClient, ServerApiVersion } from "mongodb";
-import { EventOf, Server, ServerUser, Trade, User } from "./types";
+import { EventOf, MusicEvent, Server, ServerUser, Trade, User } from "./types";
 
 // ! ============== INITIALIZATION ROUTINE ============== !
 const client = new MongoClient(process.env.MONGO_URI || "missing-uri", {
@@ -12,7 +12,7 @@ const client = new MongoClient(process.env.MONGO_URI || "missing-uri", {
 let servers: Collection<Server>,
   users: Collection<User>,
   trades: Collection<Trade>,
-  events: Collection<Event>;
+  events: Collection<MusicEvent>;
 
 /**
  * A Promise that returns when the Mongo client is fully initialized
@@ -26,7 +26,7 @@ export default (async () => {
   servers = musicDB.collection<Server>("servers");
   users = musicDB.collection<User>("users");
   trades = musicDB.collection<Trade>("trades");
-  events = musicDB.collection<Event>("events");
+  events = musicDB.collection<MusicEvent>("events");
 })();
 
 // ! PING !
@@ -398,7 +398,7 @@ export async function setTradeResponse(
  * @param toAdd the events to insert into the database
  * @returns whether the operation was successful
  */
-export async function createEvents(toAdd: Event[]) {
+export async function createEvents(toAdd: MusicEvent[]) {
   const result = await events.insertMany(toAdd);
   return result.acknowledged && result.insertedCount == toAdd.length;
 }
@@ -408,9 +408,18 @@ export async function createEvents(toAdd: Event[]) {
  *
  * @returns all events on the database
  */
-export async function getAllEvents() {
-  const cursor = events.find({});
-  return await cursor.toArray();
+export async function fetchAllEvents() {
+  return await events.find({}).toArray();
+}
+
+/**
+ * Fetches all events which match the given selector
+ *
+ * @param selector the selector for the "of" field of ones to return
+ * @returns all matching events
+ */
+export async function fetchEvents(selector: Partial<EventOf>) {
+  return await events.find({ of: selector }).toArray();
 }
 
 /**
@@ -424,8 +433,7 @@ export async function postponeEvents(
   selector: Partial<EventOf>,
   extraMinutes: number
 ) {
-  const result = await events.updateMany(
-    { of: selector },
+  const result = await events.updateMany({ of: selector }, [
     {
       $set: {
         time: {
@@ -436,8 +444,36 @@ export async function postponeEvents(
           },
         },
       },
-    }
-  );
+    },
+  ]);
+
+  return result.acknowledged && result.matchedCount == result.modifiedCount;
+}
+
+/**
+ * Reschedules the events with the given selector for a new time a given number of minutes after the baseline time
+ *
+ * @param selector a partial of the "of" field
+ * @param newMinutes the number of minutes to now set the event as away from the baseline
+ * @returns whether the operation was successful
+ */
+export async function rescheduleEvents(
+  selector: Partial<EventOf>,
+  newMinutes: number
+) {
+  const result = await events.updateMany({ of: selector }, [
+    {
+      $set: {
+        time: {
+          $dateAdd: {
+            startDate: "$baseline",
+            amount: newMinutes,
+            unit: "minute",
+          },
+        },
+      },
+    },
+  ]);
 
   return result.acknowledged && result.matchedCount == result.modifiedCount;
 }
@@ -448,10 +484,10 @@ export async function postponeEvents(
  * @returns an array of all events that occured before the moment that the function was called. If unable to be deleted, null is returned.
  */
 export async function getAndDeleteCurrEvents() {
-  const result1 = await events.find({ time: { $lte: "$$NOW" } }).toArray();
+  const result1 = await events.find({ time: { $lte: new Date() } }).toArray();
 
   if (result1.length) {
-    const result2 = await events.deleteMany({ time: { $lte: "$$NOW" } });
+    const result2 = await events.deleteMany({ time: { $lte: new Date() } });
 
     return result2.acknowledged && result2.deletedCount == result1.length
       ? result1
@@ -467,7 +503,7 @@ export async function getAndDeleteCurrEvents() {
  */
 export async function deleteEvents(selector: Partial<EventOf>) {
   const result = await events.deleteMany({ of: selector });
-  return result.acknowledged;
+  return result.deletedCount;
 }
 
 // ! ================ CLEANUP FUNCTIONS ================= !

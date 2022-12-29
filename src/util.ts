@@ -14,7 +14,7 @@ import { client } from ".";
 import adjectives from "../data/adjectives.json";
 import nouns from "../data/nouns.json";
 import { addServerUser, fetchServerUser, fetchUser, setOpt } from "./mongo";
-import { Server, Trade, User } from "./types";
+import { InServer, Server, Trade, User } from "./types";
 
 // ! ==================== DATA UTIL ===================== !
 /**
@@ -153,10 +153,7 @@ export function isInServer(
   interaction:
     | ButtonInteraction<CacheType>
     | ChatInputCommandInteraction<CacheType>
-): interaction is (
-  | ButtonInteraction<CacheType>
-  | ChatInputCommandInteraction<CacheType>
-) & { guildId: string; guild: Guild } {
+): interaction is InServer<typeof interaction> {
   if (interaction.guildId) return true;
 
   interaction.reply({

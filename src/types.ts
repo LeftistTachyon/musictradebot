@@ -3,6 +3,7 @@ import {
   ButtonInteraction,
   CacheType,
   ChatInputCommandInteraction,
+  Guild,
   ModalSubmitInteraction,
   SlashCommandBuilder,
 } from "discord.js";
@@ -67,7 +68,7 @@ export type User = {
 /**
  * An object in the events database
  */
-export type Event = {
+export type MusicEvent = {
   of: EventOf;
   baseline: Date; // the time to calculate the event from (e.g. 12 hours after this time, 2 hours before this time)
   time: Date; // the actual time of the event
@@ -80,7 +81,7 @@ export type Event = {
 export type EventOf = {
   server: Long; // the server where the trade is taking place
   trade: string; // name of the associated trade
-  type: string; // what kind of event this is
+  type: "reminder" | "phase1" | "phase2"; // what kind of event this is
 };
 
 // ! ================== DISCORD TYPES =================== !
@@ -109,3 +110,8 @@ export type FormHandler = {
   name: string;
   execute: (interaction: ModalSubmitInteraction<CacheType>) => Promise<void>;
 };
+
+/**
+ * Changes the type to something that has defined guild ID and object
+ */
+export type InServer<T> = T & { guildId: string; guild: Guild };

@@ -1,6 +1,10 @@
 import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 import { Long } from "bson";
-import { updateServerSettings } from "../mongo";
+import {
+  postponeEvents,
+  rescheduleEvents,
+  updateServerSettings,
+} from "../mongo";
 import { DiscordCommand } from "../types";
 import { getDefaultTimeframes, isAdmin, isInServer } from "../util";
 
@@ -53,10 +57,18 @@ const setperiod: DiscordCommand = {
 
     const newSetting = { [setting]: timeframeMin };
 
-    const successful = await updateServerSettings(
-      new Long(interaction.guildId),
-      newSetting
-    );
+    const guildLong = new Long(interaction.guildId);
+    const successful =
+      (await updateServerSettings(guildLong, newSetting)) &&
+      (await rescheduleEvents(
+        {
+          // ? hard-coded for now, will have to extract to function later if this expands
+          type: setting === "reminderPeriod" ? "reminder" : "phase2",
+          server: guildLong,
+        },
+        // ? hard-coded for now, will have to extract to function later if this expands
+        setting === "reminderPeriod" ? -timeframeMin : timeframeMin
+      ));
 
     interaction.editReply(
       successful

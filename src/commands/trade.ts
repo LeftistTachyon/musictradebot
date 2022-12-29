@@ -11,13 +11,16 @@ import { client } from "..";
 import { getActionRow } from "../buttons/sendSong";
 import {
   addTrade,
+  createEvents,
+  deleteEvents,
   fetchServerUser,
   fetchTrade,
   fetchUser,
   getServer,
+  postponeEvents,
   setTradeEndDate,
 } from "../mongo";
-import { DiscordCommand, Trade } from "../types";
+import { DiscordCommand, InServer, Trade } from "../types";
 import {
   createProfileEmbed,
   createTrade,
@@ -114,10 +117,7 @@ export default trade;
  * @returns a Promise that resolves when the interaction has been completed
  */
 async function tradeStart(
-  interaction: ChatInputCommandInteraction<CacheType> & {
-    guildId: string;
-    guild: Guild;
-  }
+  interaction: InServer<ChatInputCommandInteraction<CacheType>>
 ) {
   await interaction.deferReply({ ephemeral: true });
 
@@ -136,11 +136,9 @@ async function tradeStart(
     return;
   }
 
+  const deadline = interaction.options.getInteger("deadline", true);
   // create and add trade object
-  const trade: Trade = createTrade(
-    server,
-    interaction.options.getInteger("deadline", true)
-  );
+  const trade: Trade = createTrade(server, deadline);
 
   const newID = await addTrade(trade);
 
@@ -224,6 +222,40 @@ Make sure you send over the songs by ${timestamp}!
         `Channel ${server.announcementsChannel.toString()} isn't a valid channel!`
       );
   }
+
+  const endOfPhase1 = DateTime.now().plus({ days: deadline }),
+    endOfPhase2 = endOfPhase1.plus({ minutes: server.commentPeriod });
+  const epJS1 = endOfPhase1.toJSDate(),
+    epJS2 = endOfPhase2.toJSDate();
+  const createEventsResult = await createEvents([
+    {
+      of: { server: trade.server, trade: trade.name, type: "phase1" },
+      baseline: new Date(),
+      time: epJS1,
+      data: "phase1",
+    },
+    {
+      of: { server: trade.server, trade: trade.name, type: "reminder" },
+      baseline: epJS1,
+      time: endOfPhase1.minus({ minutes: server.reminderPeriod }).toJSDate(),
+      data: "phase1",
+    },
+    {
+      of: { server: trade.server, trade: trade.name, type: "phase2" },
+      baseline: epJS1,
+      time: epJS2,
+      data: "phase2",
+    },
+    {
+      of: { server: trade.server, trade: trade.name, type: "reminder" },
+      baseline: epJS2,
+      time: endOfPhase2.minus({ minutes: server.reminderPeriod }).toJSDate(),
+      data: "phase2",
+    },
+  ]);
+  if (!createEventsResult) {
+    console.warn("Could not create events for trade", trade.name);
+  }
 }
 
 /**
@@ -233,12 +265,27 @@ Make sure you send over the songs by ${timestamp}!
  * @returns a Promise that resolves when the interaction has been completed
  */
 async function tradeStop(
-  interaction: ChatInputCommandInteraction<CacheType> & {
-    guildId: string;
-    guild: Guild;
-  }
+  interaction: InServer<ChatInputCommandInteraction<CacheType>>
 ) {
   await interaction.deferReply({ ephemeral: true });
+
+  const name = interaction.options.getString("name", true);
+  const deleted = await deleteEvents({
+    trade: name,
+    server: new Long(interaction.guildId),
+  });
+
+  if (deleted === 0) {
+    // not successful
+    await interaction.editReply(
+      "Sorry, that music trade doesn't exist or you don't have access to it."
+    );
+    return;
+  }
+
+  await interaction.editReply(`Successfully stopped trade "${name}".`);
+
+  // TODO: add end-of-trade stuff here
 }
 
 /**
@@ -248,10 +295,7 @@ async function tradeStop(
  * @returns a Promise that resolves when the interaction has been handled
  */
 async function tradeExtend(
-  interaction: ChatInputCommandInteraction<CacheType> & {
-    guildId: string;
-    guild: Guild;
-  }
+  interaction: InServer<ChatInputCommandInteraction<CacheType>>
 ) {
   await interaction.deferReply({ ephemeral: true });
 
@@ -271,7 +315,9 @@ async function tradeExtend(
 
   const days = Math.floor(interaction.options.getInteger("days", true));
   const newEnd = DateTime.fromJSDate(trade.end).plus({ days });
-  const success = await setTradeEndDate(name, newEnd.toJSDate());
+  const success =
+    (await setTradeEndDate(name, newEnd.toJSDate())) &&
+    (await postponeEvents({ trade: trade.name }, days * 1440));
 
   await interaction.editReply(
     success
