@@ -1,6 +1,6 @@
 import { Long } from "bson";
 import { Collection, MongoClient, ServerApiVersion } from "mongodb";
-import { Server, ServerUser, Trade, User } from "./types";
+import { EventOf, Server, ServerUser, Trade, User } from "./types";
 
 // ! ============== INITIALIZATION ROUTINE ============== !
 const client = new MongoClient(process.env.MONGO_URI || "missing-uri", {
@@ -11,7 +11,8 @@ const client = new MongoClient(process.env.MONGO_URI || "missing-uri", {
 
 let servers: Collection<Server>,
   users: Collection<User>,
-  trades: Collection<Trade>;
+  trades: Collection<Trade>,
+  events: Collection<Event>;
 
 /**
  * A Promise that returns when the Mongo client is fully initialized
@@ -25,6 +26,7 @@ export default (async () => {
   servers = musicDB.collection<Server>("servers");
   users = musicDB.collection<User>("users");
   trades = musicDB.collection<Trade>("trades");
+  events = musicDB.collection<Event>("events");
 })();
 
 // ! PING !
@@ -387,6 +389,86 @@ export async function setTradeResponse(
 }
 
 // no delete, as these will be retained perpetually
+
+// ! =================== EVENTS CRUD ==================== !
+
+/**
+ * Inserts all of the given events into the events database
+ *
+ * @param toAdd the events to insert into the database
+ * @returns whether the operation was successful
+ */
+export async function createEvents(toAdd: Event[]) {
+  const result = await events.insertMany(toAdd);
+  return result.acknowledged && result.insertedCount == toAdd.length;
+}
+
+/**
+ * Fetches all the events on the events database
+ *
+ * @returns all events on the database
+ */
+export async function getAllEvents() {
+  const cursor = events.find({});
+  return await cursor.toArray();
+}
+
+/**
+ * Postpones the events with the given selector by the given number of minutes
+ *
+ * @param selector a partial of the "of" field
+ * @param extraMinutes the number of extra minutes to add to the selected events
+ * @returns whether the operation was successful
+ */
+export async function postponeEvents(
+  selector: Partial<EventOf>,
+  extraMinutes: number
+) {
+  const result = await events.updateMany(
+    { of: selector },
+    {
+      $set: {
+        time: {
+          $dateAdd: {
+            startDate: "$time",
+            amount: extraMinutes,
+            unit: "minute",
+          },
+        },
+      },
+    }
+  );
+
+  return result.acknowledged && result.matchedCount == result.modifiedCount;
+}
+
+/**
+ * Finds and deletes all events that occured before the present.
+ *
+ * @returns an array of all events that occured before the moment that the function was called. If unable to be deleted, null is returned.
+ */
+export async function getAndDeleteCurrEvents() {
+  const result1 = await events.find({ time: { $lte: "$$NOW" } }).toArray();
+
+  if (result1.length) {
+    const result2 = await events.deleteMany({ time: { $lte: "$$NOW" } });
+
+    return result2.acknowledged && result2.deletedCount == result1.length
+      ? result1
+      : null;
+  } else return [];
+}
+
+/**
+ * Deletes all events which match the given "of" variable
+ *
+ * @param selector the selector for the "of" variable of things to delete
+ * @returns whether the operation was successful
+ */
+export async function deleteEvents(selector: Partial<EventOf>) {
+  const result = await events.deleteMany({ of: selector });
+  return result.acknowledged;
+}
 
 // ! ================ CLEANUP FUNCTIONS ================= !
 /**

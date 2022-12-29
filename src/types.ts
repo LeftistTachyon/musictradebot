@@ -64,6 +64,25 @@ export type User = {
   instruments?: string;
 };
 
+/**
+ * An object in the events database
+ */
+export type Event = {
+  of: EventOf;
+  baseline: Date; // the time to calculate the event from (e.g. 12 hours after this time, 2 hours before this time)
+  time: Date; // the actual time of the event
+  data: string; // any other data related to the event
+};
+
+/**
+ * Descriptor of what this event is attached to
+ */
+export type EventOf = {
+  server: Long; // the server where the trade is taking place
+  trade: string; // name of the associated trade
+  type: string; // what kind of event this is
+};
+
 // ! ================== DISCORD TYPES =================== !
 /**
  * Something that represents a slash command

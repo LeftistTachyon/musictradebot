@@ -270,14 +270,30 @@ async function tradeExtend(
   }
 
   const days = Math.floor(interaction.options.getInteger("days", true));
-  const success = await setTradeEndDate(
-    name,
-    DateTime.fromJSDate(trade.end).plus({ days }).toJSDate()
-  );
+  const newEnd = DateTime.fromJSDate(trade.end).plus({ days });
+  const success = await setTradeEndDate(name, newEnd.toJSDate());
 
   await interaction.editReply(
     success
       ? `Successfully extended the deadline of ${name} by ${days} days!`
       : "Something went horribly wrong! Please let the server owner know that you can't extend deadlines of trades!"
   );
+
+  for (const { from, song } of trade.trades) {
+    const u = client.users.cache.get(from.toString());
+    if (!u) {
+      console.warn(`User ${from} doesn't exist!`);
+      continue;
+    }
+
+    const timestamp = generateTimestamp(newEnd, "F"),
+      relTimestamp = generateTimestamp(newEnd, "R");
+    u.send(
+      song
+        ? `One of the trades you are participating in (${trade.name}) has extended their deadline for submitting songs.
+The new deadline is ${timestamp} (${relTimestamp}). Hang on tight while others are submitting their songs!`
+        : `One of the trades you are participating in (${trade.name}) has extended their deadline for submitting songs.
+You now have until ${timestamp} (${relTimestamp}) to submit your song trade. Remember to submit it on time!`
+    );
+  }
 }
