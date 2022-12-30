@@ -20,11 +20,29 @@ import {
   remindPhase2,
 } from "./util";
 
+// startup time
 const programStart = DateTime.now();
 
+// initialize Discord client
 export const client: Client = new Client({
   intents: [GatewayIntentBits.Guilds],
 });
+
+let interval: string | number | NodeJS.Timeout | undefined;
+
+/**
+ * Kills the bot.
+ */
+export async function kill() {
+  console.log("Stopping...");
+  clearInterval(interval);
+
+  console.log("Closing Mongo connection...");
+  await close();
+
+  console.log("Logging off client...");
+  await client.destroy();
+}
 
 async function run() {
   await init;
@@ -148,7 +166,7 @@ async function run() {
     );
   });
 
-  const interval = setInterval(async () => {
+  interval = setInterval(async () => {
     const currEvents = await getAndDeleteCurrEvents();
     if (!currEvents?.length) return;
 
@@ -172,13 +190,7 @@ async function run() {
     }
   }, 60_000);
 
-  client.on(Events.Invalidated, async () => {
-    console.log("Stopping...");
-    clearInterval(interval);
-
-    console.log("Closing Mongo connection...");
-    await close();
-  });
+  client.on(Events.Invalidated, async () => {});
 
   client.login(process.env.DISCORD_TOKEN);
 }

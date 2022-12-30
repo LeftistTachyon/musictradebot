@@ -18,6 +18,7 @@ import nouns from "../data/nouns.json";
 import { getActionRow } from "./buttons/sendComments";
 import {
   addServerUser,
+  close,
   fetchServerUser,
   fetchTrade,
   fetchUser,
@@ -202,6 +203,23 @@ export function isAdmin(
   });
 
   return false;
+}
+
+/**
+ * Check if a slash command interaction was done by LeftistTachyon#0279, the bot owner
+ *
+ * @param interaction the interaction to check
+ * @returns whether the interaction was done by LeftistTachyon#0279
+ */
+export function isBotOwner(
+  interaction: ChatInputCommandInteraction<CacheType>
+) {
+  if (interaction.user.id === process.env.MY_ID) return true;
+
+  interaction.reply({
+    content:
+      "Sorry, this command can only be used by the bot owner!\nPlease contact LeftistTachyon#0279 for more information.",
+  });
 }
 
 /**
