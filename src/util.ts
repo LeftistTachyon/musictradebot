@@ -12,6 +12,7 @@ import { DateTime } from "luxon";
 import { client } from ".";
 import adjectives from "../data/adjectives.json";
 import nouns from "../data/nouns.json";
+import { getActionRow } from "./buttons/sendComments";
 import {
   addServerUser,
   fetchServerUser,
@@ -354,7 +355,63 @@ export function createProfileEmbed(user: User, nickname = user.name) {
  *
  * @param event the event that triggered this function call
  */
-export function endPhase1({ of }: MusicEvent) {}
+export async function endPhase1({ of }: MusicEvent) {
+  const trade = await fetchTrade(of.trade);
+  if (!trade) {
+    console.warn(`Trade ${of.trade} doesn't exist!`);
+    return;
+  }
+  const server = await getServer(of.server);
+  if (!server) {
+    console.warn(`Server ${of.server} doesn't exist!`);
+    return;
+  }
+
+  for (const { from, to, song } of trade.trades) {
+    const fromName =
+      (await fetchServerUser(of.server, from))?.nickname ??
+      (await fetchUser(from))?.name;
+    if (!fromName) {
+      console.warn(`User ${from} has no profile!`);
+      continue;
+    }
+
+    const user = client.users.cache.get(to.toString());
+    if (!user) {
+      console.warn(`User ${to} doesn't exist!`);
+      continue;
+    }
+
+    const phase2End = DateTime.fromJSDate(trade.end).plus({
+      minutes: server.commentPeriod,
+    });
+    const relTimestamp = generateTimestamp(phase2End, "R"),
+      fullTimestamp = generateTimestamp(phase2End, "F");
+    if (song) {
+      const embed = new EmbedBuilder()
+        .setTitle("Your song recommenation")
+        .setDescription(song.song)
+        .setFooter({ text: "Happy listening!" });
+      if (song.comments)
+        embed.addFields({ name: "Comments", value: song.comments });
+
+      user.send({
+        content: `**Welcome to part 2 of the song trade!**
+This is where you get the opportunity to listen and respond to the song that your recommender sent. Sending in a response is optional, but greatly appreciated!
+Submissions close at ${fullTimestamp} (${relTimestamp}). Have fun!
+Song: ${song.song}`,
+        embeds: [embed],
+        components: [getActionRow(trade.name)],
+      });
+    } else {
+      user.send(
+        `**Welcome to part 2 of the song trade!**
+Unfortunately, your song recommender didn't send in a song in time. Sit tight until ${fullTimestamp} (${relTimestamp}) to see everybody's results!
+If this is a recurring issue, please let your server owner know to exclude the offender from the next song trades.`
+      );
+    }
+  }
+}
 
 /**
  * Ends phase 2 and sends out any respective messages.
@@ -410,8 +467,8 @@ export async function remindPhase2(event: MusicEvent) {
   }
 
   const timestamp = generateTimestamp(DateTime.fromJSDate(event.baseline), "R");
-  for (const { response, to } of trade.trades) {
-    if (response) continue;
+  for (const { song, response, to } of trade.trades) {
+    if (response || !song) continue;
 
     const user = client.users.cache.get(to.toString());
     if (!user) {

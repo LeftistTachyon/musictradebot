@@ -44,7 +44,7 @@ export type Trade = {
     from: Long; // User UID
     to: Long;
     song?: { song: string; comments?: string };
-    response?: { rating: number; comments?: string };
+    response?: { rating: string; comments?: string };
   }[];
   start: Date;
   end: Date;

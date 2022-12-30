@@ -391,7 +391,7 @@ export async function setTradeSong(
 export async function setTradeResponse(
   tradeName: string,
   toUID: Long,
-  response: { rating: number; comments?: string }
+  response: { rating: string; comments?: string }
 ) {
   const result = await trades.updateOne(
     { name: tradeName, "trades.to": toUID },

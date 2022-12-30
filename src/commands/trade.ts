@@ -214,7 +214,7 @@ async function tradeStart(
     await user.send(
       embed
         ? {
-            content: `Hello there! For the new song trade (${trade.name}), you have been given ${nickname}.
+            content: `**Hello there!** For the new song trade (${trade.name}), you have been given ${nickname}.
 You have until ${timestamp} (${relTimestamp}) to send your song suggestion through the form below.
 
 Here is their music profile:`,
@@ -222,7 +222,7 @@ Here is their music profile:`,
             components: [getActionRow(trade.name)],
           }
         : {
-            content: `Hello there! For the new song trade (${trade.name}), you have been given ${nickname}.
+            content: `**Hello there!** For the new song trade (${trade.name}), you have been given ${nickname}.
 You have until ${timestamp} (${relTimestamp}) to send your song suggestion through the form below.
 
 Unfortunately, it seems that ${nickname} hasn't set up their music profile, so try your best to pick out what you think they would like! Good luck, and happy trading!`,
