@@ -7,7 +7,7 @@ import { FormHandler } from "../types";
 export const sendComments: FormHandler = {
   name: "trade-sendComments",
   async execute(interaction) {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply();
 
     const tradeName = interaction.customId.substring(
       interaction.customId.indexOf(" ") + 1
@@ -16,7 +16,7 @@ export const sendComments: FormHandler = {
     const stage = await getStage(tradeName);
     if (stage !== "phase2") {
       await interaction.editReply(
-        "The window to submit responses to songs has passed. Sorry!\n" + stage
+        "The window to submit responses to songs has passed. Sorry!"
       );
       return;
     }

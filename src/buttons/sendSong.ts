@@ -12,9 +12,7 @@ export const sendSong: ButtonHandler = {
 
     const stage = await getStage(tradeName);
     if (stage !== "phase1") {
-      await interaction.reply(
-        "The window to submit songs has passed. Sorry!\n" + stage
-      );
+      await interaction.reply("The window to submit songs has passed. Sorry!");
       return;
     }
     // console.log(`including trade name ${tradeName} into form`);

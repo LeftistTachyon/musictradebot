@@ -12,8 +12,8 @@ export const sendComments: ButtonHandler = {
 
     const stage = await getStage(tradeName);
     if (stage !== "phase2") {
-      await interaction.editReply(
-        "The window to submit responses to songs has passed. Sorry!\n" + stage
+      await interaction.reply(
+        "The window to submit responses to songs has passed. Sorry!"
       );
       return;
     }

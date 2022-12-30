@@ -22,7 +22,15 @@ import {
   getServer,
   setOpt,
 } from "./mongo";
-import { EventOf, InServer, MusicEvent, Server, Trade, User } from "./types";
+import {
+  EventOf,
+  EventSelector,
+  InServer,
+  MusicEvent,
+  Server,
+  Trade,
+  User,
+} from "./types";
 
 // ! ================== PASTEBIN INIT =================== !
 const pastebinClient = new PasteClient(
@@ -297,10 +305,10 @@ export async function optOut(
  * @param nickname the nickname to use for this user
  * @returns the created embed, if possible. Otherwise, null.
  */
-export function createProfileEmbed(user: User, nickname = user.name) {
+export async function createProfileEmbed(user: User, nickname = user.name) {
   const output = new EmbedBuilder().setTitle(nickname + "'s Music Profile");
 
-  const u = client.users.cache.get(user.uid.toString()),
+  const u = await client.users.fetch(user.uid.toString()),
     avatarURL = u?.avatarURL();
   if (avatarURL) {
     output.setThumbnail(avatarURL);
@@ -400,7 +408,7 @@ export async function endPhase1({ of }: MusicEvent) {
       continue;
     }
 
-    const user = client.users.cache.get(to.toString());
+    const user = await client.users.fetch(to.toString());
     if (!user) {
       console.warn(`User ${to} doesn't exist! (util.ts:407)`);
       continue;
@@ -458,7 +466,7 @@ export async function endPhase2({
     return;
   }
 
-  const guild = client.guilds.cache.get(serverID.toString());
+  const guild = await client.guilds.fetch(serverID.toString());
   if (!guild) {
     console.warn(`Guild ${serverID} doesn't exist!`);
     return;
@@ -546,7 +554,7 @@ Here is a link to all of the song choices and responses: <${url}>
 Hope to see you again in another trade!`;
 
   for (const user of trade.users) {
-    const u = client.users.cache.get(user.toString());
+    const u = await client.users.fetch(user.toString());
     if (!u) {
       console.warn(`User ${user} doesn't exist! (util.ts:553)`);
       continue;
@@ -572,7 +580,7 @@ export async function remindPhase1({ of }: MusicEvent) {
   for (const { song, from } of trade.trades) {
     if (song) continue;
 
-    const user = client.users.cache.get(from.toString());
+    const user = await client.users.fetch(from.toString());
     if (!user) {
       console.warn(`User ${from} doesn't exist! (util.ts:579)`);
       continue;
@@ -606,7 +614,7 @@ export async function remindPhase2(event: MusicEvent) {
   for (const { song, response, to } of trade.trades) {
     if (response || !song) continue;
 
-    const user = client.users.cache.get(to.toString());
+    const user = await client.users.fetch(to.toString());
     if (!user) {
       console.warn(`User ${to} doesn't exist! (util.ts:613)`);
       continue;
@@ -646,14 +654,7 @@ function finishedTradeEdgeEmbed(
       });
     }
 
-    if (edge.response) {
-      output.addFields({ name: "\u200B", value: "\u200B" });
-    } else {
-      return output.addFields({
-        name: toName + "'s rating",
-        value: toName + " did not leave a rating.",
-      });
-    }
+    output.addFields({ name: "\u200B", value: "\u200B" });
   } else {
     return output.addFields({
       name: fromName + "'s song suggestion",
@@ -709,9 +710,14 @@ ${edge.song.comments}
 `;
     }
 
-    if (edge.response) {
-      output += "\n";
-    }
+    output += "\n";
+  } else {
+    return (
+      output +
+      `## ${fromName}'s song suggestion
+${fromName} did not submit a song.
+`
+    );
   }
 
   if (edge.response) {
@@ -724,15 +730,24 @@ ${edge.response.rating} / 10
 ${edge.response.comments}
 `;
     }
-  }
 
-  return output;
+    return output;
+  } else {
+    return (
+      output +
+      `## ${toName}'s rating
+${toName} did not leave a rating.
+`
+    );
+  }
 }
 
-type EventSelector = {
-  [Property in keyof EventOf as `of.${Property}`]: EventOf[Property];
-};
-
+/**
+ * Transforms EventOf objects into selectors
+ *
+ * @param selector the object to convert
+ * @returns the selector
+ */
 export function fromSelector(
   selector: Partial<EventOf>
 ): Partial<EventSelector> {

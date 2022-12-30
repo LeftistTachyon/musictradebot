@@ -48,11 +48,6 @@ async function run() {
   await init;
   console.log(`Database connected in ${-programStart.diffNow().toMillis()} ms`);
 
-  // console.log("Guilds currently installed:");
-  // client.guilds.cache.forEach((guild, snowflake) =>
-  //   console.log(snowflake, guild.id)
-  // );
-
   client.on(Events.InteractionCreate, async (interaction) => {
     if (interaction.isChatInputCommand()) {
       const command = commands.get(interaction.commandName);
@@ -164,7 +159,7 @@ async function run() {
         .toMillis()} ms`
     );
 
-    checkEvents();
+    setTimeout(checkEvents, 1_000);
   });
 
   async function checkEvents() {

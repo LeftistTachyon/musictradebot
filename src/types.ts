@@ -84,6 +84,13 @@ export type EventOf = {
   type: "reminder" | "phase1" | "phase2"; // what kind of event this is
 };
 
+/**
+ * Transforms EventOf objects into selectors
+ */
+export type EventSelector = {
+  [Property in keyof EventOf as `of.${Property}`]: EventOf[Property];
+};
+
 // ! ================== DISCORD TYPES =================== !
 /**
  * Something that represents a slash command

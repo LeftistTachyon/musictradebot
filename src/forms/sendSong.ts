@@ -20,7 +20,7 @@ export const sendSong: FormHandler = {
     const stage = await getStage(tradeName);
     if (stage !== "phase1") {
       await interaction.editReply(
-        "The window to submit songs has passed. Sorry!\n" + stage
+        "The window to submit songs has passed. Sorry!"
       );
       return;
     }

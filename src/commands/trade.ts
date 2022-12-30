@@ -196,7 +196,7 @@ async function tradeStart(
     const { from, to } = edge;
 
     // ensure user exists before DM
-    const user = client.users.cache.get(from.toString());
+    const user = await client.users.fetch(from.toString());
     if (!user) {
       console.warn(`User ${from} doesn't exist! (trade.ts:195)`);
       continue;
@@ -217,7 +217,7 @@ async function tradeStart(
     }
     const nickname = toServerProfile.nickname ?? toProfile.name;
 
-    const embed = createProfileEmbed(toProfile, nickname);
+    const embed = await createProfileEmbed(toProfile, nickname);
     await user.send(
       embed
         ? {
@@ -238,7 +238,7 @@ Unfortunately, it seems that ${nickname} hasn't set up their music profile, so t
     );
   }
   if (server.announcementsChannel) {
-    const channel = client.channels.cache.get(
+    const channel = await client.channels.fetch(
       server.announcementsChannel.toString()
     );
 
@@ -369,7 +369,7 @@ async function tradeExtend(
   );
 
   for (const { from, song } of trade.trades) {
-    const u = client.users.cache.get(from.toString());
+    const u = await client.users.fetch(from.toString());
     if (!u) {
       console.warn(`User ${from} doesn't exist! (trade.ts:368)`);
       continue;
