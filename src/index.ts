@@ -158,7 +158,7 @@ async function run() {
           endPhase1(event);
           break;
         case "phase2":
-          endPhase2(event);
+          endPhase2(event.of);
           break;
         case "reminder":
           if (event.data === "phase1") {

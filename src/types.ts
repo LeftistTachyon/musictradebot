@@ -119,3 +119,5 @@ export type FormHandler = {
  * Changes the type to something that has defined guild ID and object
  */
 export type InServer<T> = T & { guildId: string; guild: Guild };
+
+// ! ================ OTHER UTILITY TYPES =============== !

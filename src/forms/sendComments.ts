@@ -50,6 +50,8 @@ export function getCommentForm(tradeName: string) {
           .setLabel("Song rating")
           .setPlaceholder("Your rating of the song they gave you out of 10")
           .setRequired(true)
+          .setMinLength(1)
+          .setMaxLength(15)
           .setStyle(TextInputStyle.Short)
       ),
       new ActionRowBuilder<TextInputBuilder>().addComponents(

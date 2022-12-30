@@ -4,6 +4,7 @@ import {
   ButtonInteraction,
   CacheType,
   ChatInputCommandInteraction,
+  Collection,
   EmbedBuilder,
   GuildMember,
   PermissionsBitField,
@@ -21,7 +22,9 @@ import {
   getServer,
   setOpt,
 } from "./mongo";
-import { InServer, MusicEvent, Server, Trade, User } from "./types";
+import { EventOf, InServer, MusicEvent, Server, Trade, User } from "./types";
+
+// ! ================== PASTEBIN INIT =================== !
 
 // ! ==================== DATA UTIL ===================== !
 /**
@@ -395,7 +398,7 @@ export async function endPhase1({ of }: MusicEvent) {
       if (song.comments)
         embed.addFields({ name: "Comments", value: song.comments });
 
-      user.send({
+      await user.send({
         content: `**Welcome to part 2 of the song trade!**
 This is where you get the opportunity to listen and respond to the song that your recommender sent. Sending in a response is optional, but greatly appreciated!
 Submissions close at ${fullTimestamp} (${relTimestamp}). Have fun!
@@ -404,7 +407,7 @@ Song: ${song.song}`,
         components: [getActionRow(trade.name)],
       });
     } else {
-      user.send(
+      await user.send(
         `**Welcome to part 2 of the song trade!**
 Unfortunately, your song recommender didn't send in a song in time. Sit tight until ${fullTimestamp} (${relTimestamp}) to see everybody's results!
 If this is a recurring issue, please let your server owner know to exclude the offender from the next song trades.`
@@ -418,7 +421,87 @@ If this is a recurring issue, please let your server owner know to exclude the o
  *
  * @param event the event that triggered this function call
  */
-export function endPhase2({ of }: MusicEvent) {}
+export async function endPhase2({
+  server: serverID,
+  trade: tradeName,
+}: EventOf) {
+  const server = await getServer(serverID);
+  if (!server) {
+    console.warn(`Server ${serverID} doesn't exist!`);
+    return;
+  }
+
+  const trade = await fetchTrade(tradeName);
+  if (!trade) {
+    console.warn(`Trade ${tradeName} doesn't exist!`);
+    return;
+  }
+
+  const guild = client.guilds.cache.get(serverID.toString());
+  if (!guild) {
+    console.warn(`Guild ${serverID} doesn't exist!`);
+    return;
+  }
+
+  const names = new Collection<Long, string | undefined>();
+  for (const userID of trade.users) {
+    names.set(
+      userID,
+      (await fetchServerUser(serverID, userID))?.nickname ??
+        (await fetchUser(userID))?.name
+    );
+  }
+
+  if (server.announcementsChannel) {
+    // send via announcements channel
+    const announcementsChannel = await guild.channels.fetch(
+      server.announcementsChannel.toString()
+    );
+
+    if (announcementsChannel?.isTextBased()) {
+      const mention = server.pingableRole
+        ? `<@&${server.pingableRole}>`
+        : "everyone";
+      const edges = trade.trades.slice();
+
+      await announcementsChannel.send({
+        content: `**End of trade ${tradeName}**
+Hello, ${mention}! Thank you for participating in another round of song trades. We'll be looking forward to doing this again, soon!
+Below are all the song trades that happened this time around:`,
+        embeds: edges
+          .splice(0, 10)
+          .map((edge) =>
+            finishedTradeEdgeEmbed(
+              edge,
+              names.get(edge.from),
+              names.get(edge.to)
+            )
+          ),
+      });
+
+      while (edges.length) {
+        await announcementsChannel.send({
+          embeds: edges
+            .splice(0, 10)
+            .map((edge) =>
+              finishedTradeEdgeEmbed(
+                edge,
+                names.get(edge.from),
+                names.get(edge.to)
+              )
+            ),
+        });
+      }
+    } else {
+      console.warn(
+        `Announcements channel ${server.announcementsChannel} is invalid!`
+      );
+      // fall through to below DM method
+    }
+  }
+
+  // send via DMs to everybody involved
+}
 
 /**
  * Sends reminder messages to any stragglers from phase 1
@@ -480,4 +563,54 @@ export async function remindPhase2(event: MusicEvent) {
       `This is a gentle reminder to send in your song commentary before the deadline! Submissions close ${timestamp}. This is _optional_, but highly recommended so the song recommenders can get feedback.`
     );
   }
+}
+
+/**
+ * Creates an embed that contains all relevant information from this trade
+ *
+ * @param edge the edge
+ * @param fromName the nickname to use for the sender
+ * @param toName the nickname to use for the reciever
+ * @returns the embed that includes all info from the edge
+ */
+function finishedTradeEdgeEmbed(
+  edge: Trade["trades"][number],
+  fromName?: string,
+  toName?: string
+) {
+  const output = new EmbedBuilder().setTitle(`${fromName} ➡ ${toName}`);
+
+  if (edge.song) {
+    output.addFields({
+      name: fromName + "'s song suggestion",
+      value: edge.song.song,
+    });
+
+    if (edge.song.comments) {
+      output.addFields({
+        name: fromName + "'s comments",
+        value: edge.song.comments,
+      });
+    }
+
+    if (edge.response) {
+      output.addFields({ name: "\u200B", value: "\u200B" });
+    }
+  }
+
+  if (edge.response) {
+    output.addFields({
+      name: toName + "'s rating",
+      value: edge.response.rating + " / 10",
+    });
+
+    if (edge.response.comments) {
+      output.addFields({
+        name: toName + "'s comments",
+        value: edge.response.comments,
+      });
+    }
+  }
+
+  return output;
 }
