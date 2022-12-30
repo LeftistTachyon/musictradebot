@@ -40,17 +40,16 @@ const trade: DiscordCommand = {
     .setName("trade")
     .setDescription("Create, extend, or stop song trades (Admin-only)")
     .addSubcommand((builder) =>
-      // TODO: undo this
       builder
         .setName("start")
         .setDescription("Start a song trade")
-        .addNumberOption((option) =>
+        .addIntegerOption((option) =>
           option
             .setName("deadline")
             .setDescription(
               "The number of days to allot people to send in their song recommendations"
             )
-            // .setMinValue(1)
+            .setMinValue(1)
             .setRequired(true)
         )
     )
@@ -107,7 +106,7 @@ const trade: DiscordCommand = {
         return;
 
       default:
-        interaction.reply({
+        await interaction.reply({
           content: "How did you call a subcommand that doesn't exist!?",
           ephemeral: true,
         });
@@ -170,8 +169,7 @@ async function tradeStart(
     return;
   }
 
-  // TODO: undo this
-  const deadline = interaction.options.getNumber("deadline", true);
+  const deadline = interaction.options.getInteger("deadline", true);
 
   // create and add trade object
   const trade: Trade = createTrade(server, deadline);
