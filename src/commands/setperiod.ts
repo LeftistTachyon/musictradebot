@@ -1,6 +1,7 @@
 import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 import { Long } from "bson";
 import {
+  getServer,
   postponeEvents,
   rescheduleEvents,
   updateServerSettings,
@@ -55,9 +56,25 @@ const setperiod: DiscordCommand = {
         getDefaultTimeframes(setting),
       timeframeMin = Math.round(timeframe * 60);
 
+    const guildLong = new Long(interaction.guildId);
+    const server = await getServer(guildLong);
+    if (!server) {
+      console.error(`Server ${guildLong} doesn't exist!`);
+      return;
+    }
+
+    if (setting === "reminderPeriod") {
+      if (timeframeMin > server.commentPeriod) {
+        await interaction.editReply(`You can't set the reminder period (${timeframeMin} minutes) to be longer than the comment period (${server.commentPeriod} minutes).
+Try again with different a value.`);
+      }
+    } else if (timeframeMin < server.reminderPeriod) {
+      await interaction.editReply(`You can't set the comment period (${timeframeMin} minutes) to be shorter than the reminder period (${server.reminderPeriod} minutes).
+Try again with different a value.`);
+    }
+
     const newSetting = { [setting]: timeframeMin };
 
-    const guildLong = new Long(interaction.guildId);
     const successful =
       (await updateServerSettings(guildLong, newSetting)) &&
       (await rescheduleEvents(
