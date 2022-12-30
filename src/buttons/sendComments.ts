@@ -1,5 +1,6 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 import { getCommentForm } from "../forms/sendComments";
+import { getStage } from "../mongo";
 import { ButtonHandler } from "../types";
 
 export const sendComments: ButtonHandler = {
@@ -8,6 +9,14 @@ export const sendComments: ButtonHandler = {
     const tradeName = interaction.customId.substring(
       interaction.customId.indexOf(" ") + 1
     );
+
+    const stage = await getStage(tradeName);
+    if (stage !== "phase2") {
+      await interaction.editReply(
+        "The window to submit responses to songs has passed. Sorry!"
+      );
+      return;
+    }
 
     await interaction.showModal(getCommentForm(tradeName));
   },

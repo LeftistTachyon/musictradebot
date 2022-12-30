@@ -436,6 +436,21 @@ export async function fetchEvents(selector: Partial<EventOf>) {
 }
 
 /**
+ * Determines which phase the given trade is in. If the trade doesn't exist, it will return "done".
+ *
+ * @param tradeName the name of the trade to fetch the stage for
+ * @returns which phase the trade is in
+ */
+export async function getStage(
+  tradeName: string
+): Promise<"phase1" | "phase2" | "done"> {
+  const length = (await fetchEvents({ trade: tradeName })).length;
+  if (!length) return "done";
+  if (length <= 2) return "phase1";
+  else return "phase2";
+}
+
+/**
  * Postpones the events with the given selector by the given number of minutes
  *
  * @param selector a partial of the "of" field

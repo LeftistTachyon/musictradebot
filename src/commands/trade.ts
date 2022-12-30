@@ -334,17 +334,17 @@ async function tradeExtend(
   const trade = await fetchTrade(name);
 
   if (!trade) {
-    interaction.editReply("That trade doesn't exist!");
+    await interaction.editReply("That trade doesn't exist!");
     return;
   }
   if (trade.server !== new Long(interaction.guildId)) {
-    interaction.editReply(
+    await interaction.editReply(
       "You don't have permission to edit this interaction!"
     );
     return;
   }
   if (trade.end < new Date()) {
-    interaction.editReply("This trade has already ended!");
+    await interaction.editReply("This trade has already ended!");
     return;
   }
 

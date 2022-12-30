@@ -70,7 +70,7 @@ const setperiod: DiscordCommand = {
         setting === "reminderPeriod" ? -timeframeMin : timeframeMin
       ));
 
-    interaction.editReply(
+    await interaction.editReply(
       successful
         ? `Successfully changed "${getUserString(
             setting

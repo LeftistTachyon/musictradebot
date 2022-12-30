@@ -28,7 +28,7 @@ const setnickname: DiscordCommand = {
       newNickname
     );
 
-    interaction.editReply(
+    await interaction.editReply(
       successful
         ? `Successfully changed your nickname in this server to ${newNickname}!`
         : "Something went horribly wrong! Please let the server owner know that you can't change your nickname!"

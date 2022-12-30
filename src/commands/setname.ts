@@ -23,7 +23,7 @@ const setname: DiscordCommand = {
       newName
     );
 
-    interaction.editReply(
+    await interaction.editReply(
       successful
         ? `Successfully changed your preferred name to ${newName}!`
         : "Something went horribly wrong! Please let the server owner know that you can't change your preferred name!"

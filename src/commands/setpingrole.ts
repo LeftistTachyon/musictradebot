@@ -32,7 +32,7 @@ const setpingrole: DiscordCommand = {
         (pingableRole && !(pingableRole instanceof Role)) ||
         !pingableRole.mentionable
       ) {
-        interaction.editReply(
+        await interaction.editReply(
           "That role either isn't a role or isn't a valid mentionable role!"
         );
         return;
@@ -43,7 +43,7 @@ const setpingrole: DiscordCommand = {
         new Long(pingableRole.id)
       );
 
-      interaction.editReply(
+      await interaction.editReply(
         successful
           ? `Successfully changed the pingable role to <@&${pingableRole.id}>!`
           : "Something went horribly wrong! Please let the server owner know that you can't change the pingable role!"
@@ -53,7 +53,7 @@ const setpingrole: DiscordCommand = {
         new Long(interaction.guildId)
       );
 
-      interaction.editReply(
+      await interaction.editReply(
         successful
           ? `Successfully removed the pingable role!`
           : "Something went horribly wrong! Please let the server owner know that you can't remove the pingable role!"

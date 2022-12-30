@@ -86,7 +86,7 @@ const sendmessage: DiscordCommand = {
           components: [registerActionRow],
         });
 
-        interaction.editReply(
+        await interaction.editReply(
           `Successfully sent the register button into <#${channel.id}>!`
         );
 
@@ -98,13 +98,13 @@ const sendmessage: DiscordCommand = {
           components: [optActionRow],
         });
 
-        interaction.editReply(
+        await interaction.editReply(
           `Successfully sent the opt in and out buttons into <#${channel.id}>!`
         );
 
         break;
       default:
-        interaction.editReply(
+        await interaction.editReply(
           "How did you choose an option that isn't in the list!?"
         );
         break;

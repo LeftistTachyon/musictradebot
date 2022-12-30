@@ -5,7 +5,7 @@ import {
   TextInputStyle,
 } from "discord.js";
 import { Long } from "mongodb";
-import { setTradeSong } from "../mongo";
+import { fetchTrade, getStage, setTradeSong } from "../mongo";
 import { FormHandler } from "../types";
 
 export const sendSong: FormHandler = {
@@ -17,6 +17,14 @@ export const sendSong: FormHandler = {
       interaction.customId.indexOf(" ") + 1
     );
 
+    const stage = await getStage(tradeName);
+    if (stage !== "phase1") {
+      await interaction.editReply(
+        "The window to submit songs has passed. Sorry!"
+      );
+      return;
+    }
+
     const song = interaction.fields.getTextInputValue("song"),
       comments = interaction.fields.getTextInputValue("comments");
     const songObj = comments.length ? { song, comments } : { song };
@@ -27,7 +35,7 @@ export const sendSong: FormHandler = {
       songObj
     );
 
-    interaction.editReply(
+    await interaction.editReply(
       success
         ? "Successfully submitted your song!\nWait for the end of the trading period to recieve a song. See you then!"
         : "Something went horribly wrong! Please let the server owner know that you can't send in your song!"

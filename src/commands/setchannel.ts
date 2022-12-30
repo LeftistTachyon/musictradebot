@@ -48,7 +48,7 @@ const setchannel: DiscordCommand = {
           new Long(channelID)
         );
 
-        interaction.editReply(
+        await interaction.editReply(
           successful
             ? `Successfully changed the announcements channel to <#${channelID}>.`
             : "Something went horribly wrong! Please let the server owner know that you can't change channel settings!"

@@ -1,7 +1,7 @@
 import { ActionRowBuilder } from "@discordjs/builders";
 import { ModalBuilder, TextInputBuilder, TextInputStyle } from "discord.js";
 import { Long } from "mongodb";
-import { setTradeResponse } from "../mongo";
+import { getStage, setTradeResponse } from "../mongo";
 import { FormHandler } from "../types";
 
 export const sendComments: FormHandler = {
@@ -13,6 +13,14 @@ export const sendComments: FormHandler = {
       interaction.customId.indexOf(" ") + 1
     );
 
+    const stage = await getStage(tradeName);
+    if (stage !== "phase2") {
+      await interaction.editReply(
+        "The window to submit responses to songs has passed. Sorry!"
+      );
+      return;
+    }
+
     const rating = interaction.fields.getTextInputValue("rating"),
       comments = interaction.fields.getTextInputValue("comments");
     const responseObj = comments.length ? { rating, comments } : { rating };
@@ -23,7 +31,7 @@ export const sendComments: FormHandler = {
       responseObj
     );
 
-    interaction.editReply(
+    await interaction.editReply(
       success
         ? "Successfully submitted your response!\nWait until the end of the commenting period to see what everybody got and what they thought of the songs!"
         : "Something went horribly wrong! Please let the server owner know that you can't send in your song response!"
