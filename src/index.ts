@@ -41,7 +41,9 @@ export async function kill() {
   await close();
 
   console.log("Logging off client...");
-  await client.destroy();
+  client.destroy();
+
+  console.log("Processes stopped.");
 }
 
 async function run() {

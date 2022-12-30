@@ -1,14 +1,12 @@
 import { commandList } from "./commands";
 import { REST, Routes } from "discord.js";
-import init, { close } from "./mongo";
+import { kill } from ".";
 
 // deploy le commmands
 // please don't hurt me, I couldn't think of a better way
 if (Boolean(process.argv[4])) {
   // global commands deploy case
   (async () => {
-    await init;
-
     // validate environment
     if (!process.env.DISCORD_TOKEN) throw new Error("Discord token missing");
     if (!process.env.CLIENT_ID) throw new Error("Client ID missing");
@@ -38,14 +36,12 @@ if (Boolean(process.argv[4])) {
     } catch (error) {
       console.dir(error);
     } finally {
-      close();
+      kill();
     }
   })();
 } else {
   // guild commands deploy case
   (async () => {
-    await init;
-
     // validate environment
     if (!process.env.DISCORD_TOKEN) throw new Error("Discord token missing");
     if (!process.env.CLIENT_ID) throw new Error("Client ID missing");
@@ -80,7 +76,7 @@ if (Boolean(process.argv[4])) {
     } catch (error) {
       console.dir(error);
     } finally {
-      close();
+      kill();
     }
   })();
 }

@@ -4,7 +4,7 @@ import { EventOf, MusicEvent, Server, ServerUser, Trade, User } from "./types";
 import { fromSelector } from "./util";
 
 // ! ============== INITIALIZATION ROUTINE ============== !
-const client = new MongoClient(process.env.MONGO_URI || "missing-uri", {
+const client = new MongoClient(process.env.MONGO_URI || "missing-mongo-uri", {
   //   useNewUrlParser: true,
   //   useUnifiedTopology: true,
   serverApi: ServerApiVersion.v1,
@@ -15,12 +15,15 @@ let servers: Collection<Server>,
   trades: Collection<Trade>,
   events: Collection<MusicEvent>;
 
+let isOpen = false;
+
 /**
  * A Promise that returns when the Mongo client is fully initialized
  */
 export default (async () => {
   console.log("Connecting to music bot DB...");
   await client.connect();
+  isOpen = true;
 
   const musicDB = client.db("musicbot");
 
@@ -534,5 +537,8 @@ export async function deleteEvents(selector: Partial<EventOf>) {
  * Closes the Mongo client.
  */
 export async function close() {
-  await client.close();
+  if (isOpen) {
+    await client.close();
+    isOpen = false;
+  }
 }
