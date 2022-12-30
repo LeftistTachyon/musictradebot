@@ -30,6 +30,7 @@ import {
   createTrade,
   endPhase2,
   generateTimestamp,
+  generateTradeName,
   isAdmin,
   isInServer,
 } from "../util";
@@ -39,16 +40,17 @@ const trade: DiscordCommand = {
     .setName("trade")
     .setDescription("Create, extend, or stop song trades (Admin-only)")
     .addSubcommand((builder) =>
+      // TODO: undo this
       builder
         .setName("start")
         .setDescription("Start a song trade")
-        .addIntegerOption((option) =>
+        .addNumberOption((option) =>
           option
             .setName("deadline")
             .setDescription(
               "The number of days to allot people to send in their song recommendations"
             )
-            .setMinValue(1)
+            // .setMinValue(1)
             .setRequired(true)
         )
     )
@@ -168,9 +170,13 @@ async function tradeStart(
     return;
   }
 
-  const deadline = interaction.options.getInteger("deadline", true);
+  // TODO: undo this
+  const deadline = interaction.options.getNumber("deadline", true);
+
   // create and add trade object
   const trade: Trade = createTrade(server, deadline);
+  while (await fetchTrade(trade.name)) trade.name = generateTradeName(); // avoid collisions
+  console.log("New trade created:", trade.name);
 
   const newID = await addTrade(trade);
 
@@ -192,14 +198,14 @@ async function tradeStart(
     // ensure user exists before DM
     const user = client.users.cache.get(from.toString());
     if (!user) {
-      console.warn(`User ${from} doesn't exist!`);
+      console.warn(`User ${from} doesn't exist! (trade.ts:195)`);
       continue;
     }
 
     // ensure opposing user exists
     const toProfile = await fetchUser(to);
     if (!toProfile) {
-      console.warn(`User ${to} doesn't exist!`);
+      console.warn(`User ${to} doesn't exist! (trade.ts:202)`);
       continue;
     }
     const toServerProfile = await fetchServerUser(trade.server, to);
@@ -365,7 +371,7 @@ async function tradeExtend(
   for (const { from, song } of trade.trades) {
     const u = client.users.cache.get(from.toString());
     if (!u) {
-      console.warn(`User ${from} doesn't exist!`);
+      console.warn(`User ${from} doesn't exist! (trade.ts:368)`);
       continue;
     }
 

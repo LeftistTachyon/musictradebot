@@ -5,7 +5,7 @@ import {
   TextInputStyle,
 } from "discord.js";
 import { Long } from "mongodb";
-import { fetchTrade, getStage, setTradeSong } from "../mongo";
+import { getStage, setTradeSong } from "../mongo";
 import { FormHandler } from "../types";
 
 export const sendSong: FormHandler = {
@@ -20,7 +20,7 @@ export const sendSong: FormHandler = {
     const stage = await getStage(tradeName);
     if (stage !== "phase1") {
       await interaction.editReply(
-        "The window to submit songs has passed. Sorry!"
+        "The window to submit songs has passed. Sorry!\n" + stage
       );
       return;
     }

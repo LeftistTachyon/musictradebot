@@ -1,6 +1,7 @@
 import { Long } from "bson";
 import { Collection, MongoClient, ServerApiVersion } from "mongodb";
 import { EventOf, MusicEvent, Server, ServerUser, Trade, User } from "./types";
+import { fromSelector } from "./util";
 
 // ! ============== INITIALIZATION ROUTINE ============== !
 const client = new MongoClient(process.env.MONGO_URI || "missing-uri", {
@@ -425,7 +426,7 @@ export async function fetchAllEvents() {
  * @returns all matching events
  */
 export async function fetchEvents(selector: Partial<EventOf>) {
-  return await events.find({ of: selector }).toArray();
+  return await events.find(fromSelector(selector)).toArray();
 }
 
 /**
@@ -438,9 +439,10 @@ export async function getStage(
   tradeName: string
 ): Promise<"phase1" | "phase2" | "done"> {
   const length = (await fetchEvents({ trade: tradeName })).length;
+
   if (!length) return "done";
-  if (length <= 2) return "phase1";
-  else return "phase2";
+  if (length <= 2) return "phase2";
+  else return "phase1";
 }
 
 /**
@@ -454,7 +456,7 @@ export async function postponeEvents(
   selector: Partial<EventOf>,
   extraMinutes: number
 ) {
-  const result = await events.updateMany({ of: selector }, [
+  const result = await events.updateMany(fromSelector(selector), [
     {
       $set: {
         time: {
@@ -482,7 +484,7 @@ export async function rescheduleEvents(
   selector: Partial<EventOf>,
   newMinutes: number
 ) {
-  const result = await events.updateMany({ of: selector }, [
+  const result = await events.updateMany(fromSelector(selector), [
     {
       $set: {
         time: {
@@ -523,7 +525,7 @@ export async function getAndDeleteCurrEvents() {
  * @returns whether the operation was successful
  */
 export async function deleteEvents(selector: Partial<EventOf>) {
-  const result = await events.deleteMany({ of: selector });
+  const result = await events.deleteMany(fromSelector(selector));
   return result.deletedCount;
 }
 

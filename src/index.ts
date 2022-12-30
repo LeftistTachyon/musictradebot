@@ -163,9 +163,11 @@ async function run() {
         .diffNow()
         .toMillis()} ms`
     );
+
+    checkEvents();
   });
 
-  interval = setInterval(async () => {
+  async function checkEvents() {
     const currEvents = await getAndDeleteCurrEvents();
     if (!currEvents?.length) return;
 
@@ -187,7 +189,8 @@ async function run() {
           break;
       }
     }
-  }, 60_000);
+  }
+  interval = setInterval(checkEvents, 30_000);
 
   client.on(Events.Invalidated, async () => {});
 

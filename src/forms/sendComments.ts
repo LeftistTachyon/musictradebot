@@ -5,7 +5,7 @@ import { getStage, setTradeResponse } from "../mongo";
 import { FormHandler } from "../types";
 
 export const sendComments: FormHandler = {
-  name: "trade-sendSong",
+  name: "trade-sendComments",
   async execute(interaction) {
     await interaction.deferReply({ ephemeral: true });
 
@@ -16,7 +16,7 @@ export const sendComments: FormHandler = {
     const stage = await getStage(tradeName);
     if (stage !== "phase2") {
       await interaction.editReply(
-        "The window to submit responses to songs has passed. Sorry!"
+        "The window to submit responses to songs has passed. Sorry!\n" + stage
       );
       return;
     }
@@ -42,7 +42,7 @@ export const sendComments: FormHandler = {
 export function getCommentForm(tradeName: string) {
   return new ModalBuilder()
     .setTitle("Submit Song Response")
-    .setCustomId("trade-sendSong " + tradeName)
+    .setCustomId("trade-sendComments " + tradeName)
     .addComponents(
       new ActionRowBuilder<TextInputBuilder>().addComponents(
         new TextInputBuilder()

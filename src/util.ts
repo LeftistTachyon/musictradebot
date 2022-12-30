@@ -4,21 +4,18 @@ import {
   ButtonInteraction,
   CacheType,
   ChatInputCommandInteraction,
-  Collection,
   EmbedBuilder,
   GuildMember,
   PermissionsBitField,
 } from "discord.js";
 import { DateTime } from "luxon";
 import { ExpireDate, PasteClient, Publicity } from "pastebin-api";
-import { getEnabledCategories } from "trace_events";
 import { client } from ".";
 import adjectives from "../data/adjectives.json";
 import nouns from "../data/nouns.json";
 import { getActionRow } from "./buttons/sendComments";
 import {
   addServerUser,
-  close,
   fetchServerUser,
   fetchTrade,
   fetchUser,
@@ -85,8 +82,9 @@ export function createTrade(server: Server, duration: number): Trade {
   trades.push({ from: fromUnchosen[0], to: toUnchosen[0] });
 
   // calculate start and end times
-  const start = DateTime.now().startOf("day"),
-    end = start.plus({ days: Math.floor(duration) }).endOf("day");
+  // TODO: undo this
+  const start = DateTime.now(), //.startOf("day"),
+    end = start.plus({ days: duration }); //.endOf("day");
 
   return {
     name: generateTradeName(),
@@ -404,7 +402,7 @@ export async function endPhase1({ of }: MusicEvent) {
 
     const user = client.users.cache.get(to.toString());
     if (!user) {
-      console.warn(`User ${to} doesn't exist!`);
+      console.warn(`User ${to} doesn't exist! (util.ts:407)`);
       continue;
     }
 
@@ -466,13 +464,11 @@ export async function endPhase2({
     return;
   }
 
-  const names = new Collection<Long, string | undefined>();
+  const names: Record<string, string | undefined> = {};
   for (const userID of trade.users) {
-    names.set(
-      userID,
+    names[userID.toString()] =
       (await fetchServerUser(serverID, userID))?.nickname ??
-        (await fetchUser(userID))?.name
-    );
+      (await fetchUser(userID))?.name;
   }
 
   if (server.announcementsChannel) {
@@ -496,8 +492,8 @@ Below are all the song trades that happened this time around:`,
           .map((edge) =>
             finishedTradeEdgeEmbed(
               edge,
-              names.get(edge.from),
-              names.get(edge.to)
+              names[edge.from.toString()],
+              names[edge.to.toString()]
             )
           ),
       });
@@ -509,12 +505,14 @@ Below are all the song trades that happened this time around:`,
             .map((edge) =>
               finishedTradeEdgeEmbed(
                 edge,
-                names.get(edge.from),
-                names.get(edge.to)
+                names[edge.from.toString()],
+                names[edge.to.toString()]
               )
             ),
         });
       }
+
+      return; // prevent fall-through
     } else {
       console.warn(
         `Announcements channel ${server.announcementsChannel} is invalid!`
@@ -525,14 +523,20 @@ Below are all the song trades that happened this time around:`,
 
   // send via DMs to everybody involved
   const url = await pastebinClient.createPaste({
-    code: trade.trades
-      .map((edge) =>
-        finishedTradeEdgeText(edge, names.get(edge.from), names.get(edge.to))
-      )
-      .join("\n\n"),
+    code: encodeURI(
+      trade.trades
+        .map((edge) =>
+          finishedTradeEdgeText(
+            edge,
+            names[edge.from.toString()],
+            names[edge.to.toString()]
+          )
+        )
+        .join("\n\n")
+    ),
     expireDate: ExpireDate.Never,
     format: "markdown",
-    name: trade.name + ".md",
+    name: encodeURI(trade.name + ".md"),
     publicity: Publicity.Public,
   });
 
@@ -544,7 +548,7 @@ Hope to see you again in another trade!`;
   for (const user of trade.users) {
     const u = client.users.cache.get(user.toString());
     if (!u) {
-      console.warn(`User ${user} doesn't exist!`);
+      console.warn(`User ${user} doesn't exist! (util.ts:553)`);
       continue;
     }
 
@@ -570,7 +574,7 @@ export async function remindPhase1({ of }: MusicEvent) {
 
     const user = client.users.cache.get(from.toString());
     if (!user) {
-      console.warn(`User ${from} doesn't exist!`);
+      console.warn(`User ${from} doesn't exist! (util.ts:579)`);
       continue;
     }
 
@@ -604,7 +608,7 @@ export async function remindPhase2(event: MusicEvent) {
 
     const user = client.users.cache.get(to.toString());
     if (!user) {
-      console.warn(`User ${to} doesn't exist!`);
+      console.warn(`User ${to} doesn't exist! (util.ts:613)`);
       continue;
     }
 
@@ -627,7 +631,7 @@ function finishedTradeEdgeEmbed(
   fromName?: string,
   toName?: string
 ) {
-  const output = new EmbedBuilder().setTitle(`${fromName} ➡ ${toName}`);
+  const output = new EmbedBuilder().setTitle(`${fromName} ➜ ${toName}`);
 
   if (edge.song) {
     output.addFields({
@@ -644,7 +648,17 @@ function finishedTradeEdgeEmbed(
 
     if (edge.response) {
       output.addFields({ name: "\u200B", value: "\u200B" });
+    } else {
+      return output.addFields({
+        name: toName + "'s rating",
+        value: toName + " did not leave a rating.",
+      });
     }
+  } else {
+    return output.addFields({
+      name: fromName + "'s song suggestion",
+      value: fromName + " did not submit a song.",
+    });
   }
 
   if (edge.response) {
@@ -659,9 +673,14 @@ function finishedTradeEdgeEmbed(
         value: edge.response.comments,
       });
     }
-  }
 
-  return output;
+    return output;
+  } else {
+    return output.addFields({
+      name: toName + "'s rating",
+      value: toName + " did not leave a rating.",
+    });
+  }
 }
 
 /**
@@ -677,7 +696,7 @@ function finishedTradeEdgeText(
   fromName?: string,
   toName?: string
 ) {
-  let output = `# ${fromName} ➡ ${toName}`;
+  let output = `# ${fromName} ➜ ${toName}`;
 
   if (edge.song) {
     output += `## ${fromName}'s song suggestion
@@ -706,6 +725,22 @@ ${edge.response.comments}
 `;
     }
   }
+
+  return output;
+}
+
+type EventSelector = {
+  [Property in keyof EventOf as `of.${Property}`]: EventOf[Property];
+};
+
+export function fromSelector(
+  selector: Partial<EventOf>
+): Partial<EventSelector> {
+  const output: Partial<EventSelector> = {};
+
+  if (selector.server) output["of.server"] = selector.server;
+  if (selector.trade) output["of.trade"] = selector.trade;
+  if (selector.type) output["of.type"] = selector.type;
 
   return output;
 }
