@@ -8,7 +8,7 @@ const setpingrole: DiscordCommand = {
   data: new SlashCommandBuilder()
     .setName("setpingrole")
     .setDescription(
-      "Set the mentionable role that the bot can use to updates to song trades"
+      "Set the mentionable role that the bot can use to updates to song trades (Admin-only)"
     )
     .addMentionableOption((option) =>
       option

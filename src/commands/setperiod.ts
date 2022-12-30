@@ -22,7 +22,7 @@ function getUserString(setting: string) {
 const setperiod: DiscordCommand = {
   data: new SlashCommandBuilder()
     .setName("setperiod")
-    .setDescription("Set a server-wide time-based setting")
+    .setDescription("Set a server-wide time-based setting (Admin-only)")
     .addStringOption((option) =>
       option
         .setName("setting")

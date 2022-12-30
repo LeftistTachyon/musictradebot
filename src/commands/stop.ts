@@ -6,7 +6,7 @@ import { isBotOwner } from "../util";
 const stop: DiscordCommand = {
   data: new SlashCommandBuilder()
     .setName("stop")
-    .setDescription("Kill the bot")
+    .setDescription("Kill the bot (Owner-only)")
     .setDMPermission(true),
 
   async execute(interaction) {

@@ -8,7 +8,7 @@ const setchannel: DiscordCommand = {
   data: new SlashCommandBuilder()
     .setName("setchannel")
     .setDescription(
-      "Instruct the bot to use this channel for certain operations"
+      "Instruct the bot to use this channel for certain operations (Admin-only)"
     )
     .addStringOption((option) =>
       option

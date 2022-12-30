@@ -37,7 +37,7 @@ import {
 const trade: DiscordCommand = {
   data: new SlashCommandBuilder()
     .setName("trade")
-    .setDescription("Create, extend, or stop song trades")
+    .setDescription("Create, extend, or stop song trades (Admin-only)")
     .addSubcommand((builder) =>
       builder
         .setName("start")

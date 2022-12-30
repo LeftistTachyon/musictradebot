@@ -38,7 +38,7 @@ function validateChannel(
 const sendmessage: DiscordCommand = {
   data: new SlashCommandBuilder()
     .setName("sendmessage")
-    .setDescription("Send a premade message into this channel")
+    .setDescription("Send a premade message into this channel (Admin-only)")
     .addStringOption((option) =>
       option
         .setName("type")
