@@ -1,11 +1,6 @@
-import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 import { Long } from "bson";
-import {
-  getServer,
-  postponeEvents,
-  rescheduleEvents,
-  updateServerSettings,
-} from "../mongo";
+import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import { getServer, rescheduleEvents, updateServerSettings } from "../mongo";
 import { DiscordCommand } from "../types";
 import { getDefaultTimeframes, isAdmin, isInServer } from "../util";
 
@@ -69,6 +64,7 @@ const setperiod: DiscordCommand = {
 Try again with different a value.`);
       }
     } else if (timeframeMin < server.reminderPeriod) {
+      // setting === "commentPeriod"
       await interaction.editReply(`You can't set the comment period (${timeframeMin} minutes) to be shorter than the reminder period (${server.reminderPeriod} minutes).
 Try again with different a value.`);
     }
