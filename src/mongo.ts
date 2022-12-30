@@ -287,14 +287,7 @@ export async function setNickname(
  */
 export async function addTrade(trade: Trade) {
   const result = await trades.insertOne(trade);
-
-  if (result.acknowledged) {
-    await servers.updateOne({ uid: trade.server }, [
-      { $set: { trades: { $concatArrays: ["$trades", [trade.name]] } } },
-    ]);
-
-    return result.insertedId;
-  } else return null;
+  return result.acknowledged ? result.insertedId : null;
 }
 
 /**

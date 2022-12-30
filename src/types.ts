@@ -17,7 +17,6 @@ export type Server = {
   uid: Long;
   name: string;
   users: ServerUser[];
-  trades: string[]; // trade names
   announcementsChannel?: Long; // channel UID
   reminderPeriod: number; // duration in minutes
   commentPeriod: number; // duration in minutes
@@ -120,4 +119,4 @@ export type FormHandler = {
  */
 export type InServer<T> = T & { guildId: string; guild: Guild };
 
-// ! ================ OTHER UTILITY TYPES =============== !
+// // ! ================ OTHER UTILITY TYPES =============== !

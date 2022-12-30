@@ -138,7 +138,6 @@ async function run() {
       uid: new Long(guild.id),
       name: guild.name,
       users: [],
-      trades: [],
       commentPeriod: getDefaultTimeframes("commentPeriod") * 60,
       reminderPeriod: getDefaultTimeframes("reminderPeriod") * 60,
     };
