@@ -28,6 +28,7 @@ import { DiscordCommand, InServer, Trade } from "../types";
 import {
   createProfileEmbed,
   createTrade,
+  endPhase2,
   generateTimestamp,
   isAdmin,
   isInServer,
@@ -301,9 +302,10 @@ async function tradeStop(
   await interaction.deferReply({ ephemeral: true });
 
   const name = interaction.options.getString("name", true);
+  const server = new Long(interaction.guildId);
   const deleted = await deleteEvents({
     trade: name,
-    server: new Long(interaction.guildId),
+    server,
   });
 
   if (deleted === 0) {
@@ -316,7 +318,7 @@ async function tradeStop(
 
   await interaction.editReply(`Successfully stopped trade "${name}".`);
 
-  // TODO: add end-of-trade stuff here
+  await endPhase2({ server, trade: name, type: "phase2" });
 }
 
 /**
