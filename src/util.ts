@@ -10,6 +10,8 @@ import {
   PermissionsBitField,
 } from "discord.js";
 import { DateTime } from "luxon";
+import { ExpireDate, PasteClient, Publicity } from "pastebin-api";
+import { getEnabledCategories } from "trace_events";
 import { client } from ".";
 import adjectives from "../data/adjectives.json";
 import nouns from "../data/nouns.json";
@@ -25,6 +27,9 @@ import {
 import { EventOf, InServer, MusicEvent, Server, Trade, User } from "./types";
 
 // ! ================== PASTEBIN INIT =================== !
+const pastebinClient = new PasteClient(
+  process.env.PASTEBIN_KEY ?? "missing pastebin key"
+);
 
 // ! ==================== DATA UTIL ===================== !
 /**
@@ -501,6 +506,32 @@ Below are all the song trades that happened this time around:`,
   }
 
   // send via DMs to everybody involved
+  const url = await pastebinClient.createPaste({
+    code: trade.trades
+      .map((edge) =>
+        finishedTradeEdgeText(edge, names.get(edge.from), names.get(edge.to))
+      )
+      .join("\n\n"),
+    expireDate: ExpireDate.Never,
+    format: "markdown",
+    name: trade.name + ".md",
+    publicity: Publicity.Public,
+  });
+
+  const message = `Thank you for taking part in trade ${tradeName}!
+Here is a link to all of the song choices and responses: <${url}>
+
+Hope to see you again in another trade!`;
+
+  for (const user of trade.users) {
+    const u = client.users.cache.get(user.toString());
+    if (!u) {
+      console.warn(`User ${user} doesn't exist!`);
+      continue;
+    }
+
+    await u.send(message);
+  }
 }
 
 /**
@@ -609,6 +640,44 @@ function finishedTradeEdgeEmbed(
         name: toName + "'s comments",
         value: edge.response.comments,
       });
+    }
+  }
+
+  return output;
+}
+
+function finishedTradeEdgeText(
+  edge: Trade["trades"][number],
+  fromName?: string,
+  toName?: string
+) {
+  let output = `# ${fromName} ➡ ${toName}`;
+
+  if (edge.song) {
+    output += `## ${fromName}'s song suggestion
+${edge.song.song}
+`;
+
+    if (edge.song.comments) {
+      output += `## ${fromName}'s comments",
+${edge.song.comments}
+`;
+    }
+
+    if (edge.response) {
+      output += "\n";
+    }
+  }
+
+  if (edge.response) {
+    output += `## ${toName}'s rating
+${edge.response.rating} / 10
+`;
+
+    if (edge.response.comments) {
+      output += `## ${toName}'s comments",
+${edge.response.comments}
+`;
     }
   }
 
