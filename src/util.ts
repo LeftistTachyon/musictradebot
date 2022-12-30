@@ -5,7 +5,6 @@ import {
   CacheType,
   ChatInputCommandInteraction,
   EmbedBuilder,
-  Guild,
   GuildMember,
   PermissionsBitField,
 } from "discord.js";
@@ -13,8 +12,15 @@ import { DateTime } from "luxon";
 import { client } from ".";
 import adjectives from "../data/adjectives.json";
 import nouns from "../data/nouns.json";
-import { addServerUser, fetchServerUser, fetchUser, setOpt } from "./mongo";
-import { InServer, Server, Trade, User } from "./types";
+import {
+  addServerUser,
+  fetchServerUser,
+  fetchTrade,
+  fetchUser,
+  getServer,
+  setOpt,
+} from "./mongo";
+import { InServer, MusicEvent, Server, Trade, User } from "./types";
 
 // ! ==================== DATA UTIL ===================== !
 /**
@@ -341,4 +347,80 @@ export function createProfileEmbed(user: User, nickname = user.name) {
   }
 
   return populated ? output : null;
+}
+
+/**
+ * Ends phase 1 and sends out any respective messages.
+ *
+ * @param event the event that triggered this function call
+ */
+export function endPhase1({ of }: MusicEvent) {}
+
+/**
+ * Ends phase 2 and sends out any respective messages.
+ *
+ * @param event the event that triggered this function call
+ */
+export function endPhase2({ of }: MusicEvent) {}
+
+/**
+ * Sends reminder messages to any stragglers from phase 1
+ *
+ * @param event the event that triggered this function call
+ */
+export async function remindPhase1({ of }: MusicEvent) {
+  const trade = await fetchTrade(of.trade);
+  if (!trade) {
+    console.warn(`Trade ${of.trade} not found!`);
+    return;
+  }
+
+  const timestamp = generateTimestamp(DateTime.fromJSDate(trade.end), "R");
+  for (const edge of trade.trades) {
+    if (edge.song) continue;
+
+    const user = client.users.cache.get(edge.from.toString());
+    if (!user) {
+      console.warn(`User ${edge.from} doesn't exist!`);
+      continue;
+    }
+
+    await user.send(
+      `This is a gentle reminder to send in your song recommendations before the deadline! Submissions close ${timestamp}, so make sure you get it in before then, or else the trade will continue without you!`
+    );
+  }
+}
+
+/**
+ * Sends reminder messages to any stragglers from phase 2
+ *
+ * @param event the event that triggered this function call
+ */
+export async function remindPhase2(event: MusicEvent) {
+  const trade = await fetchTrade(event.of.trade);
+  if (!trade) {
+    console.warn(`Trade ${event.of.trade} not found!`);
+    return;
+  }
+
+  const server = await getServer(event.of.server);
+  if (!server) {
+    console.warn(`Server ${event.of.server} not found!`);
+    return;
+  }
+
+  const timestamp = generateTimestamp(DateTime.fromJSDate(event.baseline), "R");
+  for (const edge of trade.trades) {
+    if (edge.response) continue;
+
+    const user = client.users.cache.get(edge.to.toString());
+    if (!user) {
+      console.warn(`User ${edge.to} doesn't exist!`);
+      continue;
+    }
+
+    await user.send(
+      `This is a gentle reminder to send in your song commentary before the deadline! Submissions close ${timestamp}. This is _optional_, but highly recommended so the song recommenders can get feedback.`
+    );
+  }
 }

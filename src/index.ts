@@ -4,9 +4,21 @@ import { DateTime } from "luxon";
 import buttons from "./buttons";
 import commands from "./commands";
 import forms from "./forms";
-import init, { addServer, close, getServer, updateServerName } from "./mongo";
+import init, {
+  addServer,
+  close,
+  getAndDeleteCurrEvents,
+  getServer,
+  updateServerName,
+} from "./mongo";
 import { Server } from "./types";
-import { getDefaultTimeframes } from "./util";
+import {
+  endPhase1,
+  endPhase2,
+  getDefaultTimeframes,
+  remindPhase1,
+  remindPhase2,
+} from "./util";
 
 const programStart = DateTime.now();
 
@@ -124,7 +136,34 @@ async function run() {
     );
   });
 
+  const interval = setInterval(async () => {
+    const currEvents = await getAndDeleteCurrEvents();
+    if (!currEvents?.length) return;
+
+    for (const event of currEvents) {
+      switch (event.of.type) {
+        case "phase1":
+          endPhase1(event);
+          break;
+        case "phase2":
+          endPhase2(event);
+          break;
+        case "reminder":
+          if (event.data === "phase1") {
+            remindPhase1(event);
+          } else {
+            // phase2
+            remindPhase2(event);
+          }
+          break;
+      }
+    }
+  }, 60_000);
+
   client.on(Events.Invalidated, async () => {
+    console.log("Stopping...");
+    clearInterval(interval);
+
     console.log("Closing Mongo connection...");
     await close();
   });
