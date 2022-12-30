@@ -646,6 +646,14 @@ function finishedTradeEdgeEmbed(
   return output;
 }
 
+/**
+ * Converts the edge into a string representation
+ *
+ * @param edge the edge to represent in text
+ * @param fromName the name to use for the song sender
+ * @param toName the name to user for the song recipient
+ * @returns a string representation of the edge
+ */
 function finishedTradeEdgeText(
   edge: Trade["trades"][number],
   fromName?: string,
