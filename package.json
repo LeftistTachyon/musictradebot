@@ -29,10 +29,12 @@
   "dependencies": {
     "discord.js": "^14.7.1",
     "dotenv": "^16.0.3",
+    "fuzzaldrin-plus": "^0.6.0",
     "luxon": "^3.1.1",
     "mongodb": "^4.12.1"
   },
   "devDependencies": {
+    "@types/fuzzaldrin-plus": "^0.6.2",
     "@types/luxon": "^3.1.0",
     "@types/node": "^18.11.15",
     "ts-node": "^10.9.1",

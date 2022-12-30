@@ -1,5 +1,6 @@
 import { Long } from "bson";
 import {
+  AutocompleteInteraction,
   ButtonInteraction,
   CacheType,
   ChatInputCommandInteraction,
@@ -92,6 +93,9 @@ export type DiscordCommand = {
   data: SlashCommandBuilder;
   execute: (
     interaction: ChatInputCommandInteraction<CacheType>
+  ) => Promise<void>;
+  autocomplete?: (
+    interaction: AutocompleteInteraction<CacheType>
   ) => Promise<void>;
 };
 

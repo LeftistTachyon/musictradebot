@@ -308,6 +308,19 @@ export async function fetchTrade(name: string) {
 }
 
 /**
+ * Finds all trades that are associated with the given server
+ *
+ * @param server the server to find all trade names for
+ * @returns all names of trades in the given server
+ */
+export async function fetchTradeNames(server: Long) {
+  return await trades
+    .find({ server, end: { $gt: new Date() } })
+    .map((trade) => trade.name)
+    .toArray();
+}
+
+/**
  * Sets the directed graph of trades for the given trade object.
  * Each user must have one edge coming out and one edge coming in.
  *

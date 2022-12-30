@@ -96,8 +96,20 @@ async function run() {
         });
       }
     } else if (interaction.isAutocomplete()) {
-      console.log("Autocomplete interaction event:");
-      console.dir(interaction);
+      const command = commands.get(interaction.commandName);
+
+      if (!command) {
+        console.error(
+          `No command matching ${interaction.commandName} was found.`
+        );
+        return;
+      }
+
+      try {
+        if (command.autocomplete) await command.autocomplete(interaction);
+      } catch (error) {
+        console.error(error);
+      }
     }
   });
 

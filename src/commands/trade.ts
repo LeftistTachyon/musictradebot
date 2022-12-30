@@ -2,9 +2,12 @@ import {
   CacheType,
   ChatInputCommandInteraction,
   Guild,
+  GuildMember,
   PermissionFlagsBits,
+  PermissionsBitField,
   SlashCommandBuilder,
 } from "discord.js";
+import { filter } from "fuzzaldrin-plus";
 import { DateTime } from "luxon";
 import { Long } from "mongodb";
 import { client } from "..";
@@ -15,6 +18,7 @@ import {
   deleteEvents,
   fetchServerUser,
   fetchTrade,
+  fetchTradeNames,
   fetchUser,
   getServer,
   postponeEvents,
@@ -104,6 +108,33 @@ const trade: DiscordCommand = {
           content: "How did you call a subcommand that doesn't exist!?",
           ephemeral: true,
         });
+    }
+  },
+
+  async autocomplete(interaction) {
+    if (
+      !interaction.guildId ||
+      !(interaction.member instanceof GuildMember) ||
+      !interaction.member.permissions.has(
+        PermissionsBitField.Flags.Administrator
+      )
+    )
+      // invalid conditions
+      return;
+
+    // only name is autocompleted
+    const focusedValue = interaction.options.getFocused();
+    const tradeNames = await fetchTradeNames(new Long(interaction.guildId));
+    if (focusedValue.length) {
+      const filtered = filter(tradeNames, focusedValue);
+
+      await interaction.respond(
+        filtered.map((choice) => ({ name: choice, value: choice }))
+      );
+    } else {
+      await interaction.respond(
+        tradeNames.map((choice) => ({ name: choice, value: choice }))
+      );
     }
   },
 };
@@ -278,7 +309,7 @@ async function tradeStop(
   if (deleted === 0) {
     // not successful
     await interaction.editReply(
-      "Sorry, that music trade doesn't exist or you don't have access to it."
+      "Sorry, that music trade has already ended, doesn't exist, or you don't have access to it."
     );
     return;
   }
@@ -310,6 +341,10 @@ async function tradeExtend(
     interaction.editReply(
       "You don't have permission to edit this interaction!"
     );
+    return;
+  }
+  if (trade.end < new Date()) {
+    interaction.editReply("This trade has already ended!");
     return;
   }
 

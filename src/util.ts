@@ -376,12 +376,12 @@ export async function remindPhase1({ of }: MusicEvent) {
   }
 
   const timestamp = generateTimestamp(DateTime.fromJSDate(trade.end), "R");
-  for (const edge of trade.trades) {
-    if (edge.song) continue;
+  for (const { song, from } of trade.trades) {
+    if (song) continue;
 
-    const user = client.users.cache.get(edge.from.toString());
+    const user = client.users.cache.get(from.toString());
     if (!user) {
-      console.warn(`User ${edge.from} doesn't exist!`);
+      console.warn(`User ${from} doesn't exist!`);
       continue;
     }
 
@@ -410,12 +410,12 @@ export async function remindPhase2(event: MusicEvent) {
   }
 
   const timestamp = generateTimestamp(DateTime.fromJSDate(event.baseline), "R");
-  for (const edge of trade.trades) {
-    if (edge.response) continue;
+  for (const { response, to } of trade.trades) {
+    if (response) continue;
 
-    const user = client.users.cache.get(edge.to.toString());
+    const user = client.users.cache.get(to.toString());
     if (!user) {
-      console.warn(`User ${edge.to} doesn't exist!`);
+      console.warn(`User ${to} doesn't exist!`);
       continue;
     }
 
