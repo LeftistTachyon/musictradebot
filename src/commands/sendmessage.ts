@@ -82,6 +82,9 @@ const sendmessage: DiscordCommand = {
       case "register":
         await channel.send({
           content:
+            "Hello there! My name is Music Trader 2000, and I help people trade songs!\n" +
+            "**Music trades allow you to share songs with others!** When you participate, you are randomly given another person to recommend a song for. Someone else will do the same, and at the end, you'll rate whether the song was good or not.\n" +
+            "It's good fun, so we'd love to see you join!\n\n" +
             "If you would like to register for music trades in this server, click on the button below and fill out the forms.",
           components: [registerActionRow],
         });
