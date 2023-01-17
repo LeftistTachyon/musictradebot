@@ -12,6 +12,7 @@ const setnickname: DiscordCommand = {
       option
         .setName("nickname")
         .setDescription("Your new nickname for this server")
+        .setMaxLength(240)
         .setRequired(true)
     )
     .setDMPermission(false),
