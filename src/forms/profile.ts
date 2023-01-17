@@ -98,14 +98,14 @@ export function generateProfileForm1(user: User | null) {
     .setPlaceholder(
       "Write about who you are and how you got into music. Let others get to know you better!"
     )
-    .setMaxLength(1024)
+    .setMaxLength(1022)
     .setRequired(false)
     .setStyle(TextInputStyle.Paragraph);
   const likedGenresInput = new TextInputBuilder()
     .setCustomId("likedGenres")
     .setLabel("Liked Genres")
     .setPlaceholder("List some of your favorite genres here.")
-    .setMaxLength(1024)
+    .setMaxLength(1022)
     .setRequired(false)
     .setStyle(TextInputStyle.Paragraph);
   const dislikedGenresInput = new TextInputBuilder()
@@ -114,7 +114,7 @@ export function generateProfileForm1(user: User | null) {
     .setPlaceholder(
       "List some of the genres that people recommending you songs should steer clear of."
     )
-    .setMaxLength(1024)
+    .setMaxLength(1022)
     .setRequired(false)
     .setStyle(TextInputStyle.Paragraph);
   const artistsInput = new TextInputBuilder()
@@ -123,7 +123,7 @@ export function generateProfileForm1(user: User | null) {
     .setPlaceholder(
       "List some of the artists that you've been listening to the most as of recent."
     )
-    .setMaxLength(1024)
+    .setMaxLength(1022)
     .setRequired(false)
     .setStyle(TextInputStyle.Paragraph);
 
@@ -159,7 +159,7 @@ export function generateProfileForm2(user: User | null, verb = "Create/Edit") {
     .setPlaceholder(
       "List some of your favorite songs! List as many as you want."
     )
-    .setMaxLength(1024)
+    .setMaxLength(1022)
     .setRequired(false)
     .setStyle(TextInputStyle.Paragraph);
   const newArtistsInput = new TextInputBuilder()
@@ -168,7 +168,7 @@ export function generateProfileForm2(user: User | null, verb = "Create/Edit") {
     .setPlaceholder(
       "List some of the artists that you've found recently that fit your fancy."
     )
-    .setMaxLength(1024)
+    .setMaxLength(1022)
     .setRequired(false)
     .setStyle(TextInputStyle.Paragraph);
   const favoriteSoundsInput = new TextInputBuilder()
@@ -177,7 +177,7 @@ export function generateProfileForm2(user: User | null, verb = "Create/Edit") {
     .setPlaceholder(
       "List some of your favorite sounds, whether it's in songs or in general."
     )
-    .setMaxLength(1024)
+    .setMaxLength(1022)
     .setRequired(false)
     .setStyle(TextInputStyle.Paragraph);
   const instrumentsInput = new TextInputBuilder()
@@ -186,7 +186,7 @@ export function generateProfileForm2(user: User | null, verb = "Create/Edit") {
     .setPlaceholder(
       "List some instruments. Whether you like how they sound or you play them yourself, doesn't matter!"
     )
-    .setMaxLength(1024)
+    .setMaxLength(1022)
     .setRequired(false)
     .setStyle(TextInputStyle.Paragraph);
 
