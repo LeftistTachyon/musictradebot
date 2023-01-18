@@ -430,6 +430,8 @@ export async function endPhase1({ of }: MusicEvent) {
         content: `**Welcome to part 2 of the song trade!**
 This is where you get the opportunity to listen and respond to the song that your recommender sent. Sending in a response is optional, but greatly appreciated!
 Submissions close at ${fullTimestamp} (${relTimestamp}). Have fun!
+_NOTE: resubmitting overwrites your previous submission._
+
 Song: ${song.song}`,
         embeds: [embed],
         components: [getActionRow(trade.name)],
