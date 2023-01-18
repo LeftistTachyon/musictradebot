@@ -180,7 +180,7 @@ async function tradeStart(
 
   await interaction.editReply(
     newID
-      ? `Started a new trade, "${trade.name}"!`
+      ? `Started a new trade, \`${trade.name}\`!`
       : "Something went horribly wrong! Please let the server owner know that you can't start trades!"
   );
 
@@ -219,7 +219,7 @@ async function tradeStart(
     await user.send(
       embed
         ? {
-            content: `**Hello there!** For the new song trade (${trade.name}), you have been given ${nickname}.
+            content: `**Hello there!** For the new song trade (\`${trade.name}\`), you have been given ${nickname}.
 You have until ${timestamp} (${relTimestamp}) to send your song suggestion through the form below.
 
 Here is their music profile:`,
@@ -227,7 +227,7 @@ Here is their music profile:`,
             components: [getActionRow(trade.name)],
           }
         : {
-            content: `**Hello there!** For the new song trade (${trade.name}), you have been given ${nickname}.
+            content: `**Hello there!** For the new song trade (\`${trade.name}\`), you have been given ${nickname}.
 You have until ${timestamp} (${relTimestamp}) to send your song suggestion through the form below.
 
 Unfortunately, it seems that ${nickname} hasn't set up their music profile, so try your best to pick out what you think they would like! Good luck, and happy trading!`,
@@ -307,6 +307,13 @@ async function tradeStop(
 
   const name = interaction.options.getString("name", true);
   const server = new Long(interaction.guildId);
+  const trade = await fetchTrade(name);
+  if (!trade) {
+    // not successful
+    await interaction.editReply("Sorry, that music trade has doesn't exist.");
+    return;
+  }
+
   const deleted = await deleteEvents({
     trade: name,
     server,
@@ -315,12 +322,24 @@ async function tradeStop(
   if (deleted === 0) {
     // not successful
     await interaction.editReply(
-      "Sorry, that music trade has already ended, doesn't exist, or you don't have access to it."
+      "Sorry, that music trade has already ended or you don't have access to it."
     );
     return;
   }
 
-  await interaction.editReply(`Successfully stopped trade "${name}".`);
+  for (const user of trade.users) {
+    const u = await client.users.fetch(user.toString());
+    if (!u) {
+      console.warn(`User ${user} doesn't exist! (trade.ts:333)`);
+      continue;
+    }
+
+    await u.send(
+      `One of the trades you're participating in (\`${name}\`) has been canceled. Sorry for the inconvenience!`
+    );
+  }
+
+  await interaction.editReply(`Successfully stopped trade \`${name}\`.`);
 
   await endPhase2({ server, trade: name, type: "phase2" });
 }
@@ -362,7 +381,7 @@ async function tradeExtend(
 
   await interaction.editReply(
     success
-      ? `Successfully extended the deadline of ${name} by ${days} days!`
+      ? `Successfully extended the deadline of \`${name}\` by ${days} days!`
       : "Something went horribly wrong! Please let the server owner know that you can't extend deadlines of trades!"
   );
 
@@ -375,11 +394,11 @@ async function tradeExtend(
 
     const timestamp = generateTimestamp(newEnd, "F"),
       relTimestamp = generateTimestamp(newEnd, "R");
-    u.send(
+    await u.send(
       song
-        ? `One of the trades you are participating in (${trade.name}) has extended their deadline for submitting songs.
+        ? `One of the trades you are participating in (\`${trade.name}\`) has extended their deadline for submitting songs.
 The new deadline is ${timestamp} (${relTimestamp}). Hang on tight while others are submitting their songs!`
-        : `One of the trades you are participating in (${trade.name}) has extended their deadline for submitting songs.
+        : `One of the trades you are participating in (\`${trade.name}\`) has extended their deadline for submitting songs.
 You now have until ${timestamp} (${relTimestamp}) to submit your song trade. Remember to submit it on time!`
     );
   }

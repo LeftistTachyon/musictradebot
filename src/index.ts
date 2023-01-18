@@ -144,7 +144,7 @@ async function run() {
     await addServer(server);
 
     if (guild.systemChannel) {
-      guild.systemChannel.send(
+      await guild.systemChannel.send(
         "Hello there! I'm Music Trade 2000, and I help people make music trades!\nTo get started, run `/help`."
       );
     }
