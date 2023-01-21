@@ -65,6 +65,7 @@ export function getSongForm(tradeName: string) {
           .setPlaceholder(
             "Have any comments you'd like to share with the song recipient? This is the place!"
           )
+          .setMaxLength(1022)
           .setRequired(false)
           .setStyle(TextInputStyle.Paragraph)
       )

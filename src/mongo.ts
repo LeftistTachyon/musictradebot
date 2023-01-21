@@ -96,7 +96,7 @@ export async function deleteUser(uid: Long) {
   const result1 = await users.deleteOne({ uid });
   const result2 = await servers.updateMany(
     { "users.uid": uid },
-    { $pull: { users: { uid } } }
+    { $pull: { "users.uid": uid } }
   );
 
   return (
@@ -246,7 +246,7 @@ export async function addServerUser(serverUID: Long, user: ServerUser) {
 export async function setOpt(serverUID: Long, userUID: Long, optedIn: boolean) {
   const result = await servers.updateOne(
     { uid: serverUID, "users.uid": userUID },
-    [{ $set: { users: { optedIn } } }]
+    [{ $set: { "users.$.optedIn": optedIn } }]
   );
 
   return result.acknowledged && result.matchedCount === 1;
@@ -270,9 +270,8 @@ export async function setNickname(
     [
       {
         $set: {
-          users: {
-            nickname: nickname.toLowerCase() === "none" ? undefined : nickname,
-          },
+          "users.$.nickname":
+            nickname.toLowerCase() === "none" ? undefined : nickname,
         },
       },
     ]
@@ -369,7 +368,7 @@ export async function setTradeSong(
 ) {
   const result = await trades.updateOne(
     { name: tradeName, "trades.from": fromUID },
-    [{ $set: { trades: { song } } }]
+    [{ $set: { "trades.$.song": song } }]
   );
 
   return result.acknowledged && result.matchedCount === 1;
@@ -392,7 +391,7 @@ export async function setTradeResponse(
 ) {
   const result = await trades.updateOne(
     { name: tradeName, "trades.to": toUID },
-    [{ $set: { trades: { response } } }]
+    [{ $set: { "trades.$.response": response } }]
   );
 
   return result.acknowledged && result.matchedCount === 1;
