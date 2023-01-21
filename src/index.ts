@@ -84,7 +84,7 @@ async function run() {
       const customId = interaction.customId.includes(" ")
         ? interaction.customId.substring(0, interaction.customId.indexOf(" "))
         : interaction.customId;
-      console.log("button press:", interaction.customId, "=>", customId);
+      // console.log("button press:", interaction.customId, "=>", customId);
       const buttonHandler = buttons.get(customId);
 
       if (!buttonHandler) {
