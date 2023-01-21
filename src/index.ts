@@ -67,12 +67,12 @@ async function run() {
         console.error("error:", error);
         if (!interaction.replied) {
           if (interaction.deferred) {
-            console.log("error detected, attempting edit...");
+            // console.log("error detected, attempting edit...");
             await interaction.editReply(
               "There was an error while executing this command!"
             );
           } else {
-            console.log("error detected, attempting reply...");
+            // console.log("error detected, attempting reply...");
             await interaction.reply({
               content: "There was an error while executing this command!",
               ephemeral: true,
