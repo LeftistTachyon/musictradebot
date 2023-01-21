@@ -240,8 +240,14 @@ export async function optIn(
 ) {
   if (!isInServer(interaction)) return;
 
+  // console.log("deferring reply...", {
+  //   deferReply: interaction.deferReply,
+  //   deferred: interaction.deferred,
+  //   replied: interaction.replied,
+  // });
   await interaction.deferReply({ ephemeral: true });
 
+  // console.log("attempting to fetch server user profile");
   const serverID = new Long(interaction.guildId),
     userID = new Long(interaction.user.id);
   const user = await fetchUser(userID);
@@ -251,9 +257,10 @@ export async function optIn(
     );
   }
 
+  // console.log("attempting to opt in...");
   const successful = (await fetchServerUser(serverID, userID)) // if server user exists
     ? await setOpt(serverID, userID, true)
-    : addServerUser(serverID, { uid: userID, optedIn: true });
+    : await addServerUser(serverID, { uid: userID, optedIn: true });
 
   await interaction.editReply(
     successful
@@ -288,7 +295,7 @@ export async function optOut(
 
   const successful = (await fetchServerUser(serverID, userID)) // if server user exists
     ? await setOpt(serverID, userID, false)
-    : addServerUser(serverID, { uid: userID, optedIn: false });
+    : await addServerUser(serverID, { uid: userID, optedIn: false });
 
   await interaction.editReply(
     successful

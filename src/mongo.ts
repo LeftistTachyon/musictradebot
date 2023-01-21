@@ -246,7 +246,7 @@ export async function addServerUser(serverUID: Long, user: ServerUser) {
 export async function setOpt(serverUID: Long, userUID: Long, optedIn: boolean) {
   const result = await servers.updateOne(
     { uid: serverUID, "users.uid": userUID },
-    [{ $set: { "users.$.optedIn": optedIn } }]
+    { $set: { "users.$.optedIn": optedIn } }
   );
 
   return result.acknowledged && result.matchedCount === 1;
@@ -267,14 +267,12 @@ export async function setNickname(
 ) {
   const result = await servers.updateOne(
     { uid: serverUID, "users.uid": userUID },
-    [
-      {
-        $set: {
-          "users.$.nickname":
-            nickname.toLowerCase() === "none" ? undefined : nickname,
-        },
+    {
+      $set: {
+        "users.$.nickname":
+          nickname.toLowerCase() === "none" ? undefined : nickname,
       },
-    ]
+    }
   );
 
   return result.acknowledged && result.matchedCount === 1;
@@ -368,7 +366,7 @@ export async function setTradeSong(
 ) {
   const result = await trades.updateOne(
     { name: tradeName, "trades.from": fromUID },
-    [{ $set: { "trades.$.song": song } }]
+    { $set: { "trades.$.song": song } }
   );
 
   return result.acknowledged && result.matchedCount === 1;
@@ -391,7 +389,7 @@ export async function setTradeResponse(
 ) {
   const result = await trades.updateOne(
     { name: tradeName, "trades.to": toUID },
-    [{ $set: { "trades.$.response": response } }]
+    { $set: { "trades.$.response": response } }
   );
 
   return result.acknowledged && result.matchedCount === 1;
