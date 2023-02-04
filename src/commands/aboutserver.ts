@@ -26,6 +26,8 @@ const aboutserver: DiscordCommand = {
 
     let participantsValue = "";
     for (let idx = 0; idx < server.users.length; idx++) {
+      if (!server.users[idx].optedIn) continue;
+
       const user = `<@${server.users[idx].uid}>\n`;
       if (participantsValue.length + user.length > 1006) {
         participantsValue += `...and ${server.users.length - idx} more`;
