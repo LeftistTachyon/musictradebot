@@ -7,6 +7,7 @@ import forms from "./forms";
 import init, {
   addServer,
   close,
+  deleteServerUser,
   getAndDeleteCurrEvents,
   getServer,
   updateServerName,
@@ -170,6 +171,10 @@ async function run() {
 
   client.on(Events.GuildUpdate, async (_, newGuild) => {
     await updateServerName(new Long(newGuild.id), newGuild.name);
+  });
+
+  client.on(Events.GuildMemberRemove, async (member) => {
+    await deleteServerUser(new Long(member.guild.id), new Long(member.id));
   });
 
   client.once(Events.ClientReady, (c) => {

@@ -145,6 +145,24 @@ export async function fetchServerUser(serverUID: Long, userUID: Long) {
 }
 
 /**
+ * Deletes the given server's user profile.
+ *
+ * @param serverUID the UID of the server to delete the user from
+ * @param userUID the UID of the user to remove
+ * @returns whether the operation was successful
+ */
+export async function deleteServerUser(serverUID: Long, userUID: Long) {
+  const result = await servers.updateOne(
+    {
+      uid: serverUID,
+    },
+    { $pull: { "users.uid": userUID } }
+  );
+
+  return result.acknowledged && result.matchedCount == 1;
+}
+
+/**
  * Updates the name for the given server.
  *
  * @param uid the UID of the server to update
