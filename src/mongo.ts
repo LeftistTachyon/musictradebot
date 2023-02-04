@@ -33,7 +33,7 @@ export default (async () => {
   events = musicDB.collection<MusicEvent>("events");
 })();
 
-// ! PING !
+// ! ======================= PING ======================= !
 /**
  * Pings the database.
  *
@@ -138,7 +138,7 @@ export async function getServer(uid: Long) {
 export async function fetchServerUser(serverUID: Long, userUID: Long) {
   const server = await servers.findOne({
     uid: serverUID,
-    "users.uid": userUID,
+    users: { $elemMatch: { uid: userUID } },
   });
 
   return server?.users[0];
