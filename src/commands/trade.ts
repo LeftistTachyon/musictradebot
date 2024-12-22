@@ -252,7 +252,7 @@ Unfortunately, it seems that ${nickname} hasn't set up their music profile, so t
 Hey, ${mention}! A new song trade is starting!
 Those of you who have opted in should have recieved a DM that tells you who you have and what kind of music they're looking for.
 Make sure you send over the songs by ${timestamp}!
-        
+
 **Happy trading!**`
       );
     } else

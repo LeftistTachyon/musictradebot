@@ -1,6 +1,6 @@
 import { Long } from "bson";
 import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
-import { getServer, rescheduleEvents, updateServerSettings } from "../mongo";
+import { getServer, updateServerSettings } from "../mongo";
 import { DiscordCommand } from "../types";
 import { getDefaultTimeframes, isAdmin, isInServer } from "../util";
 
@@ -71,17 +71,7 @@ Try again with different a value.`);
 
     const newSetting = { [setting]: timeframeMin };
 
-    const successful =
-      (await updateServerSettings(guildLong, newSetting)) &&
-      (await rescheduleEvents(
-        {
-          // ? hard-coded for now, will have to extract to function later if this expands
-          type: setting === "reminderPeriod" ? "reminder" : "phase2",
-          server: guildLong,
-        },
-        // ? hard-coded for now, will have to extract to function later if this expands
-        setting === "reminderPeriod" ? -timeframeMin : timeframeMin
-      ));
+    const successful = await updateServerSettings(guildLong, newSetting);
 
     await interaction.editReply(
       successful

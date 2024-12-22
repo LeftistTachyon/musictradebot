@@ -1,7 +1,7 @@
 {
   "name": "musictradebot",
   "version": "1.0.0",
-  "description": "A music trading bot for the Rubber Duckies Discord server",
+  "description": "A music trading bot for Discord",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Test successful\"",

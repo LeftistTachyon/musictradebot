@@ -492,34 +492,6 @@ export async function postponeEvents(
 }
 
 /**
- * Reschedules the events with the given selector for a new time a given number of minutes after the baseline time
- *
- * @param selector a partial of the "of" field
- * @param newMinutes the number of minutes to now set the event as away from the baseline
- * @returns whether the operation was successful
- */
-export async function rescheduleEvents(
-  selector: Partial<EventOf>,
-  newMinutes: number
-) {
-  const result = await events.updateMany(fromSelector(selector), [
-    {
-      $set: {
-        time: {
-          $dateAdd: {
-            startDate: "$baseline",
-            amount: newMinutes,
-            unit: "minute",
-          },
-        },
-      },
-    },
-  ]);
-
-  return result.acknowledged && result.matchedCount == result.modifiedCount;
-}
-
-/**
  * Finds and deletes all events that occured before the present.
  *
  * @returns an array of all events that occured before the moment that the function was called. If unable to be deleted, null is returned.
