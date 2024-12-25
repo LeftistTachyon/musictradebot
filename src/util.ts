@@ -104,24 +104,6 @@ export function createTrade(server: Server, duration: number): Trade {
 }
 
 /**
- * Extends the phase 1 deadline of the given trade by the given number of days.
- * The number of days is rounded down before being used in computations.
- *
- * @param trade the trade to alter
- * @param extendBy the number of days to extend the phase 1 deadline by
- * @returns the same trade, but with an extended deadline
- */
-export function extendDeadline(trade: Trade, extendBy: number): Trade {
-  trade.end = DateTime.fromJSDate(trade.end)
-    .plus({
-      days: Math.floor(extendBy),
-    })
-    .toJSDate();
-
-  return trade;
-}
-
-/**
  * Gets the default setting for the given setting
  *
  * @param setting the setting to fetch
@@ -211,10 +193,10 @@ export function isAdmin(
 }
 
 /**
- * Check if a slash command interaction was done by LeftistTachyon#0279, the bot owner
+ * Check if a slash command interaction was done by leafytachyon, the bot owner
  *
  * @param interaction the interaction to check
- * @returns whether the interaction was done by LeftistTachyon#0279
+ * @returns whether the interaction was done by the one and only leafytachyon
  */
 export function isBotOwner(
   interaction: ChatInputCommandInteraction<CacheType>
@@ -223,7 +205,7 @@ export function isBotOwner(
 
   interaction.reply({
     content:
-      "Sorry, this command can only be used by the bot owner!\nPlease contact LeftistTachyon#0279 for more information.",
+      "Sorry, this command can only be used by the bot owner!\nPlease contact leafytachyon for more information.",
   });
 }
 
