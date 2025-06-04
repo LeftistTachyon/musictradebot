@@ -11,8 +11,7 @@ const client = new MongoClient(process.env.MONGO_URI || "missing-mongo-uri", {
 
 let servers: Collection<Server>,
   users: Collection<User>,
-  trades: Collection<Trade>,
-  events: Collection<MusicEvent>;
+  trades: Collection<Trade>;
 
 let isOpen = false;
 
@@ -29,7 +28,6 @@ export default (async () => {
   servers = musicDB.collection<Server>("servers");
   users = musicDB.collection<User>("users");
   trades = musicDB.collection<Trade>("trades");
-  events = musicDB.collection<MusicEvent>("events");
 })();
 
 // ! ======================= PING ======================= !
