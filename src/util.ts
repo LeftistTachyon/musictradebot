@@ -161,7 +161,7 @@ export function isInServer(
 
   interaction.reply({
     content: "Sorry, this command only works in servers I'm in!",
-    ephemeral: true,
+    flags: MessageFlags.Ephemeral,
   });
 
   return false;
@@ -186,7 +186,7 @@ export function isAdmin(
 
   interaction.reply({
     content: "Sorry, this command can only be used by (human) admins!",
-    ephemeral: true,
+    flags: MessageFlags.Ephemeral,
   });
 
   return false;
@@ -227,7 +227,7 @@ export async function optIn(
   //   deferred: interaction.deferred,
   //   replied: interaction.replied,
   // });
-  await interaction.deferReply({ ephemeral: true });
+  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
   // console.log("attempting to fetch server user profile");
   const serverID = new Long(interaction.guildId),
@@ -264,7 +264,7 @@ export async function optOut(
 ) {
   if (!isInServer(interaction)) return;
 
-  await interaction.deferReply({ ephemeral: true });
+  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
   const serverID = new Long(interaction.guildId),
     userID = new Long(interaction.user.id);

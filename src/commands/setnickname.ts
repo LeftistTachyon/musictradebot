@@ -1,5 +1,9 @@
-import { SlashCommandBuilder } from "discord.js";
 import { Long } from "bson";
+import {
+  InteractionContextType,
+  MessageFlags,
+  SlashCommandBuilder,
+} from "discord.js";
 import { setNickname } from "../mongo";
 import { DiscordCommand } from "../types";
 import { isInServer } from "../util";
@@ -15,12 +19,12 @@ const setnickname: DiscordCommand = {
         .setMaxLength(240)
         .setRequired(true)
     )
-    .setDMPermission(false),
+    .setContexts(InteractionContextType.Guild),
 
   async execute(interaction) {
     if (!isInServer(interaction)) return;
 
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const newNickname = interaction.options.getString("nickname", true);
     const successful = await setNickname(

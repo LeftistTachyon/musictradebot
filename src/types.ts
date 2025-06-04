@@ -6,7 +6,7 @@ import {
   ChatInputCommandInteraction,
   Guild,
   ModalSubmitInteraction,
-  SlashCommandBuilder,
+  SharedSlashCommand,
 } from "discord.js";
 
 // ! =================== SCHEMA TYPES =================== !
@@ -96,7 +96,7 @@ export type EventSelector = {
  * Something that represents a slash command
  */
 export type DiscordCommand = {
-  data: SlashCommandBuilder;
+  data: SharedSlashCommand;
   execute: (
     interaction: ChatInputCommandInteraction<CacheType>
   ) => Promise<void>;

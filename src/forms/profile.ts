@@ -13,7 +13,7 @@ export const handleProfileForm1: FormHandler = {
   name: "profile-form1",
 
   async execute(interaction) {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     // check if is new
     const uid = new Long(interaction.user.id),
@@ -54,7 +54,7 @@ export const handleProfileForm1: FormHandler = {
 export const handleProfileForm2: FormHandler = {
   name: "profile-form2",
   async execute(interaction) {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const newUser: Partial<User> = {
       uid: new Long(interaction.user.id),

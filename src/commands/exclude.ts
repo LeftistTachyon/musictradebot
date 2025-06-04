@@ -1,30 +1,31 @@
+import { Long } from "bson";
 import {
+  InteractionContextType,
+  MessageFlags,
   PermissionFlagsBits,
   SlashCommandBuilder,
-  SlashCommandUserOption,
 } from "discord.js";
-import { Long } from "bson";
-import { DiscordCommand } from "../types";
-import { isAdmin, isInServer, optOut } from "../util";
 import { fetchServerUser, fetchUser, setOpt } from "../mongo";
+import { DiscordCommand } from "../types";
+import { isAdmin, isInServer } from "../util";
 
 const exclude: DiscordCommand = {
   data: new SlashCommandBuilder()
     .setName("exclude")
     .setDescription("Forcefully opts out a user (Admin-only)")
-    .addUserOption(
-      new SlashCommandUserOption()
+    .addUserOption((option) =>
+      option
         .setName("user")
         .setDescription("The user to exclude from future trades")
         .setRequired(true)
     )
-    .setDMPermission(false)
-    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+    .setContexts(InteractionContextType.Guild),
 
   async execute(interaction) {
     if (!isInServer(interaction) || !isAdmin(interaction)) return;
 
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const u = interaction.options.getUser("user", true);
 

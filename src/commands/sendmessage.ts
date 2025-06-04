@@ -1,29 +1,21 @@
 import {
-  ActionRowBuilder,
-  APIInteractionDataResolvedChannel,
-  ButtonBuilder,
-  ButtonStyle,
-  CategoryChannel,
+  BaseChannel,
   ChannelType,
-  ForumChannel,
+  GuildChannel,
+  InteractionContextType,
+  MessageFlags,
   PermissionFlagsBits,
   SlashCommandBuilder,
-  StageChannel,
-  TextBasedChannel,
+  TextChannel,
 } from "discord.js";
 import { registerActionRow } from "../buttons/createUpdateProfile";
 import { actionRow as optActionRow } from "../buttons/optInOut";
 import { DiscordCommand } from "../types";
 import { isAdmin, isInServer } from "../util";
 
-function validateChannel(
-  channel:
-    | CategoryChannel
-    | StageChannel
-    | ForumChannel
-    | APIInteractionDataResolvedChannel
-    | TextBasedChannel
-): channel is TextBasedChannel {
+function validateChannel(channel: {
+  type: ChannelType;
+}): channel is TextChannel {
   return (
     channel.type in
     [
@@ -60,7 +52,7 @@ const sendmessage: DiscordCommand = {
           ChannelType.PublicThread
         )
     )
-    .setDMPermission(false)
+    .setContexts(InteractionContextType.Guild)
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   async execute(interaction) {
@@ -71,12 +63,12 @@ const sendmessage: DiscordCommand = {
     if (!channel || !validateChannel(channel)) {
       await interaction.reply({
         content: "Invalid channel! Try a text channel that I can access.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
 
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     switch (interaction.options.getString("type", true)) {
       case "register":

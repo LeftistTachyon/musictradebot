@@ -1,5 +1,10 @@
 import { Long } from "bson";
-import { ChannelType, SlashCommandBuilder } from "discord.js";
+import {
+  ChannelType,
+  InteractionContextType,
+  MessageFlags,
+  SlashCommandBuilder,
+} from "discord.js";
 import { updateServerAnnounceCh } from "../mongo";
 import { DiscordCommand } from "../types";
 import { isAdmin, isInServer } from "../util";
@@ -30,7 +35,7 @@ const setchannel: DiscordCommand = {
           ChannelType.PublicThread
         )
     )
-    .setDMPermission(false),
+    .setContexts(InteractionContextType.Guild),
 
   async execute(interaction) {
     if (!isInServer(interaction) || !isAdmin(interaction)) return;
@@ -41,7 +46,7 @@ const setchannel: DiscordCommand = {
 
     switch (interaction.options.getString("type", true)) {
       case "announce":
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const successful = await updateServerAnnounceCh(
           new Long(interaction.guildId),
@@ -60,7 +65,7 @@ const setchannel: DiscordCommand = {
         await interaction.reply({
           content:
             "How were you able to select an option that isn't in the list!?",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
 
         break;

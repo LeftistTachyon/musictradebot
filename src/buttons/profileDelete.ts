@@ -6,7 +6,7 @@ import { ButtonHandler } from "../types";
 export const profileDeleteConfirm: ButtonHandler = {
   name: "profileDelete-confirm",
   async execute(interaction) {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const successful = await deleteUser(new Long(interaction.user.id));
 

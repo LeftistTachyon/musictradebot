@@ -76,7 +76,7 @@ async function run() {
             // console.log("error detected, attempting reply...");
             await interaction.reply({
               content: "There was an error while executing this command!",
-              ephemeral: true,
+              flags: MessageFlags.Ephemeral,
             });
           }
         }
@@ -105,7 +105,7 @@ async function run() {
           } else {
             await interaction.reply({
               content: "There was an error while executing this button press!",
-              ephemeral: true,
+              flags: MessageFlags.Ephemeral,
             });
           }
         }
@@ -126,7 +126,7 @@ async function run() {
       } catch (error) {
         await interaction.reply({
           content: "There was an error while submitting this form!",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
     } else if (interaction.isAutocomplete()) {

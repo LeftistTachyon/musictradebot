@@ -3,6 +3,7 @@ import {
   ChatInputCommandInteraction,
   Guild,
   GuildMember,
+  MessageFlags,
   PermissionFlagsBits,
   PermissionsBitField,
   SlashCommandBuilder,
@@ -108,7 +109,7 @@ const trade: DiscordCommand = {
       default:
         await interaction.reply({
           content: "How did you call a subcommand that doesn't exist!?",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
     }
   },
@@ -152,7 +153,7 @@ export default trade;
 async function tradeStart(
   interaction: InServer<ChatInputCommandInteraction<CacheType>>
 ) {
-  await interaction.deferReply({ ephemeral: true });
+  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
   // create server object
   const server = await getServer(new Long(interaction.guildId));
@@ -242,7 +243,7 @@ Unfortunately, it seems that ${nickname} hasn't set up their music profile, so t
       server.announcementsChannel.toString()
     );
 
-    if (channel?.isTextBased()) {
+    if (channel?.isSendable()) {
       const mention = server.pingableRole
         ? `<@&${server.pingableRole}>`
         : "everyone";
@@ -305,7 +306,7 @@ Make sure you send over the songs by ${timestamp}!
 async function tradeStop(
   interaction: InServer<ChatInputCommandInteraction<CacheType>>
 ) {
-  await interaction.deferReply({ ephemeral: true });
+  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
   const name = interaction.options.getString("name", true);
   const server = new Long(interaction.guildId);
@@ -355,7 +356,7 @@ async function tradeStop(
 async function tradeExtend(
   interaction: InServer<ChatInputCommandInteraction<CacheType>>
 ) {
-  await interaction.deferReply({ ephemeral: true });
+  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
   const name = interaction.options.getString("name", true);
   const trade = await fetchTrade(name);

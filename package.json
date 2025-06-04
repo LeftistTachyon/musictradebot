@@ -27,7 +27,7 @@
   },
   "homepage": "https://github.com/LeftistTachyon/musictradebot#readme",
   "dependencies": {
-    "discord.js": "^14.14.1",
+    "discord.js": "^14.19.3",
     "dotenv": "^16.5.0",
     "fuzzaldrin-plus": "^0.6.0",
     "luxon": "^3.6.1",

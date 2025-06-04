@@ -1,5 +1,10 @@
 import { Long } from "bson";
-import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import {
+  InteractionContextType,
+  MessageFlags,
+  PermissionFlagsBits,
+  SlashCommandBuilder,
+} from "discord.js";
 import { getServer, updateServerSettings } from "../mongo";
 import { DiscordCommand } from "../types";
 import { getDefaultTimeframes, isAdmin, isInServer } from "../util";
@@ -37,13 +42,13 @@ const setperiod: DiscordCommand = {
         )
         .setMinValue(1)
     )
-    .setDMPermission(false)
+    .setContexts(InteractionContextType.Guild)
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   async execute(interaction) {
     if (!isInServer(interaction) || !isAdmin(interaction)) return;
 
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const setting = interaction.options.getString("setting", true),
       timeframe =

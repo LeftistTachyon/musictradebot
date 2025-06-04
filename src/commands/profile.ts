@@ -1,5 +1,9 @@
 import { Long } from "bson";
-import { SlashCommandBuilder } from "discord.js";
+import {
+  InteractionContextType,
+  MessageFlags,
+  SlashCommandBuilder,
+} from "discord.js";
 import { defaultActionRow as cuProfileActionRow } from "../buttons/createUpdateProfile";
 import { actionRow as dProfileActionRow } from "../buttons/profileDelete";
 import { fetchServerUser, fetchUser } from "../mongo";
@@ -31,7 +35,11 @@ const profile: DiscordCommand = {
     .addSubcommand((builder) =>
       builder.setName("delete").setDescription("Deletes your music profile")
     )
-    .setDMPermission(true),
+    .setContexts(
+      InteractionContextType.Guild |
+        InteractionContextType.BotDM |
+        InteractionContextType.PrivateChannel
+    ),
 
   async execute(interaction) {
     if (!isInServer(interaction)) return;
@@ -43,7 +51,7 @@ const profile: DiscordCommand = {
         content:
           "To create a new account or edit your existing one, click the button below.",
         components: [cuProfileActionRow],
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     } else if (subCommand === "delete") {
       const user = await fetchUser(new Long(interaction.user.id));
@@ -52,12 +60,12 @@ const profile: DiscordCommand = {
         await interaction.reply({
           content: "Are you sure you want to delete your profile?",
           components: [dProfileActionRow],
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       } else {
         await interaction.reply({
           content: "You don't have an account to delete!",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
     } else if (subCommand === "find") {
@@ -89,7 +97,7 @@ const profile: DiscordCommand = {
     } else {
       await interaction.reply({
         content: "How did you even call a subcommand that doesn't exist!?",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
   },

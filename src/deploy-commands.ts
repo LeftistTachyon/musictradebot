@@ -1,6 +1,6 @@
-import { commandList } from "./commands";
 import { REST, Routes } from "discord.js";
 import { kill } from ".";
+import { commandList } from "./commands";
 
 // deploy le commmands
 // please don't hurt me, I couldn't think of a better way
@@ -15,9 +15,7 @@ if (Boolean(process.argv[4])) {
     const commands = commandList.map((command) => command.data.toJSON());
 
     // create REST client
-    const rest = new REST({ version: "10" }).setToken(
-      process.env.DISCORD_TOKEN
-    );
+    const rest = new REST().setToken(process.env.DISCORD_TOKEN);
     try {
       console.log(
         `Started refreshing ${commands.length} application (/) commands.`
@@ -52,29 +50,27 @@ if (Boolean(process.argv[4])) {
     const commands = commandList.map((command) => command.data.toJSON());
 
     // create REST client
-    const rest = new REST({ version: "10" }).setToken(
-      process.env.DISCORD_TOKEN
-    );
+    const rest = new REST().setToken(process.env.DISCORD_TOKEN);
     try {
       console.log(
         `Started refreshing ${commands.length} application (/) commands.`
       );
 
-      const data = await rest.put(
+      // The put method is used to fully refresh all commands in the guild with the current set
+      const data = (await rest.put(
         Routes.applicationGuildCommands(
           process.env.CLIENT_ID,
           process.env.GUILD_ID
         ),
         { body: commands }
-      );
+      )) as { length: number };
 
       console.log(
-        `Successfully reloaded ${
-          (data as { length: number }).length
-        } application (/) commands.`
+        `Successfully reloaded ${data.length} application (/) commands.`
       );
     } catch (error) {
-      console.dir(error);
+      // And of course, make sure you catch and log any errors!
+      console.error(error);
     } finally {
       kill();
     }

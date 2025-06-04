@@ -1,5 +1,5 @@
-import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 import { Long } from "bson";
+import { MessageFlags, SlashCommandBuilder } from "discord.js";
 import { setUserName } from "../mongo";
 import { DiscordCommand } from "../types";
 
@@ -15,7 +15,7 @@ const setname: DiscordCommand = {
     .setDescription("Change your preferred name"),
 
   async execute(interaction) {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const newName = interaction.options.getString("name", true);
     const successful = await setUserName(

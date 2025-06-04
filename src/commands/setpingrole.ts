@@ -1,5 +1,11 @@
-import { PermissionFlagsBits, Role, SlashCommandBuilder } from "discord.js";
 import { Long } from "bson";
+import {
+  InteractionContextType,
+  MessageFlags,
+  PermissionFlagsBits,
+  Role,
+  SlashCommandBuilder,
+} from "discord.js";
 import { removeServerPingableRole, updateServerPingableRole } from "../mongo";
 import { DiscordCommand } from "../types";
 import { isAdmin, isInServer } from "../util";
@@ -17,13 +23,13 @@ const setpingrole: DiscordCommand = {
           "The pingable role to use for this purpose. Omit = no role"
         )
     )
-    .setDMPermission(false)
+    .setContexts(InteractionContextType.Guild)
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   async execute(interaction) {
     if (!isInServer(interaction) || !isAdmin(interaction)) return;
 
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const pingableRole = interaction.options.getMentionable("role", false);
 

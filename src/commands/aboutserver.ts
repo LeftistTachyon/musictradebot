@@ -1,5 +1,9 @@
 import { Long } from "bson";
-import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import {
+  EmbedBuilder,
+  InteractionContextType,
+  SlashCommandBuilder,
+} from "discord.js";
 import { Duration } from "luxon";
 import { getServer } from "../mongo";
 import { DiscordCommand } from "../types";
@@ -9,7 +13,7 @@ const aboutserver: DiscordCommand = {
   data: new SlashCommandBuilder()
     .setName("aboutserver")
     .setDescription("Display various information about this server")
-    .setDMPermission(false),
+    .setContexts(InteractionContextType.Guild),
 
   async execute(interaction) {
     if (!isInServer(interaction)) return;
