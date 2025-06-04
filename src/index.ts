@@ -26,7 +26,7 @@ const programStart = DateTime.now();
 
 // initialize Discord client
 export const client: Client = new Client({
-  intents: [GatewayIntentBits.Guilds],
+  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.DirectMessages],
 });
 
 let interval: string | number | NodeJS.Timeout | undefined;

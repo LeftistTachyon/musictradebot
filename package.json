@@ -27,20 +27,18 @@
   },
   "homepage": "https://github.com/LeftistTachyon/musictradebot#readme",
   "dependencies": {
-    "discord.js": "^14.7.1",
-    "dotenv": "^16.0.3",
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.5.0",
     "fuzzaldrin-plus": "^0.6.0",
-    "luxon": "^3.1.1",
-    "mongodb": "^4.12.1",
-    "node-cron": "^4.1.0",
-    "pastebin-api": "^5.1.5"
+    "luxon": "^3.6.1",
+    "mongodb": "^6.17.0",
+    "pastebin-api": "^7.0.0"
   },
   "devDependencies": {
-    "@types/fuzzaldrin-plus": "^0.6.2",
-    "@types/luxon": "^3.1.0",
-    "@types/node": "^18.11.15",
-    "@types/node-cron": "^3.0.11",
-    "ts-node": "^10.9.1",
-    "typescript": "^4.9.4"
+    "@types/fuzzaldrin-plus": "^0.6.5",
+    "@types/luxon": "^3.6.2",
+    "@types/node": "^22.15.29",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
   }
 }
