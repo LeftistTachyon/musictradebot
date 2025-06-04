@@ -6,7 +6,7 @@ import {
   SlashCommandBuilder,
 } from "discord.js";
 import { updateServerAnnounceCh } from "../mongo";
-import { DiscordCommand } from "../types";
+import type { DiscordCommand } from "../types";
 import { isAdmin, isInServer } from "../util";
 
 const setchannel: DiscordCommand = {

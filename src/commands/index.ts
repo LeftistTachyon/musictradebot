@@ -1,5 +1,5 @@
 import { Collection } from "discord.js";
-import { DiscordCommand } from "../types";
+import type { DiscordCommand } from "../types";
 import aboutserver from "./aboutserver";
 import exclude from "./exclude";
 import optin from "./optin";

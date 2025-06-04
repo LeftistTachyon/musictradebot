@@ -10,7 +10,7 @@ import {
 } from "discord.js";
 import { registerActionRow } from "../buttons/createUpdateProfile";
 import { actionRow as optActionRow } from "../buttons/optInOut";
-import { DiscordCommand } from "../types";
+import type { DiscordCommand } from "../types";
 import { isAdmin, isInServer } from "../util";
 
 function validateChannel(channel: {

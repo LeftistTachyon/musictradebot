@@ -2,7 +2,7 @@ import { Long } from "bson";
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 import { generateProfileForm1, generateProfileForm2 } from "../forms/profile";
 import { fetchUser } from "../mongo";
-import { ButtonHandler } from "../types";
+import type { ButtonHandler } from "../types";
 
 export const createUpdateProfile1: ButtonHandler = {
   name: "profile-updateCreate1",

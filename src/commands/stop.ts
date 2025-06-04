@@ -4,7 +4,7 @@ import {
   SlashCommandBuilder,
 } from "discord.js";
 import { kill } from "..";
-import { DiscordCommand } from "../types";
+import type { DiscordCommand } from "../types";
 import { isBotOwner } from "../util";
 
 const stop: DiscordCommand = {

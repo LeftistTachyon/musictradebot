@@ -1,5 +1,5 @@
 import { Collection } from "discord.js";
-import { ButtonHandler } from "../types";
+import type { ButtonHandler } from "../types";
 import {
   createUpdateProfile1,
   createUpdateProfile2,

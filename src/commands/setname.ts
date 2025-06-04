@@ -1,7 +1,7 @@
 import { Long } from "bson";
 import { MessageFlags, SlashCommandBuilder } from "discord.js";
 import { setUserName } from "../mongo";
-import { DiscordCommand } from "../types";
+import type { DiscordCommand } from "../types";
 
 const setname: DiscordCommand = {
   data: new SlashCommandBuilder()

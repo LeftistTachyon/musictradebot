@@ -6,7 +6,7 @@ import {
   SlashCommandBuilder,
 } from "discord.js";
 import { getServer, updateServerSettings } from "../mongo";
-import { DiscordCommand } from "../types";
+import type { DiscordCommand } from "../types";
 import { getDefaultTimeframes, isAdmin, isInServer } from "../util";
 
 function getUserString(setting: string) {

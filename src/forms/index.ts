@@ -1,5 +1,5 @@
 import { Collection } from "discord.js";
-import { FormHandler } from "../types";
+import type { FormHandler } from "../types";
 import { handleProfileForm1, handleProfileForm2 } from "./profile";
 import { sendComments } from "./sendComments";
 import { sendSong } from "./sendSong";

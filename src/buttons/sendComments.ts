@@ -1,7 +1,7 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 import { getCommentForm } from "../forms/sendComments";
 import { getStage } from "../mongo";
-import { ButtonHandler } from "../types";
+import type { ButtonHandler } from "../types";
 
 export const sendComments: ButtonHandler = {
   name: "trade-sendComments",

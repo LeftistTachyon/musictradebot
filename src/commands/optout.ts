@@ -1,5 +1,5 @@
 import { InteractionContextType, SlashCommandBuilder } from "discord.js";
-import { DiscordCommand } from "../types";
+import type { DiscordCommand } from "../types";
 import { optOut } from "../util";
 
 const optout: DiscordCommand = {

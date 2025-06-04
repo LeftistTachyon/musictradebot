@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from "discord.js";
 import { DateTime } from "luxon";
 import { pingDB } from "../mongo";
-import { DiscordCommand } from "../types";
+import type { DiscordCommand } from "../types";
 
 const ping: DiscordCommand = {
   data: new SlashCommandBuilder()

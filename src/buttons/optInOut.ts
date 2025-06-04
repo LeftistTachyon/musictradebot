@@ -1,5 +1,5 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
-import { ButtonHandler } from "../types";
+import type { ButtonHandler } from "../types";
 import { optIn as optInFunction, optOut as optOutFunction } from "../util";
 
 export const optIn: ButtonHandler = {

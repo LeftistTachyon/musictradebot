@@ -1,8 +1,8 @@
 import {
   CacheType,
   ChatInputCommandInteraction,
-  Guild,
   GuildMember,
+  InteractionContextType,
   MessageFlags,
   PermissionFlagsBits,
   PermissionsBitField,
@@ -15,17 +15,14 @@ import { client } from "..";
 import { getActionRow } from "../buttons/sendSong";
 import {
   addTrade,
-  createEvents,
   deleteEvents,
   fetchServerUser,
   fetchTrade,
   fetchTradeNames,
   fetchUser,
   getServer,
-  postponeEvents,
-  setTradeEndDate,
 } from "../mongo";
-import { DiscordCommand, InServer, Trade } from "../types";
+import type { DiscordCommand, InServer, Trade } from "../types";
 import {
   createProfileEmbed,
   createTrade,
@@ -87,7 +84,7 @@ const trade: DiscordCommand = {
             .setRequired(true)
         )
     )
-    .setDMPermission(false)
+    .setContexts(InteractionContextType.Guild)
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   async execute(interaction) {
@@ -100,10 +97,6 @@ const trade: DiscordCommand = {
 
       case "stop":
         await tradeStop(interaction);
-        return;
-
-      case "extend":
-        await tradeExtend(interaction);
         return;
 
       default:
@@ -345,64 +338,4 @@ async function tradeStop(
   await interaction.editReply(`Successfully stopped trade \`${name}\`.`);
 
   await endPhase2({ server, trade: name, type: "phase2" });
-}
-
-/**
- * Handles the "trade extend" subcommand
- *
- * @param interaction the interaction to handle
- * @returns a Promise that resolves when the interaction has been handled
- */
-async function tradeExtend(
-  interaction: InServer<ChatInputCommandInteraction<CacheType>>
-) {
-  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-
-  const name = interaction.options.getString("name", true);
-  const trade = await fetchTrade(name);
-
-  if (!trade) {
-    await interaction.editReply("That trade doesn't exist!");
-    return;
-  }
-  if (trade.server !== new Long(interaction.guildId)) {
-    await interaction.editReply(
-      "You don't have permission to edit this interaction!"
-    );
-    return;
-  }
-  if (trade.end < new Date()) {
-    await interaction.editReply("This trade has already ended!");
-    return;
-  }
-
-  const days = Math.floor(interaction.options.getInteger("days", true));
-  const newEnd = DateTime.fromJSDate(trade.end).plus({ days });
-  const success =
-    (await setTradeEndDate(name, newEnd.toJSDate())) &&
-    (await postponeEvents({ trade: trade.name }, days * 1440));
-
-  await interaction.editReply(
-    success
-      ? `Successfully extended the deadline of \`${name}\` by ${days} days!`
-      : "Something went horribly wrong! Please let the server owner know that you can't extend deadlines of trades!"
-  );
-
-  for (const { from, song } of trade.trades) {
-    const u = await client.users.fetch(from.toString());
-    if (!u) {
-      console.warn(`User ${from} doesn't exist! (trade.ts:368)`);
-      continue;
-    }
-
-    const timestamp = generateTimestamp(newEnd, "F"),
-      relTimestamp = generateTimestamp(newEnd, "R");
-    await u.send(
-      song
-        ? `One of the trades you are participating in (\`${trade.name}\`) has extended their deadline for submitting songs.
-The new deadline is ${timestamp} (${relTimestamp}). Hang on tight while others are submitting their songs!`
-        : `One of the trades you are participating in (\`${trade.name}\`) has extended their deadline for submitting songs.
-You now have until ${timestamp} (${relTimestamp}) to submit your song trade. Remember to submit it on time!`
-    );
-  }
 }

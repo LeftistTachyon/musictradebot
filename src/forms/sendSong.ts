@@ -6,7 +6,7 @@ import {
 } from "discord.js";
 import { Long } from "mongodb";
 import { getStage, setTradeSong } from "../mongo";
-import { FormHandler } from "../types";
+import type { FormHandler } from "../types";
 
 export const sendSong: FormHandler = {
   name: "trade-sendSong",

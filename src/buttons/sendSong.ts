@@ -1,7 +1,7 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 import { getSongForm } from "../forms/sendSong";
 import { getStage } from "../mongo";
-import { ButtonHandler } from "../types";
+import type { ButtonHandler } from "../types";
 
 export const sendSong: ButtonHandler = {
   name: "trade-sendSong",

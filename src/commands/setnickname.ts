@@ -5,7 +5,7 @@ import {
   SlashCommandBuilder,
 } from "discord.js";
 import { setNickname } from "../mongo";
-import { DiscordCommand } from "../types";
+import type { DiscordCommand } from "../types";
 import { isInServer } from "../util";
 
 const setnickname: DiscordCommand = {

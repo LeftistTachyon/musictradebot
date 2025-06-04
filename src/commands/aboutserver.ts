@@ -6,7 +6,7 @@ import {
 } from "discord.js";
 import { Duration } from "luxon";
 import { getServer } from "../mongo";
-import { DiscordCommand } from "../types";
+import type { DiscordCommand } from "../types";
 import { isInServer } from "../util";
 
 const aboutserver: DiscordCommand = {

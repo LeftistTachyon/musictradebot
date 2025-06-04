@@ -7,7 +7,7 @@ import {
 } from "discord.js";
 import { createContinueActionRow } from "../buttons/createUpdateProfile";
 import { fetchUser, upsertUser } from "../mongo";
-import { FormHandler, User } from "../types";
+import type { FormHandler, User } from "../types";
 
 export const handleProfileForm1: FormHandler = {
   name: "profile-form1",

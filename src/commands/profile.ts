@@ -7,7 +7,7 @@ import {
 import { defaultActionRow as cuProfileActionRow } from "../buttons/createUpdateProfile";
 import { actionRow as dProfileActionRow } from "../buttons/profileDelete";
 import { fetchServerUser, fetchUser } from "../mongo";
-import { DiscordCommand } from "../types";
+import type { DiscordCommand } from "../types";
 import { createProfileEmbed, isInServer } from "../util";
 
 const profile: DiscordCommand = {

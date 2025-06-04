@@ -1,7 +1,7 @@
 import { Long } from "bson";
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 import { deleteUser } from "../mongo";
-import { ButtonHandler } from "../types";
+import type { ButtonHandler } from "../types";
 
 export const profileDeleteConfirm: ButtonHandler = {
   name: "profileDelete-confirm",

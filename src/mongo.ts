@@ -1,7 +1,6 @@
 import { Long } from "bson";
 import { Collection, MongoClient, ServerApiVersion } from "mongodb";
-import { EventOf, MusicEvent, Server, ServerUser, Trade, User } from "./types";
-import { fromSelector } from "./util";
+import type { MusicEvent, Server, ServerUser, Trade, User } from "./types";
 
 // ! ============== INITIALIZATION ROUTINE ============== !
 const client = new MongoClient(process.env.MONGO_URI || "missing-mongo-uri", {
@@ -418,36 +417,6 @@ export async function setTradeResponse(
 // ! =================== EVENTS CRUD ==================== !
 
 /**
- * Inserts all of the given events into the events database
- *
- * @param toAdd the events to insert into the database
- * @returns whether the operation was successful
- */
-export async function createEvents(toAdd: MusicEvent[]) {
-  const result = await events.insertMany(toAdd);
-  return result.acknowledged && result.insertedCount == toAdd.length;
-}
-
-/**
- * Fetches all the events on the events database
- *
- * @returns all events on the database
- */
-export async function fetchAllEvents() {
-  return await events.find({}).toArray();
-}
-
-/**
- * Fetches all events which match the given selector
- *
- * @param selector the selector for the "of" field of ones to return
- * @returns all matching events
- */
-export async function fetchEvents(selector: Partial<EventOf>) {
-  return await events.find(fromSelector(selector)).toArray();
-}
-
-/**
  * Determines which phase the given trade is in. If the trade doesn't exist, it will return "done".
  *
  * @param tradeName the name of the trade to fetch the stage for
@@ -456,67 +425,12 @@ export async function fetchEvents(selector: Partial<EventOf>) {
 export async function getStage(
   tradeName: string
 ): Promise<"phase1" | "phase2" | "done"> {
-  const length = (await fetchEvents({ trade: tradeName })).length;
+  // const length = (await fetchEvents({ trade: tradeName })).length;
+  const length = 1;
 
   if (!length) return "done";
   if (length <= 2) return "phase2";
   else return "phase1";
-}
-
-/**
- * Postpones the events with the given selector by the given number of minutes
- *
- * @param selector a partial of the "of" field
- * @param extraMinutes the number of extra minutes to add to the selected events
- * @returns whether the operation was successful
- */
-export async function postponeEvents(
-  selector: Partial<EventOf>,
-  extraMinutes: number
-) {
-  const result = await events.updateMany(fromSelector(selector), [
-    {
-      $set: {
-        time: {
-          $dateAdd: {
-            startDate: "$time",
-            amount: extraMinutes,
-            unit: "minute",
-          },
-        },
-      },
-    },
-  ]);
-
-  return result.acknowledged && result.matchedCount == result.modifiedCount;
-}
-
-/**
- * Finds and deletes all events that occured before the present.
- *
- * @returns an array of all events that occured before the moment that the function was called. If unable to be deleted, null is returned.
- */
-export async function getAndDeleteCurrEvents() {
-  const result1 = await events.find({ time: { $lte: new Date() } }).toArray();
-
-  if (result1.length) {
-    const result2 = await events.deleteMany({ time: { $lte: new Date() } });
-
-    return result2.acknowledged && result2.deletedCount == result1.length
-      ? result1
-      : null;
-  } else return [];
-}
-
-/**
- * Deletes all events which match the given "of" variable
- *
- * @param selector the selector for the "of" variable of things to delete
- * @returns whether the operation was successful
- */
-export async function deleteEvents(selector: Partial<EventOf>) {
-  const result = await events.deleteMany(fromSelector(selector));
-  return result.deletedCount;
 }
 
 // ! ================ CLEANUP FUNCTIONS ================= !

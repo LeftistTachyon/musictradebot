@@ -1,5 +1,5 @@
 import { Long } from "bson";
-import { Client, Events, GatewayIntentBits } from "discord.js";
+import { Client, Events, GatewayIntentBits, MessageFlags } from "discord.js";
 import { DateTime } from "luxon";
 import buttons from "./buttons";
 import commands from "./commands";
@@ -12,7 +12,7 @@ import init, {
   getServer,
   updateServerName,
 } from "./mongo";
-import { Server } from "./types";
+import type { Server } from "./types";
 import {
   endPhase1,
   endPhase2,

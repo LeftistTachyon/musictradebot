@@ -2,7 +2,7 @@ import { ActionRowBuilder } from "@discordjs/builders";
 import { ModalBuilder, TextInputBuilder, TextInputStyle } from "discord.js";
 import { Long } from "mongodb";
 import { getStage, setTradeResponse } from "../mongo";
-import { FormHandler } from "../types";
+import type { FormHandler } from "../types";
 
 export const sendComments: FormHandler = {
   name: "trade-sendComments",
