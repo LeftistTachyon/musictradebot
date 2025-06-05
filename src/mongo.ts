@@ -1,6 +1,7 @@
 import { Long } from "bson";
 import { Collection, MongoClient } from "mongodb";
 import type { Server, ServerUser, Trade, User } from "./types";
+import trade from "./commands/trade";
 
 // ! ============== INITIALIZATION ROUTINE ============== !
 const mongoURI = process.env.MONGO_URI || "missing-mongo-uri";
@@ -351,18 +352,6 @@ export async function setTradeGraph(name: string, graph: [Long, Long][]) {
 }
 
 /**
- * Sets a new end date for the trade.
- *
- * @param name the name of the trade to change
- * @param date the new ending date to set for the trade
- * @returns whether the operation was successful
- */
-export async function setTradeEndDate(name: string, date: Date) {
-  const result = await trades.updateOne({ name }, { $set: { date } });
-  return result.acknowledged && result.matchedCount === 1;
-}
-
-/**
  * Sets the song + optional comments sent for a certain two-person trade, characterized by a JS object.
  * The two-person trade (or an edge in the trade graph) is characterized by the name of the trade
  * and the UID of the user sending the song
@@ -418,15 +407,24 @@ export async function setTradeResponse(
  * @param tradeName the name of the trade to fetch the stage for
  * @returns which phase the trade is in
  */
-export async function getStage(
-  tradeName: string
-): Promise<"phase1" | "phase2" | "done"> {
-  // const length = (await fetchEvents({ trade: tradeName })).length;
-  const length = 1;
+export async function getStage(tradeName: string): Promise<string> {
+  const trade = await fetchTrade(tradeName);
+  return trade?.phase || "done";
+}
 
-  if (!length) return "done";
-  if (length <= 2) return "phase2";
-  else return "phase1";
+/**
+ * Updates the given trade to the given stage
+ *
+ * @param tradeName the name of the trade to update the stage for
+ * @param phase which stage to update the trade to
+ * @returns whether the operation completed successfully
+ */
+export async function setStage(tradeName: string, phase: string) {
+  const result = await trades.updateOne(
+    { name: tradeName },
+    { $set: { phase } }
+  );
+  return result.acknowledged && result.matchedCount === 1;
 }
 
 // ! ================ CLEANUP FUNCTIONS ================= !

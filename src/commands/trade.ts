@@ -380,7 +380,8 @@ async function tradeStop(
   for (const user of trade.users) {
     const u = await client.users.fetch(user.toString());
     if (!u) {
-      console.warn(`User ${user} doesn't exist! (trade.ts:333)`);
+      console.warn(`User ${user} doesn't exist!`);
+      console.trace();
       continue;
     }
 

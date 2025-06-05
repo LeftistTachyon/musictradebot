@@ -22,6 +22,7 @@ import {
   fetchUser,
   getServer,
   setOpt,
+  setStage,
 } from "./mongo";
 import {
   EventOf,
@@ -101,6 +102,7 @@ export function createTrade(server: Server, duration: number): Trade {
     trades,
     start: start.toJSDate(),
     end: end.toJSDate(),
+    phase: "phase1",
   };
 }
 
@@ -385,6 +387,11 @@ export async function endPhase1({
     console.warn(`Trade ${tradeName} doesn't exist!`);
     return;
   }
+  if (!(await setStage(tradeName, "phase2"))) {
+    console.warn(`Unable to update trade ${tradeName} to phase 2!`);
+    return;
+  }
+
   const server = await getServer(serverID);
   if (!server) {
     console.warn(`Server ${serverID} doesn't exist!`);
@@ -402,7 +409,8 @@ export async function endPhase1({
 
     const user = await client.users.fetch(to.toString());
     if (!user) {
-      console.warn(`User ${to} doesn't exist! (util.ts:407)`);
+      console.warn(`User ${to} doesn't exist!`);
+      console.trace();
       continue;
     }
 
@@ -448,15 +456,19 @@ export async function endPhase2({
   server: serverID,
   trade: tradeName,
 }: EventOf) {
-  const server = await getServer(serverID);
-  if (!server) {
-    console.warn(`Server ${serverID} doesn't exist!`);
-    return;
-  }
-
   const trade = await fetchTrade(tradeName);
   if (!trade) {
     console.warn(`Trade ${tradeName} doesn't exist!`);
+    return;
+  }
+  if (!(await setStage(tradeName, "done"))) {
+    console.warn(`Unable to update trade ${tradeName} to phase 2!`);
+    return;
+  }
+
+  const server = await getServer(serverID);
+  if (!server) {
+    console.warn(`Server ${serverID} doesn't exist!`);
     return;
   }
 
@@ -550,7 +562,8 @@ Hope to see you again in another trade!`;
   for (const user of trade.users) {
     const u = await client.users.fetch(user.toString());
     if (!u) {
-      console.warn(`User ${user} doesn't exist! (util.ts:553)`);
+      console.warn(`User ${user} doesn't exist!`);
+      console.trace();
       continue;
     }
 
@@ -576,7 +589,8 @@ export async function remindPhase1({ trade: tradeName }: EventOf) {
 
     const user = await client.users.fetch(from.toString());
     if (!user) {
-      console.warn(`User ${from} doesn't exist! (util.ts:579)`);
+      console.warn(`User ${from} doesn't exist!`);
+      console.trace();
       continue;
     }
 
@@ -616,7 +630,8 @@ export async function remindPhase2({
 
     const user = await client.users.fetch(to.toString());
     if (!user) {
-      console.warn(`User ${to} doesn't exist! (util.ts:613)`);
+      console.warn(`User ${to} doesn't exist!`);
+      console.trace();
       continue;
     }
 

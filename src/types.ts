@@ -47,6 +47,7 @@ export type Trade = {
   }[];
   start: Date;
   end: Date;
+  phase: string; // phase1, phase2, or done
 };
 
 /**
