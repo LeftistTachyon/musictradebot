@@ -12,9 +12,9 @@ const stop: DiscordCommand = {
     .setName("stop")
     .setDescription("Kill the bot (Owner-only)")
     .setContexts(
-      InteractionContextType.BotDM |
-        InteractionContextType.Guild |
-        InteractionContextType.PrivateChannel
+      InteractionContextType.BotDM,
+      InteractionContextType.Guild,
+      InteractionContextType.PrivateChannel
     )
     .setDefaultMemberPermissions(PermissionsBitField.Flags.Administrator),
 

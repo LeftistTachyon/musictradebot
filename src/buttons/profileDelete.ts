@@ -1,5 +1,10 @@
 import { Long } from "bson";
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
+import {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  MessageFlags,
+} from "discord.js";
 import { deleteUser } from "../mongo";
 import type { ButtonHandler } from "../types";
 

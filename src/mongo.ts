@@ -1,13 +1,11 @@
 import { Long } from "bson";
-import { Collection, MongoClient, ServerApiVersion } from "mongodb";
-import type { MusicEvent, Server, ServerUser, Trade, User } from "./types";
+import { Collection, MongoClient } from "mongodb";
+import type { Server, ServerUser, Trade, User } from "./types";
 
 // ! ============== INITIALIZATION ROUTINE ============== !
-const client = new MongoClient(process.env.MONGO_URI || "missing-mongo-uri", {
-  //   useNewUrlParser: true,
-  //   useUnifiedTopology: true,
-  serverApi: ServerApiVersion.v1,
-});
+const mongoURI = process.env.MONGO_URI || "missing-mongo-uri";
+// console.log(`Connecting to URI ${mongoURI}...`);
+const client = new MongoClient(mongoURI);
 
 let servers: Collection<Server>,
   users: Collection<User>,

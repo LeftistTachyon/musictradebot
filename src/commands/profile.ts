@@ -36,9 +36,9 @@ const profile: DiscordCommand = {
       builder.setName("delete").setDescription("Deletes your music profile")
     )
     .setContexts(
-      InteractionContextType.Guild |
-        InteractionContextType.BotDM |
-        InteractionContextType.PrivateChannel
+      InteractionContextType.Guild,
+      InteractionContextType.BotDM,
+      InteractionContextType.PrivateChannel
     ),
 
   async execute(interaction) {
