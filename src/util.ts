@@ -238,8 +238,9 @@ export async function optIn(
   const user = await fetchUser(userID);
   if (!user) {
     await interaction.editReply(
-      "You don't have an account yet! Register first before trying to opt into music trades."
+      "You don't have an account yet! Register first with `/profile create` before trying to opt into music trades."
     );
+    return;
   }
 
   // console.log("attempting to opt in...");
@@ -317,7 +318,7 @@ export async function createProfileEmbed(user: User, nickname = user.name) {
   if (user.likedGenres) {
     output.addFields({
       name: "Liked Genres",
-      value: "`" + user.likedGenres.replace("`", "") + "`",
+      value: "```" + user.likedGenres.replace("`", "") + "```",
     });
     populated = true;
   }
@@ -325,7 +326,7 @@ export async function createProfileEmbed(user: User, nickname = user.name) {
   if (user.dislikedGenres) {
     output.addFields({
       name: "Disliked Genres",
-      value: "`" + user.dislikedGenres.replace("`", "") + "`",
+      value: "```" + user.dislikedGenres.replace("`", "") + "```",
     });
     populated = true;
   }
@@ -333,7 +334,7 @@ export async function createProfileEmbed(user: User, nickname = user.name) {
   if (user.artists) {
     output.addFields({
       name: "Artists Most Listened To",
-      value: "`" + user.artists.replace("`", "") + "`",
+      value: "```" + user.artists.replace("`", "") + "```",
     });
     populated = true;
   }
@@ -341,7 +342,7 @@ export async function createProfileEmbed(user: User, nickname = user.name) {
   if (user.favoriteSongs) {
     output.addFields({
       name: "Favorite Songs",
-      value: "`" + user.favoriteSongs.replace("`", "") + "`",
+      value: "```" + user.favoriteSongs.replace("`", "") + "```",
     });
     populated = true;
   }
@@ -349,7 +350,7 @@ export async function createProfileEmbed(user: User, nickname = user.name) {
   if (user.newArtists) {
     output.addFields({
       name: "Newly Discovered Artists",
-      value: "`" + user.newArtists.replace("`", "") + "`",
+      value: "```" + user.newArtists.replace("`", "") + "```",
     });
     populated = true;
   }
@@ -357,7 +358,7 @@ export async function createProfileEmbed(user: User, nickname = user.name) {
   if (user.favoriteSounds) {
     output.addFields({
       name: "Favourite Sounds",
-      value: "`" + user.favoriteSounds.replace("`", "") + "`",
+      value: "```" + user.favoriteSounds.replace("`", "") + "```",
     });
     populated = true;
   }
@@ -365,7 +366,7 @@ export async function createProfileEmbed(user: User, nickname = user.name) {
   if (user.instruments) {
     output.addFields({
       name: "Instruments",
-      value: "`" + user.instruments.replace("`", "") + "`",
+      value: "```" + user.instruments.replace("`", "") + "```",
     });
     populated = true;
   }

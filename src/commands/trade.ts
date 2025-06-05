@@ -39,7 +39,7 @@ import { setTimeout } from "timers/promises";
 const trade: DiscordCommand = {
   data: new SlashCommandBuilder()
     .setName("trade")
-    .setDescription("Create, extend, or stop song trades (Admin-only)")
+    .setDescription("Create or stop song trades (Admin-only)")
     .addSubcommand((builder) =>
       builder
         .setName("start")
@@ -63,27 +63,6 @@ const trade: DiscordCommand = {
             .setName("name")
             .setDescription("The name of the song trade to stop")
             .setAutocomplete(true)
-            .setRequired(true)
-        )
-    )
-    .addSubcommand((builder) =>
-      builder
-        .setName("extend")
-        .setDescription("Extend the deadline for a song trade")
-        .addStringOption((option) =>
-          option
-            .setName("name")
-            .setDescription(
-              "The name of the song trade to extend the deadline of"
-            )
-            .setAutocomplete(true)
-            .setRequired(true)
-        )
-        .addIntegerOption((option) =>
-          option
-            .setName("days")
-            .setDescription("The number of days to extend the deadline by")
-            .setMinValue(1)
             .setRequired(true)
         )
     )
@@ -304,36 +283,6 @@ Make sure you send over the songs by ${timestamp}!
     { signal: controller.signal }
   ); // reminder for phase 2
   tradeStops[trade.name] = controller;
-
-  // const createEventsResult = await createEvents([
-  //   {
-  //     of: { server: trade.server, trade: trade.name, type: "phase1" },
-  //     baseline: new Date(),
-  //     time: epJS1,
-  //     data: "phase1",
-  //   },
-  //   {
-  //     of: { server: trade.server, trade: trade.name, type: "reminder" },
-  //     baseline: epJS1,
-  //     time: endOfPhase1.minus({ minutes: server.reminderPeriod }).toJSDate(),
-  //     data: "phase1",
-  //   },
-  //   {
-  //     of: { server: trade.server, trade: trade.name, type: "phase2" },
-  //     baseline: epJS1,
-  //     time: epJS2,
-  //     data: "phase2",
-  //   },
-  //   {
-  //     of: { server: trade.server, trade: trade.name, type: "reminder" },
-  //     baseline: epJS2,
-  //     time: endOfPhase2.minus({ minutes: server.reminderPeriod }).toJSDate(),
-  //     data: "phase2",
-  //   },
-  // ]);
-  // if (!createEventsResult) {
-  //   console.warn("Could not create events for trade", trade.name);
-  // }
 }
 
 /**
@@ -355,19 +304,6 @@ async function tradeStop(
     await interaction.editReply("Sorry, that music trade has doesn't exist.");
     return;
   }
-
-  // const deleted = await deleteEvents({
-  //   trade: name,
-  //   server,
-  // });
-
-  // if (deleted === 0) {
-  //   // not successful
-  //   await interaction.editReply(
-  //     "Sorry, that music trade has already ended or you don't have access to it."
-  //   );
-  //   return;
-  // }
 
   const controller = tradeStops[name];
   if (!controller) {

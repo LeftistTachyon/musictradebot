@@ -182,34 +182,7 @@ async function run() {
         .diffNow()
         .toMillis()} ms`
     );
-
-    // setTimeout(checkEvents, 1_000);
   });
-
-  // async function checkEvents() {
-  //   const currEvents = await getAndDeleteCurrEvents();
-  //   if (!currEvents?.length) return;
-
-  //   for (const event of currEvents) {
-  //     switch (event.of.type) {
-  //       case "phase1":
-  //         endPhase1(event.of);
-  //         break;
-  //       case "phase2":
-  //         endPhase2(event.of);
-  //         break;
-  //       case "reminder":
-  //         if (event.data === "phase1") {
-  //           remindPhase1(event);
-  //         } else {
-  //           // phase2
-  //           remindPhase2(event);
-  //         }
-  //         break;
-  //     }
-  //   }
-  // }
-  // interval = setInterval(checkEvents, 30_000);
 
   client.on(Events.Invalidated, async () => {});
 
