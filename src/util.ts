@@ -376,21 +376,24 @@ export async function createProfileEmbed(user: User, nickname = user.name) {
  *
  * @param event the event that triggered this function call
  */
-export async function endPhase1({ of }: MusicEvent) {
-  const trade = await fetchTrade(of.trade);
+export async function endPhase1({
+  server: serverID,
+  trade: tradeName,
+}: EventOf) {
+  const trade = await fetchTrade(tradeName);
   if (!trade) {
-    console.warn(`Trade ${of.trade} doesn't exist!`);
+    console.warn(`Trade ${tradeName} doesn't exist!`);
     return;
   }
-  const server = await getServer(of.server);
+  const server = await getServer(serverID);
   if (!server) {
-    console.warn(`Server ${of.server} doesn't exist!`);
+    console.warn(`Server ${serverID} doesn't exist!`);
     return;
   }
 
   for (const { from, to, song } of trade.trades) {
     const fromName =
-      (await fetchServerUser(of.server, from))?.nickname ??
+      (await fetchServerUser(serverID, from))?.nickname ??
       (await fetchUser(from))?.name;
     if (!fromName) {
       console.warn(`User ${from} has no profile!`);
@@ -560,10 +563,10 @@ Hope to see you again in another trade!`;
  *
  * @param event the event that triggered this function call
  */
-export async function remindPhase1({ of }: MusicEvent) {
-  const trade = await fetchTrade(of.trade);
+export async function remindPhase1({ trade: tradeName }: EventOf) {
+  const trade = await fetchTrade(tradeName);
   if (!trade) {
-    console.warn(`Trade ${of.trade} not found!`);
+    console.warn(`Trade ${tradeName} not found!`);
     return;
   }
 
@@ -588,20 +591,26 @@ export async function remindPhase1({ of }: MusicEvent) {
  *
  * @param event the event that triggered this function call
  */
-export async function remindPhase2(event: MusicEvent) {
-  const trade = await fetchTrade(event.of.trade);
+export async function remindPhase2({
+  trade: tradeName,
+  server: serverID,
+}: EventOf) {
+  const trade = await fetchTrade(tradeName);
   if (!trade) {
-    console.warn(`Trade ${event.of.trade} not found!`);
+    console.warn(`Trade ${tradeName} not found!`);
     return;
   }
 
-  const server = await getServer(event.of.server);
+  const server = await getServer(serverID);
   if (!server) {
-    console.warn(`Server ${event.of.server} not found!`);
+    console.warn(`Server ${serverID} not found!`);
     return;
   }
 
-  const timestamp = generateTimestamp(DateTime.fromJSDate(event.baseline), "R");
+  const timestamp = generateTimestamp(
+    DateTime.fromJSDate(trade.end).plus({ minutes: server.commentPeriod }),
+    "R"
+  );
   for (const { song, response, to } of trade.trades) {
     if (response || !song) continue;
 

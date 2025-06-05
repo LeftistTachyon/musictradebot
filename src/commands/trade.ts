@@ -15,7 +15,6 @@ import { client } from "..";
 import { getActionRow } from "../buttons/sendSong";
 import {
   addTrade,
-  deleteEvents,
   fetchServerUser,
   fetchTrade,
   fetchTradeNames,
@@ -26,12 +25,16 @@ import type { DiscordCommand, InServer, Trade } from "../types";
 import {
   createProfileEmbed,
   createTrade,
+  endPhase1,
   endPhase2,
   generateTimestamp,
   generateTradeName,
   isAdmin,
   isInServer,
+  remindPhase1,
+  remindPhase2,
 } from "../util";
+import { setTimeout } from "timers/promises";
 
 const trade: DiscordCommand = {
   data: new SlashCommandBuilder()
@@ -137,6 +140,8 @@ const trade: DiscordCommand = {
 
 export default trade;
 
+const tradeStops: Record<string, AbortController> = {};
+
 /**
  * Handles the "trade start" subcommand
  *
@@ -190,14 +195,16 @@ async function tradeStart(
     // ensure user exists before DM
     const user = await client.users.fetch(from.toString());
     if (!user) {
-      console.warn(`User ${from} doesn't exist! (trade.ts:195)`);
+      console.warn(`User ${from} doesn't exist!`);
+      console.trace();
       continue;
     }
 
     // ensure opposing user exists
     const toProfile = await fetchUser(to);
     if (!toProfile) {
-      console.warn(`User ${to} doesn't exist! (trade.ts:202)`);
+      console.warn(`User ${to} doesn't exist!`);
+      console.trace();
       continue;
     }
     const toServerProfile = await fetchServerUser(trade.server, to);
@@ -231,6 +238,8 @@ Unfortunately, it seems that ${nickname} hasn't set up their music profile, so t
           }
     );
   }
+
+  // send server-wide announcement
   if (server.announcementsChannel) {
     const channel = await client.channels.fetch(
       server.announcementsChannel.toString()
@@ -255,39 +264,76 @@ Make sure you send over the songs by ${timestamp}!
       );
   }
 
-  const endOfPhase1 = DateTime.now().plus({ days: deadline }),
-    endOfPhase2 = endOfPhase1.plus({ minutes: server.commentPeriod });
-  const epJS1 = endOfPhase1.toJSDate(),
-    epJS2 = endOfPhase2.toJSDate();
-  const createEventsResult = await createEvents([
-    {
-      of: { server: trade.server, trade: trade.name, type: "phase1" },
-      baseline: new Date(),
-      time: epJS1,
-      data: "phase1",
-    },
-    {
-      of: { server: trade.server, trade: trade.name, type: "reminder" },
-      baseline: epJS1,
-      time: endOfPhase1.minus({ minutes: server.reminderPeriod }).toJSDate(),
-      data: "phase1",
-    },
-    {
-      of: { server: trade.server, trade: trade.name, type: "phase2" },
-      baseline: epJS1,
-      time: epJS2,
-      data: "phase2",
-    },
-    {
-      of: { server: trade.server, trade: trade.name, type: "reminder" },
-      baseline: epJS2,
-      time: endOfPhase2.minus({ minutes: server.reminderPeriod }).toJSDate(),
-      data: "phase2",
-    },
-  ]);
-  if (!createEventsResult) {
-    console.warn("Could not create events for trade", trade.name);
-  }
+  // calculate when each event should occur
+  const endOfPhase1 = deadline * 86_400_000,
+    endOfPhase2 = endOfPhase1 + server.commentPeriod * 60_000,
+    reminderPeriod = server.reminderPeriod * 60_000;
+
+  // set timeouts
+  const controller = new AbortController();
+  setTimeout(
+    endOfPhase1,
+    () =>
+      endPhase1({ server: trade.server, trade: trade.name, type: "phase1" }),
+    { signal: controller.signal }
+  ); // ending phase 1
+  setTimeout(
+    endOfPhase1 - reminderPeriod,
+    () =>
+      remindPhase1({
+        server: trade.server,
+        trade: trade.name,
+        type: "reminder",
+      }),
+    { signal: controller.signal }
+  ); // reminder for phase 1
+  setTimeout(
+    endOfPhase2,
+    () =>
+      endPhase2({ server: trade.server, trade: trade.name, type: "phase2" }),
+    { signal: controller.signal }
+  ); // ending phase 2
+  setTimeout(
+    endOfPhase2 - reminderPeriod,
+    () =>
+      remindPhase2({
+        server: trade.server,
+        trade: trade.name,
+        type: "reminder",
+      }),
+    { signal: controller.signal }
+  ); // reminder for phase 2
+  tradeStops[trade.name] = controller;
+
+  // const createEventsResult = await createEvents([
+  //   {
+  //     of: { server: trade.server, trade: trade.name, type: "phase1" },
+  //     baseline: new Date(),
+  //     time: epJS1,
+  //     data: "phase1",
+  //   },
+  //   {
+  //     of: { server: trade.server, trade: trade.name, type: "reminder" },
+  //     baseline: epJS1,
+  //     time: endOfPhase1.minus({ minutes: server.reminderPeriod }).toJSDate(),
+  //     data: "phase1",
+  //   },
+  //   {
+  //     of: { server: trade.server, trade: trade.name, type: "phase2" },
+  //     baseline: epJS1,
+  //     time: epJS2,
+  //     data: "phase2",
+  //   },
+  //   {
+  //     of: { server: trade.server, trade: trade.name, type: "reminder" },
+  //     baseline: epJS2,
+  //     time: endOfPhase2.minus({ minutes: server.reminderPeriod }).toJSDate(),
+  //     data: "phase2",
+  //   },
+  // ]);
+  // if (!createEventsResult) {
+  //   console.warn("Could not create events for trade", trade.name);
+  // }
 }
 
 /**
@@ -310,18 +356,26 @@ async function tradeStop(
     return;
   }
 
-  const deleted = await deleteEvents({
-    trade: name,
-    server,
-  });
+  // const deleted = await deleteEvents({
+  //   trade: name,
+  //   server,
+  // });
 
-  if (deleted === 0) {
-    // not successful
+  // if (deleted === 0) {
+  //   // not successful
+  //   await interaction.editReply(
+  //     "Sorry, that music trade has already ended or you don't have access to it."
+  //   );
+  //   return;
+  // }
+
+  const controller = tradeStops[name];
+  if (!controller) {
     await interaction.editReply(
       "Sorry, that music trade has already ended or you don't have access to it."
     );
-    return;
   }
+  controller.abort("Trade stopped");
 
   for (const user of trade.users) {
     const u = await client.users.fetch(user.toString());
