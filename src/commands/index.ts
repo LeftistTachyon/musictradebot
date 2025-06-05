@@ -2,8 +2,7 @@ import { Collection } from "discord.js";
 import type { DiscordCommand } from "../types";
 import aboutserver from "./aboutserver";
 import exclude from "./exclude";
-import optin from "./optin";
-import optout from "./optout";
+import opt from "./opt";
 import ping from "./ping";
 import profile from "./profile";
 import sendmessage from "./sendmessage";
@@ -19,8 +18,7 @@ import trade from "./trade";
 export const commandList: DiscordCommand[] = [
   aboutserver,
   exclude,
-  optin,
-  optout,
+  opt,
   ping,
   profile,
   sendmessage,
