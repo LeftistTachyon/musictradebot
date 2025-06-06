@@ -45,7 +45,7 @@ const trade: DiscordCommand = {
       builder
         .setName("start")
         .setDescription("Start a song trade")
-        .addNumberOption((option) =>
+        .addIntegerOption((option) =>
           option
             .setName("deadline")
             .setDescription(
@@ -148,7 +148,7 @@ async function tradeStart(
     return;
   }
 
-  const deadline = interaction.options.getNumber("deadline", true);
+  const deadline = interaction.options.getInteger("deadline", true);
 
   // create and add trade object
   const trade: Trade = createTrade(server, deadline);
