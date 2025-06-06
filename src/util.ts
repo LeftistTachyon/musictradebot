@@ -24,11 +24,10 @@ import {
   setOpt,
   setStage,
 } from "./mongo";
-import {
+import type {
   EventOf,
   EventSelector,
   InServer,
-  MusicEvent,
   Server,
   Trade,
   User,
@@ -92,8 +91,10 @@ export function createTrade(server: Server, duration: number): Trade {
   trades.push({ from: fromUnchosen[0], to: toUnchosen[0] });
 
   // calculate start and end times
-  const start = DateTime.now().startOf("day"),
-    end = start.plus({ days: duration }).endOf("day");
+  // const start = DateTime.now().startOf("day"),
+  //   end = start.plus({ days: duration }).endOf("day");
+  const start = DateTime.now(),
+    end = start.plus({ days: duration });
 
   return {
     name: generateTradeName(),
@@ -383,6 +384,8 @@ export async function endPhase1({
   server: serverID,
   trade: tradeName,
 }: EventOf) {
+  console.log("Attempting to end phase 1 of", tradeName);
+
   const trade = await fetchTrade(tradeName);
   if (!trade) {
     console.warn(`Trade ${tradeName} doesn't exist!`);
@@ -457,6 +460,8 @@ export async function endPhase2({
   server: serverID,
   trade: tradeName,
 }: EventOf) {
+  console.log("Attempting to end phase 2 of", tradeName);
+
   const trade = await fetchTrade(tradeName);
   if (!trade) {
     console.warn(`Trade ${tradeName} doesn't exist!`);
@@ -499,7 +504,8 @@ export async function endPhase2({
       const edges = trade.trades.slice();
 
       await announcementsChannel.send({
-        content: `**End of trade ${tradeName}**
+        content: `_End of trade ${tradeName}_
+
 Hello, ${mention}! Thank you for participating in another round of song trades. We'll be looking forward to doing this again, soon!
 Below are all the song trades that happened this time around:`,
         embeds: edges
@@ -578,6 +584,8 @@ Hope to see you again in another trade!`;
  * @param event the event that triggered this function call
  */
 export async function remindPhase1({ trade: tradeName }: EventOf) {
+  console.log("Attempting to remind for phase 1 of", tradeName);
+
   const trade = await fetchTrade(tradeName);
   if (!trade) {
     console.warn(`Trade ${tradeName} not found!`);
@@ -610,6 +618,8 @@ export async function remindPhase2({
   trade: tradeName,
   server: serverID,
 }: EventOf) {
+  console.log("Attempting to remind for phase 2 of", tradeName);
+
   const trade = await fetchTrade(tradeName);
   if (!trade) {
     console.warn(`Trade ${tradeName} not found!`);
@@ -756,22 +766,4 @@ ${toName} did not leave a rating.
 `
     );
   }
-}
-
-/**
- * Transforms EventOf objects into selectors
- *
- * @param selector the object to convert
- * @returns the selector
- */
-export function fromSelector(
-  selector: Partial<EventOf>
-): Partial<EventSelector> {
-  const output: Partial<EventSelector> = {};
-
-  if (selector.server) output["of.server"] = selector.server;
-  if (selector.trade) output["of.trade"] = selector.trade;
-  if (selector.type) output["of.type"] = selector.type;
-
-  return output;
 }

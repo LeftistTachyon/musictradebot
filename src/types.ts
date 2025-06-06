@@ -82,7 +82,7 @@ export type MusicEvent = {
 export type EventOf = {
   server: Long; // the server where the trade is taking place
   trade: string; // name of the associated trade
-  type: "reminder" | "phase1" | "phase2"; // what kind of event this is
+  // type: "reminder" | "phase1" | "phase2"; // what kind of event this is
 };
 
 /**

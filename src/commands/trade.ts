@@ -11,6 +11,7 @@ import {
 import { filter } from "fuzzaldrin-plus";
 import { DateTime } from "luxon";
 import { Long } from "mongodb";
+import { setTimeout } from "timers/promises";
 import { client } from "..";
 import { getActionRow } from "../buttons/sendSong";
 import {
@@ -20,6 +21,7 @@ import {
   fetchTradeNames,
   fetchUser,
   getServer,
+  setStage,
 } from "../mongo";
 import type { DiscordCommand, InServer, Trade } from "../types";
 import {
@@ -34,7 +36,6 @@ import {
   remindPhase1,
   remindPhase2,
 } from "../util";
-import { setTimeout } from "timers/promises";
 
 const trade: DiscordCommand = {
   data: new SlashCommandBuilder()
@@ -44,7 +45,7 @@ const trade: DiscordCommand = {
       builder
         .setName("start")
         .setDescription("Start a song trade")
-        .addIntegerOption((option) =>
+        .addNumberOption((option) =>
           option
             .setName("deadline")
             .setDescription(
@@ -147,7 +148,7 @@ async function tradeStart(
     return;
   }
 
-  const deadline = interaction.options.getInteger("deadline", true);
+  const deadline = interaction.options.getNumber("deadline", true);
 
   // create and add trade object
   const trade: Trade = createTrade(server, deadline);
@@ -244,45 +245,35 @@ Make sure you send over the songs by ${timestamp}!
   }
 
   // calculate when each event should occur
-  const endOfPhase1 = deadline * 86_400_000,
+  const endOfPhase1 = DateTime.fromJSDate(trade.end)
+      .diff(DateTime.now())
+      .toMillis(),
     endOfPhase2 = endOfPhase1 + server.commentPeriod * 60_000,
     reminderPeriod = server.reminderPeriod * 60_000;
+  // console.log({ endOfPhase1, endOfPhase2, reminderPeriod });
 
   // set timeouts
   const controller = new AbortController();
-  setTimeout(
-    endOfPhase1,
-    () =>
-      endPhase1({ server: trade.server, trade: trade.name, type: "phase1" }),
-    { signal: controller.signal }
-  ); // ending phase 1
-  setTimeout(
-    endOfPhase1 - reminderPeriod,
-    () =>
-      remindPhase1({
-        server: trade.server,
-        trade: trade.name,
-        type: "reminder",
-      }),
-    { signal: controller.signal }
-  ); // reminder for phase 1
-  setTimeout(
-    endOfPhase2,
-    () =>
-      endPhase2({ server: trade.server, trade: trade.name, type: "phase2" }),
-    { signal: controller.signal }
-  ); // ending phase 2
-  setTimeout(
-    endOfPhase2 - reminderPeriod,
-    () =>
-      remindPhase2({
-        server: trade.server,
-        trade: trade.name,
-        type: "reminder",
-      }),
-    { signal: controller.signal }
-  ); // reminder for phase 2
+  const tradeParams = { server: trade.server, trade: trade.name };
+  setTimeout(endOfPhase1, tradeParams, { signal: controller.signal })
+    .then(endPhase1)
+    .catch(console.warn); // ending phase 1
+  setTimeout(endOfPhase1 - reminderPeriod, tradeParams, {
+    signal: controller.signal,
+  })
+    .then(remindPhase1)
+    .catch(console.warn); // reminder for phase 1
+  setTimeout(endOfPhase2, tradeParams, { signal: controller.signal })
+    .then(endPhase2)
+    .catch(console.warn); // ending phase 2
+  setTimeout(endOfPhase2 - reminderPeriod, tradeParams, {
+    signal: controller.signal,
+  })
+    .then(remindPhase2)
+    .catch(console.warn); // reminder for phase 2
+
   tradeStops[trade.name] = controller;
+  console.log(tradeStops);
 }
 
 /**
@@ -301,7 +292,7 @@ async function tradeStop(
   const trade = await fetchTrade(name);
   if (!trade) {
     // not successful
-    await interaction.editReply("Sorry, that music trade has doesn't exist.");
+    await interaction.editReply("Sorry, that music trade doesn't exist.");
     return;
   }
 
@@ -310,8 +301,21 @@ async function tradeStop(
     await interaction.editReply(
       "Sorry, that music trade has already ended or you don't have access to it."
     );
+    return;
   }
-  controller.abort("Trade stopped");
+  try {
+    controller.abort("Trade stopped");
+  } catch (e) {
+    // const error = e as Error;
+    // console.trace(error?.stack);
+  }
+
+  if (!(await setStage(name, "done"))) {
+    await interaction.editReply(
+      "Sorry, that music trade has ended already or you don't have access to it."
+    );
+    return;
+  }
 
   for (const user of trade.users) {
     const u = await client.users.fetch(user.toString());
@@ -328,5 +332,5 @@ async function tradeStop(
 
   await interaction.editReply(`Successfully stopped trade \`${name}\`.`);
 
-  await endPhase2({ server, trade: name, type: "phase2" });
+  await endPhase2({ server, trade: name });
 }
