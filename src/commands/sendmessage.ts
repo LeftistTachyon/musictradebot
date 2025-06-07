@@ -51,7 +51,9 @@ const sendmessage: DiscordCommand = {
           ChannelType.AnnouncementThread,
           ChannelType.GuildAnnouncement,
           ChannelType.GuildText,
-          ChannelType.PublicThread
+          ChannelType.GuildForum,
+          ChannelType.PublicThread,
+          ChannelType.PrivateThread
         )
     )
     .setContexts(InteractionContextType.Guild)
@@ -67,6 +69,9 @@ const sendmessage: DiscordCommand = {
         content: "Invalid channel! Try a text channel that I can access.",
         flags: MessageFlags.Ephemeral,
       });
+      console.warn(
+        `Tried to send a message into type ${channel?.type} channel`
+      );
       return;
     }
 
