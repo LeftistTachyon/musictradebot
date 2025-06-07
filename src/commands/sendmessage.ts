@@ -22,7 +22,9 @@ function validateChannel(channel: {
       ChannelType.AnnouncementThread,
       ChannelType.GuildAnnouncement,
       ChannelType.GuildText,
+      ChannelType.GuildForum,
       ChannelType.PublicThread,
+      ChannelType.PrivateThread,
     ]
   );
 }
