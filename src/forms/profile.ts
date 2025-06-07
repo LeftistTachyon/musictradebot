@@ -97,7 +97,7 @@ export function generateProfileForm1(user: User | null) {
     .setCustomId("bio")
     .setLabel("Musical Biography")
     .setPlaceholder(
-      "Write about who you are and how you got into music. Let others get to know you better! (Markdown supported)"
+      "Write about who you are and how you got into music. Let others get to know you better! (MD works)"
     )
     .setMaxLength(1022)
     .setRequired(false)
