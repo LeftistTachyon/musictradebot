@@ -16,17 +16,14 @@ import { isAdmin, isInServer } from "../util";
 function validateChannel(channel: {
   type: ChannelType;
 }): channel is TextChannel {
-  return (
-    channel.type in
-    [
-      ChannelType.AnnouncementThread,
-      ChannelType.GuildAnnouncement,
-      ChannelType.GuildText,
-      ChannelType.GuildForum,
-      ChannelType.PublicThread,
-      ChannelType.PrivateThread,
-    ]
-  );
+  return [
+    ChannelType.AnnouncementThread,
+    ChannelType.GuildAnnouncement,
+    ChannelType.GuildText,
+    ChannelType.GuildForum,
+    ChannelType.PublicThread,
+    ChannelType.PrivateThread,
+  ].includes(channel.type);
 }
 
 const sendmessage: DiscordCommand = {
