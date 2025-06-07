@@ -3,76 +3,59 @@ import { kill } from ".";
 import { commandList } from "./commands";
 
 // deploy le commmands
-// please don't hurt me, I couldn't think of a better way
-if (Boolean(process.argv[4])) {
-  // global commands deploy case
-  (async () => {
-    // validate environment
-    if (!process.env.DISCORD_TOKEN) throw new Error("Discord token missing");
-    if (!process.env.CLIENT_ID) throw new Error("Client ID missing");
 
-    // gather list of commands
-    const commands = commandList.map((command) => command.data.toJSON());
+// validate environment
+if (!process.env.DISCORD_TOKEN) throw new Error("Discord token missing");
+if (!process.env.CLIENT_ID) throw new Error("Client ID missing");
+if (Boolean(process.argv[4]) && !process.env.GUILD_ID)
+  throw new Error("Guild ID missing for guild deploy");
 
-    // create REST client
-    const rest = new REST().setToken(process.env.DISCORD_TOKEN);
-    try {
-      console.log(
-        `Started refreshing ${commands.length} application (/) commands.`
-      );
+// gather list of commands
+const commands = commandList.map((command) => command.data.toJSON());
 
-      const data = await rest.put(
-        Routes.applicationCommands(process.env.CLIENT_ID),
-        { body: commands }
-      );
+// create REST client
+const rest = new REST().setToken(process.env.DISCORD_TOKEN);
 
-      console.log(
-        `Successfully reloaded ${
-          (data as { length: number }).length
-        } application (/) commands.`
-      );
-    } catch (error) {
-      console.dir(error);
-    } finally {
-      kill();
-    }
-  })();
-} else {
-  // guild commands deploy case
-  (async () => {
-    // validate environment
-    if (!process.env.DISCORD_TOKEN) throw new Error("Discord token missing");
-    if (!process.env.CLIENT_ID) throw new Error("Client ID missing");
-    if (!process.env.GUILD_ID)
-      throw new Error("Guild ID missing for guild deploy");
+// guild commands deploy case
+(async () => {
+  try {
+    console.log(
+      `Started refreshing ${commands.length} application (/) commands.`
+    );
 
-    // gather list of commands
-    const commands = commandList.map((command) => command.data.toJSON());
+    await rest.put(
+      Boolean(process.argv[4])
+        ? Routes.applicationCommands(
+            process.env.CLIENT_ID ?? "missing-client-id"
+          )
+        : Routes.applicationGuildCommands(
+            process.env.CLIENT_ID ?? "missing-client-id",
+            process.env.GUILD_ID ?? "missing-guild-id"
+          ),
+      { body: [] }
+    );
 
-    // create REST client
-    const rest = new REST().setToken(process.env.DISCORD_TOKEN);
-    try {
-      console.log(
-        `Started refreshing ${commands.length} application (/) commands.`
-      );
+    // The put method is used to fully refresh all commands in the guild with the current set
+    const data = (await rest.put(
+      Boolean(process.argv[4])
+        ? Routes.applicationCommands(
+            process.env.CLIENT_ID ?? "missing-client-id"
+          )
+        : Routes.applicationGuildCommands(
+            process.env.CLIENT_ID ?? "missing-client-id",
+            process.env.GUILD_ID ?? "missing-guild-id"
+          ),
+      { body: commands }
+    )) as { length: number };
 
-      // The put method is used to fully refresh all commands in the guild with the current set
-      const data = (await rest.put(
-        Routes.applicationGuildCommands(
-          process.env.CLIENT_ID,
-          process.env.GUILD_ID
-        ),
-        { body: commands }
-      )) as { length: number };
-
-      console.log(
-        `Successfully reloaded ${data.length} application (/) commands.`
-      );
-    } catch (error) {
-      // And of course, make sure you catch and log any errors!
-      console.error(error);
-    } finally {
-      kill();
-    }
-  })();
-}
+    console.log(
+      `Successfully reloaded ${data.length} application (/) commands.`
+    );
+    // console.log(data);
+  } catch (error) {
+    // And of course, make sure you catch and log any errors!
+    console.error(error);
+  } finally {
+    await kill();
+  }
+})();
