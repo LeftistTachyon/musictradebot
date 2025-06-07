@@ -91,10 +91,10 @@ export function createTrade(server: Server, duration: number): Trade {
   trades.push({ from: fromUnchosen[0], to: toUnchosen[0] });
 
   // calculate start and end times
-  // const start = DateTime.now().startOf("day"),
-  //   end = start.plus({ days: duration }).endOf("day");
-  const start = DateTime.now(),
-    end = start.plus({ days: duration });
+  const start = DateTime.now().startOf("day"),
+    end = start.plus({ days: duration }).endOf("day");
+  // const start = DateTime.now(),
+  //   end = start.plus({ days: duration });
 
   return {
     name: generateTradeName(),
