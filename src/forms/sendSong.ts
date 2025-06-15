@@ -6,7 +6,7 @@ import {
 } from "discord.js";
 import { Long } from "mongodb";
 import { getStage, setTradeSong } from "../mongo";
-import type { FormHandler } from "../types";
+import type { FormHandler, Trade } from "../types";
 
 export const sendSong: FormHandler = {
   name: "trade-sendSong",
@@ -37,13 +37,16 @@ export const sendSong: FormHandler = {
 
     await interaction.editReply(
       success
-        ? "Successfully submitted your song!\nWait for the end of the trading period to recieve a song. See you then!"
+        ? `Successfully submitted your song! (${song})\nWait for the end of the trading period to recieve a song. See you then!`
         : "Something went horribly wrong! Please let the server owner know that you can't send in your song!"
     );
   },
 };
 
-export function getSongForm(tradeName: string) {
+export function getSongForm(
+  tradeName: string,
+  edge: Trade["trades"][0] | undefined
+) {
   return new ModalBuilder()
     .setTitle("Submit Song Trade")
     .setCustomId("trade-sendSong " + tradeName)
@@ -55,6 +58,7 @@ export function getSongForm(tradeName: string) {
           .setPlaceholder(
             "The name or link to the song you'd like to recommend"
           )
+          .setValue(edge?.song?.song ?? "")
           .setRequired(true)
           .setStyle(TextInputStyle.Short)
       ),
@@ -65,6 +69,7 @@ export function getSongForm(tradeName: string) {
           .setPlaceholder(
             "Have any comments you'd like to share with the song recipient? This is the place!"
           )
+          .setValue(edge?.song?.comments ?? "")
           .setMaxLength(1022)
           .setRequired(false)
           .setStyle(TextInputStyle.Paragraph)

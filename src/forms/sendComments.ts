@@ -2,7 +2,7 @@ import { ActionRowBuilder } from "@discordjs/builders";
 import { ModalBuilder, TextInputBuilder, TextInputStyle } from "discord.js";
 import { Long } from "mongodb";
 import { getStage, setTradeResponse } from "../mongo";
-import type { FormHandler } from "../types";
+import type { FormHandler, Trade } from "../types";
 
 export const sendComments: FormHandler = {
   name: "trade-sendComments",
@@ -39,7 +39,10 @@ export const sendComments: FormHandler = {
   },
 };
 
-export function getCommentForm(tradeName: string) {
+export function getCommentForm(
+  tradeName: string,
+  edge: Trade["trades"][0] | undefined
+) {
   return new ModalBuilder()
     .setTitle("Submit Song Response")
     .setCustomId("trade-sendComments " + tradeName)
@@ -49,6 +52,7 @@ export function getCommentForm(tradeName: string) {
           .setCustomId("rating")
           .setLabel("Song rating")
           .setPlaceholder("Your rating of the song they gave you out of 10")
+          .setValue(edge?.response?.rating ?? "")
           .setRequired(true)
           .setMinLength(1)
           .setMaxLength(15)
@@ -61,6 +65,7 @@ export function getCommentForm(tradeName: string) {
           .setPlaceholder(
             "Have any comments you'd like to share with the song sender? This is the place!"
           )
+          .setValue(edge?.response?.comments ?? "")
           .setMaxLength(1022)
           .setRequired(false)
           .setStyle(TextInputStyle.Paragraph)

@@ -1,6 +1,6 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 import { getCommentForm } from "../forms/sendComments";
-import { getStage } from "../mongo";
+import { fetchTrade, getStage } from "../mongo";
 import type { ButtonHandler } from "../types";
 
 export const sendComments: ButtonHandler = {
@@ -18,7 +18,18 @@ export const sendComments: ButtonHandler = {
       return;
     }
 
-    await interaction.showModal(getCommentForm(tradeName));
+    const trade = await fetchTrade(tradeName);
+    if (!trade) {
+      console.warn("This trade does not exist!");
+      console.trace();
+      return;
+    }
+
+    const prevSubmit = trade.trades.find(
+      (song) => interaction.user.id === song.to.toString()
+    );
+
+    await interaction.showModal(getCommentForm(tradeName, prevSubmit));
   },
 };
 

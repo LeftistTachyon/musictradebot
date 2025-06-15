@@ -12,13 +12,7 @@ import init, {
   updateServerName,
 } from "./mongo";
 import type { Server } from "./types";
-import {
-  endPhase1,
-  endPhase2,
-  getDefaultTimeframes,
-  remindPhase1,
-  remindPhase2,
-} from "./util";
+import { getDefaultTimeframes } from "./util";
 
 // startup time
 const programStart = DateTime.now();

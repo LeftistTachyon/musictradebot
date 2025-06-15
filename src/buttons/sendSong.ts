@@ -1,6 +1,6 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 import { getSongForm } from "../forms/sendSong";
-import { getStage } from "../mongo";
+import { fetchTrade, getStage } from "../mongo";
 import type { ButtonHandler } from "../types";
 
 export const sendSong: ButtonHandler = {
@@ -15,8 +15,20 @@ export const sendSong: ButtonHandler = {
       await interaction.reply("The window to submit songs has passed. Sorry!");
       return;
     }
+
+    const trade = await fetchTrade(tradeName);
+    if (!trade) {
+      console.warn("This trade does not exist!");
+      console.trace();
+      return;
+    }
+
+    const prevSubmit = trade.trades.find(
+      (song) => interaction.user.id === song.from.toString()
+    );
+
     // console.log(`including trade name ${tradeName} into form`);
-    await interaction.showModal(getSongForm(tradeName));
+    await interaction.showModal(getSongForm(tradeName, prevSubmit));
     // console.log("modal shown");
   },
 };
