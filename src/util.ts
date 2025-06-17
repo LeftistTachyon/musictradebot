@@ -554,7 +554,6 @@ Below are all the song trades that happened this time around:`,
         .join("\n\n")
     ),
     expireDate: ExpireDate.Never,
-    format: "markdown",
     name: encodeURI(trade.name + ".md"),
     publicity: Publicity.Public,
   });
