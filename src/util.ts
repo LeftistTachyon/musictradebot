@@ -542,19 +542,17 @@ Below are all the song trades that happened this time around:`,
 
   // send via DMs to everybody involved
   const url = await pastebinClient.createPaste({
-    code: encodeURI(
-      trade.trades
-        .map((edge) =>
-          finishedTradeEdgeText(
-            edge,
-            names[edge.from.toString()],
-            names[edge.to.toString()]
-          )
+    code: trade.trades
+      .map((edge) =>
+        finishedTradeEdgeText(
+          edge,
+          names[edge.from.toString()],
+          names[edge.to.toString()]
         )
-        .join("\n\n")
-    ),
+      )
+      .join("\n\n"),
     expireDate: ExpireDate.Never,
-    name: encodeURI(trade.name + ".md"),
+    name: trade.name + ".md",
     publicity: Publicity.Public,
   });
 
