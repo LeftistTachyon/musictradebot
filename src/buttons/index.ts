@@ -8,6 +8,7 @@ import { optIn, optOut } from "./optInOut";
 import { profileDeleteConfirm } from "./profileDelete";
 import { sendComments } from "./sendComments";
 import { sendSong } from "./sendSong";
+import { debug } from "./debug";
 
 const buttonList: ButtonHandler[] = [
   createUpdateProfile1,
@@ -17,6 +18,7 @@ const buttonList: ButtonHandler[] = [
   profileDeleteConfirm,
   sendComments,
   sendSong,
+  debug,
 ];
 
 // Creating collection of buttons

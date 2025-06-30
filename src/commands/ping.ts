@@ -11,11 +11,11 @@ const ping: DiscordCommand = {
   async execute(interaction) {
     const sent = await interaction.reply({
       content: "Pinging...",
-      fetchReply: true,
+      withResponse: true,
     });
     await interaction.editReply(
       `Pong!\nRoundtrip latency: ${
-        sent.createdTimestamp - interaction.createdTimestamp
+        sent.interaction.createdTimestamp - interaction.createdTimestamp
       } ms`
     );
 
@@ -25,7 +25,7 @@ const ping: DiscordCommand = {
     const d = beforeNow.diffNow();
     await interaction.editReply(
       `Pong!\nRoundtrip latency: ${
-        sent.createdTimestamp - interaction.createdTimestamp
+        sent.interaction.createdTimestamp - interaction.createdTimestamp
       } ms\nDatabase latency: ${-d.toMillis()} ms`
     );
   },

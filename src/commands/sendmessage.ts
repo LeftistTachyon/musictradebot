@@ -1,7 +1,5 @@
 import {
-  BaseChannel,
   ChannelType,
-  GuildChannel,
   InteractionContextType,
   MessageFlags,
   PermissionFlagsBits,
@@ -9,6 +7,7 @@ import {
   TextChannel,
 } from "discord.js";
 import { registerActionRow } from "../buttons/createUpdateProfile";
+import { debugActionRow } from "../buttons/debug";
 import { actionRow as optActionRow } from "../buttons/optInOut";
 import type { DiscordCommand } from "../types";
 import { isAdmin, isInServer } from "../util";
@@ -36,7 +35,8 @@ const sendmessage: DiscordCommand = {
         .setDescription("The type of message to send into this channel")
         .addChoices(
           { name: "Registration button", value: "register" },
-          { name: "Opt in/out", value: "opt" }
+          { name: "Opt in/out", value: "opt" },
+          { name: "Debug", value: "debug" }
         )
         .setRequired(true)
     )
@@ -99,6 +99,17 @@ const sendmessage: DiscordCommand = {
 
         await interaction.editReply(
           `Successfully sent the opt in and out buttons into <#${channel.id}>!`
+        );
+
+        break;
+      case "debug":
+        await channel.send({
+          content: "This is a debug message.",
+          components: [debugActionRow],
+        });
+
+        await interaction.editReply(
+          `Successfully sent the debug message into <#${channel.id}>!`
         );
 
         break;

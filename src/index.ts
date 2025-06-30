@@ -102,6 +102,8 @@ async function run() {
             });
           }
         }
+
+        console.warn((error as Error).stack);
       }
     } else if (interaction.isModalSubmit()) {
       const customId = interaction.customId.includes(" ")
@@ -117,10 +119,20 @@ async function run() {
       try {
         await formHandler.execute(interaction);
       } catch (error) {
-        await interaction.reply({
-          content: "There was an error while submitting this form!",
-          flags: MessageFlags.Ephemeral,
-        });
+        if (!interaction.replied) {
+          if (interaction.deferred) {
+            await interaction.editReply(
+              "There was an error while submitting this form!"
+            );
+          } else {
+            await interaction.reply({
+              content: "There was an error while submitting this form!",
+              flags: MessageFlags.Ephemeral,
+            });
+          }
+        }
+
+        console.warn((error as Error).stack);
       }
     } else if (interaction.isAutocomplete()) {
       const command = commands.get(interaction.commandName);

@@ -54,7 +54,6 @@ export function getCommentForm(
           .setPlaceholder("Your rating of the song they gave you out of 10")
           .setValue(edge?.response?.rating ?? "")
           .setRequired(true)
-          .setMinLength(1)
           .setMaxLength(15)
           .setStyle(TextInputStyle.Short)
       ),

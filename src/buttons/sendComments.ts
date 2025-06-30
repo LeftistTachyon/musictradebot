@@ -1,4 +1,9 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
+import {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  MessageFlags,
+} from "discord.js";
 import { getCommentForm } from "../forms/sendComments";
 import { fetchTrade, getStage } from "../mongo";
 import type { ButtonHandler } from "../types";
@@ -12,9 +17,10 @@ export const sendComments: ButtonHandler = {
 
     const stage = await getStage(tradeName);
     if (stage !== "phase2") {
-      await interaction.reply(
-        "The window to submit responses to songs has passed. Sorry!"
-      );
+      await interaction.reply({
+        content: "The window to submit responses to songs has passed. Sorry!",
+        flags: MessageFlags.Ephemeral,
+      });
       return;
     }
 
