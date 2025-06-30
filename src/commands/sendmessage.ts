@@ -105,7 +105,7 @@ const sendmessage: DiscordCommand = {
       case "debug":
         await channel.send({
           content: "This is a debug message.",
-          components: [debugActionRow],
+          // components: [debugActionRow],
         });
 
         await interaction.editReply(
