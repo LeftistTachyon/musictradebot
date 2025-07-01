@@ -12,7 +12,6 @@ import { filter } from "fuzzaldrin-plus";
 import { DateTime } from "luxon";
 import { Long } from "mongodb";
 import { setTimeout } from "timers/promises";
-import { client } from "..";
 import { getActionRow } from "../buttons/sendSong";
 import {
   addTrade,
@@ -173,7 +172,7 @@ async function tradeStart(
     const { from, to } = edge;
 
     // ensure user exists before DM
-    const user = await client.users.fetch(from.toString());
+    const user = await interaction.client.users.fetch(from.toString());
     if (!user) {
       console.warn(`User ${from} doesn't exist!`);
       console.trace();
@@ -196,7 +195,11 @@ async function tradeStart(
     }
     const nickname = toServerProfile.nickname ?? toProfile.name;
 
-    const embed = await createProfileEmbed(toProfile, nickname);
+    const embed = await createProfileEmbed(
+      toProfile,
+      interaction.client,
+      nickname
+    );
     await user.send(
       embed
         ? {
@@ -221,7 +224,7 @@ Unfortunately, it seems that ${nickname} hasn't set up their music profile, so t
 
   // send server-wide announcement
   if (server.announcementsChannel) {
-    const channel = await client.channels.fetch(
+    const channel = await interaction.client.channels.fetch(
       server.announcementsChannel.toString()
     );
 
@@ -255,21 +258,25 @@ Make sure you send over the songs by ${timestamp}!
   // set timeouts
   const controller = new AbortController();
   const tradeParams = { server: trade.server, trade: trade.name };
+
   setTimeout(endOfPhase1, tradeParams, { signal: controller.signal })
-    .then(endPhase1)
+    .then((params) => endPhase1(params, interaction.client))
     .catch(console.warn); // ending phase 1
+
   setTimeout(endOfPhase1 - reminderPeriod, tradeParams, {
     signal: controller.signal,
   })
-    .then(remindPhase1)
+    .then((params) => remindPhase1(params, interaction.client))
     .catch(console.warn); // reminder for phase 1
+
   setTimeout(endOfPhase2, tradeParams, { signal: controller.signal })
-    .then(endPhase2)
+    .then((params) => endPhase2(params, interaction.client))
     .catch(console.warn); // ending phase 2
+
   setTimeout(endOfPhase2 - reminderPeriod, tradeParams, {
     signal: controller.signal,
   })
-    .then(remindPhase2)
+    .then((params) => remindPhase2(params, interaction.client))
     .catch(console.warn); // reminder for phase 2
 
   tradeStops[trade.name] = controller;
@@ -318,7 +325,7 @@ async function tradeStop(
   }
 
   for (const user of trade.users) {
-    const u = await client.users.fetch(user.toString());
+    const u = await interaction.client.users.fetch(user.toString());
     if (!u) {
       console.warn(`User ${user} doesn't exist!`);
       console.trace();
@@ -332,5 +339,5 @@ async function tradeStop(
 
   await interaction.editReply(`Successfully stopped trade \`${name}\`.`);
 
-  await endPhase2({ server, trade: name });
+  await endPhase2({ server, trade: name }, interaction.client);
 }

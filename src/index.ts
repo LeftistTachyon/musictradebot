@@ -18,7 +18,7 @@ import { getDefaultTimeframes } from "./util";
 const programStart = DateTime.now();
 
 // initialize Discord client
-export const client: Client = new Client({
+const client: Client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.DirectMessages],
 });
 

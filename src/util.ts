@@ -4,6 +4,7 @@ import {
   ButtonInteraction,
   CacheType,
   ChatInputCommandInteraction,
+  Client,
   EmbedBuilder,
   GuildMember,
   MessageFlags,
@@ -11,7 +12,6 @@ import {
 } from "discord.js";
 import { DateTime } from "luxon";
 import { ExpireDate, PasteClient, Publicity } from "pastebin-api";
-import { client } from ".";
 import adjectives from "../data/adjectives.json";
 import nouns from "../data/nouns.json";
 import { getActionRow } from "./buttons/sendComments";
@@ -298,7 +298,11 @@ export async function optOut(
  * @param nickname the nickname to use for this user
  * @returns the created embed, if possible. Otherwise, null.
  */
-export async function createProfileEmbed(user: User, nickname = user.name) {
+export async function createProfileEmbed(
+  user: User,
+  client: Client<true>,
+  nickname = user.name
+) {
   const output = new EmbedBuilder().setTitle(nickname + "'s Music Profile");
 
   const u = await client.users.fetch(user.uid.toString()),
@@ -380,10 +384,10 @@ export async function createProfileEmbed(user: User, nickname = user.name) {
  *
  * @param event the event that triggered this function call
  */
-export async function endPhase1({
-  server: serverID,
-  trade: tradeName,
-}: EventOf) {
+export async function endPhase1(
+  { server: serverID, trade: tradeName }: EventOf,
+  client: Client<true>
+) {
   console.log("Attempting to end phase 1 of", tradeName);
 
   const trade = await fetchTrade(tradeName);
@@ -454,10 +458,10 @@ If this is a recurring issue, please let your server owner know to exclude the o
  *
  * @param event the event that triggered this function call
  */
-export async function endPhase2({
-  server: serverID,
-  trade: tradeName,
-}: EventOf) {
+export async function endPhase2(
+  { server: serverID, trade: tradeName }: EventOf,
+  client: Client<true>
+) {
   console.log("Attempting to end phase 2 of", tradeName);
 
   const trade = await fetchTrade(tradeName);
@@ -578,7 +582,10 @@ Hope to see you again in another trade!`;
  *
  * @param event the event that triggered this function call
  */
-export async function remindPhase1({ trade: tradeName }: EventOf) {
+export async function remindPhase1(
+  { trade: tradeName }: EventOf,
+  client: Client<true>
+) {
   console.log("Attempting to remind for phase 1 of", tradeName);
 
   const trade = await fetchTrade(tradeName);
@@ -609,10 +616,10 @@ export async function remindPhase1({ trade: tradeName }: EventOf) {
  *
  * @param event the event that triggered this function call
  */
-export async function remindPhase2({
-  trade: tradeName,
-  server: serverID,
-}: EventOf) {
+export async function remindPhase2(
+  { trade: tradeName, server: serverID }: EventOf,
+  client: Client<true>
+) {
   console.log("Attempting to remind for phase 2 of", tradeName);
 
   const trade = await fetchTrade(tradeName);
