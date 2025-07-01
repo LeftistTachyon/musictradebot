@@ -82,7 +82,11 @@ const profile: DiscordCommand = {
         );
 
         const name = serverUserProfile?.nickname ?? userProfile.name;
-        const embed = await createProfileEmbed(userProfile, name);
+        const embed = await createProfileEmbed(
+          userProfile,
+          interaction.client,
+          name
+        );
 
         await interaction.editReply(
           embed

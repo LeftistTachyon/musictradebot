@@ -203,7 +203,9 @@ export function isAdmin(
  * @returns whether the interaction was done by the one and only leafytachyon
  */
 export function isBotOwner(
-  interaction: ChatInputCommandInteraction<CacheType>
+  interaction:
+    | ButtonInteraction<CacheType>
+    | ChatInputCommandInteraction<CacheType>
 ) {
   if (interaction.user.id === process.env.MY_ID) return true;
 
