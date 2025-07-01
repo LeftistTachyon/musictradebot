@@ -1,17 +1,6 @@
-import { PasteClient, ExpireDate, Publicity } from "pastebin-api";
+import { DateTime } from "luxon";
 
-// test
-(async () => {
-  const pastebinClient = new PasteClient(
-    process.env.PASTEBIN_KEY ?? "missing pastebin key"
-  );
+const now = DateTime.now(),
+  after = now.plus({ hours: 1 });
 
-  // send via DMs to everybody involved
-  const url = await pastebinClient.createPaste({
-    code: "# 早上好",
-    expireDate: ExpireDate.Never,
-    name: "something.md",
-    publicity: Publicity.Public,
-  });
-  console.log(url);
-})();
+console.log(now > after, after > now);
