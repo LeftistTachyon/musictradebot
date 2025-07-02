@@ -13,20 +13,22 @@ const ping: DiscordCommand = {
       content: "Pinging...",
       withResponse: true,
     });
+    const discordLatency = DateTime.fromJSDate(sent.interaction.createdAt)
+      .diffNow()
+      .toMillis();
     await interaction.editReply(
-      `Pong!\nRoundtrip latency: ${
-        sent.interaction.createdTimestamp - interaction.createdTimestamp
-      } ms`
+      `Pong!
+Roundtrip latency: ${discordLatency} ms`
     );
 
     const beforeNow = DateTime.now();
     await pingDB();
 
-    const d = beforeNow.diffNow();
+    const databaseLatency = -beforeNow.diffNow().toMillis();
     await interaction.editReply(
-      `Pong!\nRoundtrip latency: ${
-        sent.interaction.createdTimestamp - interaction.createdTimestamp
-      } ms\nDatabase latency: ${-d.toMillis()} ms`
+      `Pong!
+Roundtrip latency: ${discordLatency} ms
+Database latency: ${databaseLatency} ms`
     );
   },
 };

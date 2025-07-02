@@ -1,7 +1,6 @@
 import { Long } from "bson";
 import { Collection, MongoClient } from "mongodb";
 import type { Server, ServerUser, Trade, User } from "./types";
-import trade from "./commands/trade";
 
 // ! ============== INITIALIZATION ROUTINE ============== !
 const mongoURI = process.env.MONGO_URI || "missing-mongo-uri";
@@ -21,6 +20,7 @@ export default (async () => {
   console.log("Connecting to music bot DB...");
   await client.connect();
   isOpen = true;
+  console.log("Connected!");
 
   const musicDB = client.db("musicbot");
 

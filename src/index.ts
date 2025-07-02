@@ -13,6 +13,8 @@ import init, {
 } from "./mongo";
 import type { Server } from "./types";
 import { getDefaultTimeframes } from "./util";
+import { loadCache, scheduleFromCache } from "./event-cache";
+import { initTrades } from "./commands/trade";
 
 // startup time
 const programStart = DateTime.now();
@@ -22,14 +24,11 @@ const client: Client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.DirectMessages],
 });
 
-let interval: string | number | NodeJS.Timeout | undefined;
-
 /**
  * Kills the bot.
  */
 export async function kill() {
   console.log("Stopping...");
-  clearInterval(interval);
 
   console.log("Closing Mongo connection...");
   await close();
@@ -182,12 +181,16 @@ async function run() {
     await deleteServerUser(new Long(member.guild.id), new Long(member.id));
   });
 
-  client.once(Events.ClientReady, (c) => {
+  client.once(Events.ClientReady, async (c) => {
     console.log(
       `Ready! Logged in as ${c.user.tag} in ${-programStart
         .diffNow()
         .toMillis()} ms`
     );
+
+    process.stdout.write("loading event cache... ");
+    await initTrades(c);
+    console.log("loaded!");
   });
 
   client.on(Events.Invalidated, async () => {});

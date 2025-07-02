@@ -11,7 +11,7 @@ import { Trade } from "./types";
 type TradeEvent = {
   event: string;
   type: "end1" | "end2" | "remind1" | "remind2";
-  time: Date;
+  time: number;
 };
 
 let cache: TradeEvent[] = [];
@@ -36,7 +36,7 @@ export function addEvents(events: TradeEvent[]) {
  * Trims the cache to only contain future events
  */
 export function trimCache() {
-  const now = new Date();
+  const now = DateTime.now().toMillis();
   cache = cache.filter((event) => now <= event.time);
 }
 
@@ -87,7 +87,7 @@ export async function scheduleFromCache(client: Client<true>) {
     }
 
     // calculate the amount of time in the future this is
-    const millis = DateTime.fromJSDate(tradeEvent.time).diffNow().toMillis();
+    const millis = DateTime.fromMillis(tradeEvent.time).diffNow().toMillis();
     if (millis < 0) {
       console.warn(
         `${tradeEvent.event}'s ${tradeEvent.type} is from the past!`

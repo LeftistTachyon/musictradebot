@@ -1,6 +1,7 @@
 import {
   CacheType,
   ChatInputCommandInteraction,
+  Client,
   GuildMember,
   InteractionContextType,
   MessageFlags,
@@ -13,6 +14,13 @@ import { DateTime } from "luxon";
 import { Long } from "mongodb";
 import { setTimeout } from "timers/promises";
 import { getActionRow } from "../buttons/sendSong";
+import {
+  addEvents,
+  loadCache,
+  saveCache,
+  scheduleFromCache,
+  trimCache,
+} from "../event-cache";
 import {
   addTrade,
   fetchServerUser,
@@ -35,7 +43,6 @@ import {
   remindPhase1,
   remindPhase2,
 } from "../util";
-import { addEvents } from "../event-cache";
 
 const trade: DiscordCommand = {
   data: new SlashCommandBuilder()
@@ -120,7 +127,15 @@ const trade: DiscordCommand = {
 
 export default trade;
 
-const tradeStops: Record<string, AbortController> = {};
+let tradeStops: Record<string, AbortController> = {};
+/**
+ * Initializes the trades from the disk cache
+ * @param c a valid Discord.JS client to send DMs to members with
+ */
+export async function initTrades(c: Client<true>) {
+  await loadCache();
+  Object.assign(tradeStops, await scheduleFromCache(c));
+}
 
 /**
  * Handles the "trade start" subcommand
@@ -281,7 +296,33 @@ Make sure you send over the songs by ${timestamp}!
   tradeStops[trade.name] = controller;
   // console.log(tradeStops);
 
-  addEvents([{ event: trade.name, time: trade.end, type: "end1" }]);
+  const phase1Time = DateTime.fromJSDate(trade.end).toMillis(),
+    phase2Time = phase1Time + server.commentPeriod * 60_000;
+  addEvents([
+    {
+      event: trade.name,
+      time: phase1Time,
+      type: "end1",
+    },
+    {
+      event: trade.name,
+      time: phase1Time - reminderPeriod,
+      type: "remind1",
+    },
+    {
+      event: trade.name,
+      time: phase2Time,
+      type: "end2",
+    },
+    {
+      event: trade.name,
+      time: phase2Time - reminderPeriod,
+      type: "remind2",
+    },
+  ]);
+
+  trimCache();
+  await saveCache();
 }
 
 /**
