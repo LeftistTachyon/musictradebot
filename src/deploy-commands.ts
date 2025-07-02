@@ -1,6 +1,6 @@
 import { REST, Routes } from "discord.js";
-import { kill } from ".";
 import { commandList } from "./commands";
+import { kill } from ".";
 
 // deploy le commmands
 
@@ -57,5 +57,6 @@ const rest = new REST().setToken(process.env.DISCORD_TOKEN);
     console.error(error);
   } finally {
     await kill();
+    process.exit(0);
   }
 })();

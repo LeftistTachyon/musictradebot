@@ -2,27 +2,21 @@ import { Client } from "discord.js";
 import { existsSync } from "fs";
 import { readFile, writeFile } from "fs/promises";
 import { DateTime } from "luxon";
-import { fetchTrade } from "./mongo";
-import { setTimeout } from "timers/promises";
-import { endPhase1, endPhase2, remindPhase1, remindPhase2 } from "./util";
 import { WithId } from "mongodb";
-import { Trade } from "./types";
-
-type TradeEvent = {
-  event: string;
-  type: "end1" | "end2" | "remind1" | "remind2";
-  time: number;
-};
+import { setTimeout } from "timers/promises";
+import { fetchTrade } from "./mongo";
+import type { Trade, TradeEvent } from "./types";
+import { endPhase1, endPhase2, remindPhase1, remindPhase2 } from "./util";
 
 let cache: TradeEvent[] = [];
 
-/**
- * Returns all cached events
- * @returns all events
- */
-export function getCache() {
-  return cache;
-}
+// /**
+//  * Returns all cached events
+//  * @returns all events
+//  */
+// export function getCache() {
+//   return cache;
+// }
 
 /**
  * Adds the given events to the cache

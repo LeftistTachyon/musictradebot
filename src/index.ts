@@ -3,6 +3,7 @@ import { Client, Events, GatewayIntentBits, MessageFlags } from "discord.js";
 import { DateTime } from "luxon";
 import buttons from "./buttons";
 import commands from "./commands";
+import { initTrades } from "./commands/trade";
 import forms from "./forms";
 import init, {
   addServer,
@@ -13,8 +14,6 @@ import init, {
 } from "./mongo";
 import type { Server } from "./types";
 import { getDefaultTimeframes } from "./util";
-import { loadCache, scheduleFromCache } from "./event-cache";
-import { initTrades } from "./commands/trade";
 
 // startup time
 const programStart = DateTime.now();

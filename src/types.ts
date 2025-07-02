@@ -92,6 +92,15 @@ export type EventSelector = {
   [Property in keyof EventOf as `of.${Property}`]: EventOf[Property];
 };
 
+/**
+ * An event stored in the disc cache
+ */
+export type TradeEvent = {
+  event: string;
+  type: "end1" | "end2" | "remind1" | "remind2";
+  time: number;
+};
+
 // ! ================== DISCORD TYPES =================== !
 /**
  * Something that represents a slash command
