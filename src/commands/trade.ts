@@ -35,6 +35,7 @@ import {
   remindPhase1,
   remindPhase2,
 } from "../util";
+import { addEvents } from "../event-cache";
 
 const trade: DiscordCommand = {
   data: new SlashCommandBuilder()
@@ -248,9 +249,7 @@ Make sure you send over the songs by ${timestamp}!
   }
 
   // calculate when each event should occur
-  const endOfPhase1 = DateTime.fromJSDate(trade.end)
-      .diff(DateTime.now())
-      .toMillis(),
+  const endOfPhase1 = DateTime.fromJSDate(trade.end).diffNow().toMillis(),
     endOfPhase2 = endOfPhase1 + server.commentPeriod * 60_000,
     reminderPeriod = server.reminderPeriod * 60_000;
   // console.log({ endOfPhase1, endOfPhase2, reminderPeriod });
@@ -280,7 +279,9 @@ Make sure you send over the songs by ${timestamp}!
     .catch(console.warn); // reminder for phase 2
 
   tradeStops[trade.name] = controller;
-  console.log(tradeStops);
+  // console.log(tradeStops);
+
+  addEvents([{ event: trade.name, time: trade.end, type: "end1" }]);
 }
 
 /**

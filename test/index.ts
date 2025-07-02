@@ -1,6 +1,3 @@
 import { DateTime } from "luxon";
 
-const now = DateTime.now(),
-  after = now.plus({ hours: 1 });
-
-console.log(now > after, after > now);
+console.log(DateTime.now().minus({ minutes: 1 }).diffNow().toMillis());
