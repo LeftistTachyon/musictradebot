@@ -13,7 +13,7 @@ const ping: DiscordCommand = {
       content: "Pinging...",
       withResponse: true,
     });
-    const discordLatency = DateTime.fromJSDate(sent.interaction.createdAt)
+    const discordLatency = -DateTime.fromJSDate(sent.interaction.createdAt)
       .diffNow()
       .toMillis();
     await interaction.editReply(
