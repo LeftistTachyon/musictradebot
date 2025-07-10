@@ -449,7 +449,7 @@ export async function getIndividualTrades(
       });
     }
   }
-  console.log({ filter, projection });
+  // console.log({ filter, projection });
 
   // collect all responses
   const cursor = trades.find(filter, { projection }),
