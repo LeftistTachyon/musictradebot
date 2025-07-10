@@ -397,6 +397,70 @@ export async function setTradeResponse(
   return result.acknowledged && result.matchedCount === 1;
 }
 
+/**
+ * Fetches all trades from a given user or to a given user in a given server
+ *
+ * @param serverUID the server to query trades from
+ * @param from the (optional) user to check for song recommendations from
+ * @param to the (optional) user to check for song recipents to
+ * @returns all matching trades
+ */
+export async function getIndividualTrades(
+  serverUID: Long,
+  from?: Long,
+  to?: Long
+) {
+  if (!from && !to) {
+    console.warn("Invalid individual trade request!");
+    return [];
+  }
+
+  const filter = { server: serverUID },
+    projection: { trades?: { $elemMatch: any } } = {};
+
+  // sender filter
+  if (from) {
+    Object.assign(filter, {
+      "trades.from": from,
+      "trades.song": { $exists: true },
+    });
+
+    Object.assign(projection, {
+      trades: {
+        $elemMatch: { from },
+      },
+    });
+  }
+
+  // recipient filter
+  if (to) {
+    Object.assign(filter, {
+      "trades.to": to,
+      "trades.song": { $exists: true },
+    });
+
+    if (projection.trades?.$elemMatch) {
+      Object.assign(projection.trades?.$elemMatch, { to });
+    } else {
+      Object.assign(projection, {
+        trades: {
+          $elemMatch: { to },
+        },
+      });
+    }
+  }
+  console.log({ filter, projection });
+
+  // collect all responses
+  const cursor = trades.find(filter, { projection }),
+    result: Trade["trades"] = [];
+  for await (const doc of cursor) {
+    if (doc.trades[0].song) result.push(doc.trades[0]);
+  }
+
+  return result;
+}
+
 // no delete, as these will be retained perpetually
 
 // ! =================== EVENTS CRUD ==================== !

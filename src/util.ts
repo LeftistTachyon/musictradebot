@@ -16,22 +16,13 @@ import adjectives from "../data/adjectives.json";
 import nouns from "../data/nouns.json";
 import { getActionRow } from "./buttons/sendComments";
 import {
-  addServerUser,
   fetchServerUser,
   fetchTrade,
   fetchUser,
   getServer,
-  setOpt,
   setStage,
 } from "./mongo";
-import type {
-  EventOf,
-  EventSelector,
-  InServer,
-  Server,
-  Trade,
-  User,
-} from "./types";
+import type { EventOf, InServer, Server, Trade, User } from "./types";
 
 // ! ================== PASTEBIN INIT =================== !
 const pastebinClient = new PasteClient(
@@ -242,84 +233,6 @@ export function isBotOwner(
     content:
       "Sorry, this command can only be used by the bot owner!\nPlease contact leafytachyon for more information.",
   });
-}
-
-/**
- * Opts the user in to the interaction server's song trades given an interaction
- *
- * @param interaction the interaction to respond to
- * @returns a blank Promise that resolves when this interaction is complete
- */
-export async function optIn(
-  interaction:
-    | ChatInputCommandInteraction<CacheType>
-    | ButtonInteraction<CacheType>
-) {
-  if (!isInServer(interaction)) return;
-
-  // console.log("deferring reply...", {
-  //   deferReply: interaction.deferReply,
-  //   deferred: interaction.deferred,
-  //   replied: interaction.replied,
-  // });
-  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-
-  // console.log("attempting to fetch server user profile");
-  const serverID = new Long(interaction.guildId),
-    userID = new Long(interaction.user.id);
-  const user = await fetchUser(userID);
-  if (!user) {
-    await interaction.editReply(
-      "You don't have an account yet! Register first with `/profile create` before trying to opt into music trades."
-    );
-    return;
-  }
-
-  // console.log("attempting to opt in...");
-  const successful = (await fetchServerUser(serverID, userID)) // if server user exists
-    ? await setOpt(serverID, userID, true)
-    : await addServerUser(serverID, { uid: userID, optedIn: true });
-
-  await interaction.editReply(
-    successful
-      ? `You have successfully opted into ${interaction.guild?.name}'s music trades!`
-      : "Something went horribly wrong! Please let the server owner know that you can't opt into trades!"
-  );
-}
-
-/**
- * Opts the user out of the interaction server's song trades given an interaction
- *
- * @param interaction the interaction to respond to
- * @returns a blank Promise that respolves when this interaction is complete
- */
-export async function optOut(
-  interaction:
-    | ChatInputCommandInteraction<CacheType>
-    | ButtonInteraction<CacheType>
-) {
-  if (!isInServer(interaction)) return;
-
-  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-
-  const serverID = new Long(interaction.guildId),
-    userID = new Long(interaction.user.id);
-  const user = await fetchUser(userID);
-  if (!user) {
-    await interaction.editReply(
-      "You don't have an account yet! Register first before trying to opt out of music trades."
-    );
-  }
-
-  const successful = (await fetchServerUser(serverID, userID)) // if server user exists
-    ? await setOpt(serverID, userID, false)
-    : await addServerUser(serverID, { uid: userID, optedIn: false });
-
-  await interaction.editReply(
-    successful
-      ? `You have successfully opted out of ${interaction.guild?.name}'s music trades!`
-      : "Something went horribly wrong! Please let the server owner know that you can't opt out of trades!"
-  );
 }
 
 /**
@@ -693,7 +606,7 @@ export async function remindPhase2(
  * @param toName the nickname to use for the reciever
  * @returns the embed that includes all info from the edge
  */
-function finishedTradeEdgeEmbed(
+export function finishedTradeEdgeEmbed(
   edge: Trade["trades"][number],
   fromName?: string,
   toName?: string
