@@ -54,48 +54,68 @@ const tradeHistory: DiscordCommand = {
       guildID = new Long(interaction.guildId);
     const trades = await getIndividualTrades(guildID, fromUID, toUID);
 
-    // fetch all users in this trade
-    const allUsers: Set<Long> = new Set();
-    for (const trade of trades) {
-      allUsers.add(trade.from);
-      allUsers.add(trade.to);
-    }
+    if (trades.length) {
+      // fetch all users in this trade
+      const allUsers: Set<Long> = new Set();
+      for (const trade of trades) {
+        allUsers.add(trade.from);
+        allUsers.add(trade.to);
+      }
 
-    // fetch all nicknames
-    const names: Record<string, string | undefined> = {};
-    for (const userID of allUsers) {
-      names[userID.toString()] =
-        (await fetchServerUser(guildID, userID))?.nickname ??
-        (await fetchUser(userID))?.name;
-    }
+      // fetch all nicknames
+      const names: Record<string, string | undefined> = {};
+      for (const userID of allUsers) {
+        names[userID.toString()] =
+          (await fetchServerUser(guildID, userID))?.nickname ??
+          (await fetchUser(userID))?.name;
+      }
 
-    // send the message
-    while (trades.length) {
-      await channel.send({
-        embeds: trades
-          .splice(0, 10)
-          .map((edge) =>
-            finishedTradeEdgeEmbed(
-              edge,
-              names[edge.from.toString()],
-              names[edge.to.toString()]
-            )
-          ),
-      });
-    }
+      // send the message
+      while (trades.length) {
+        await channel.send({
+          embeds: trades
+            .splice(0, 10)
+            .map((edge) =>
+              finishedTradeEdgeEmbed(
+                edge,
+                names[edge.from.toString()],
+                names[edge.to.toString()]
+              )
+            ),
+        });
+      }
 
-    // send success command
-    await interaction.editReply(
-      from
-        ? to
-          ? `↓ Song trades from ${names[from.id.toString()]} to ${
-              names[to.id.toString()]
-            } ↓`
-          : `↓ Song trades from ${names[from.id.toString()]} ↓`
-        : to
-        ? `↓ Song trades to ${names[to.id.toString()]} ↓`
-        : "ERROR"
-    );
+      // send success command
+      await interaction.editReply(
+        from
+          ? to
+            ? `↓ Song trades sent by ${names[from.id.toString()]} to ${
+                names[to.id.toString()]
+              } ↓`
+            : `↓ Song trades sent by ${names[from.id.toString()]} ↓`
+          : to
+          ? `↓ Song trades recieved by ${names[to.id.toString()]} ↓`
+          : "ERROR"
+      );
+    } else {
+      // no such trades exist
+      const fromName = fromUID
+        ? (await fetchServerUser(guildID, fromUID))?.nickname ??
+          (await fetchUser(fromUID))?.name
+        : "";
+      const toName = toUID
+        ? (await fetchServerUser(guildID, toUID))?.nickname ??
+          (await fetchUser(toUID))?.name
+        : "";
+
+      await interaction.editReply(
+        from
+          ? to
+            ? `There have been no song trades sent by ${fromName} to ${toName}.`
+            : `There have been no song trades sent by ${fromName}.`
+          : `There have been no song trades recieved by ${toName}.`
+      );
+    }
   },
 };
 
