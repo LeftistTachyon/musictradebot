@@ -13,6 +13,7 @@ import setperiod from "./setperiod";
 import setpingrole from "./setpingrole";
 import stop from "./stop";
 import trade from "./trade";
+import tradeHistory from "./tradehistory";
 
 // ! Add any new commands into this list
 export const commandList: DiscordCommand[] = [
@@ -29,6 +30,7 @@ export const commandList: DiscordCommand[] = [
   setpingrole,
   stop,
   trade,
+  tradeHistory,
 ];
 
 // Creating collection of commands
