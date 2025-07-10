@@ -17,6 +17,7 @@ import { getActionRow } from "../buttons/sendSong";
 import {
   addEvents,
   loadCache,
+  removeFromCache,
   saveCache,
   scheduleFromCache,
   trimCache,
@@ -345,6 +346,7 @@ async function tradeStop(
     return;
   }
 
+  // stop all JS intervals
   const controller = tradeStops[name];
   if (!controller) {
     await interaction.editReply(
@@ -359,6 +361,7 @@ async function tradeStop(
     // console.trace(error?.stack);
   }
 
+  // mark the trade as done
   if (!(await setStage(name, "done"))) {
     await interaction.editReply(
       "Sorry, that music trade has ended already or you don't have access to it."
@@ -366,6 +369,7 @@ async function tradeStop(
     return;
   }
 
+  // notify individual users that the trade has stopped
   for (const user of trade.users) {
     const u = await interaction.client.users.fetch(user.toString());
     if (!u) {
@@ -379,7 +383,13 @@ async function tradeStop(
     );
   }
 
+  // notify of success
   await interaction.editReply(`Successfully stopped trade \`${name}\`.`);
+
+  // remove events from cache & save
+  removeFromCache(name);
+  trimCache();
+  await saveCache();
 
   await endPhase2({ server, trade: name }, interaction.client);
 }

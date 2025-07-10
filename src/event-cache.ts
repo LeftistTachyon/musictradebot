@@ -35,6 +35,14 @@ export function trimCache() {
 }
 
 /**
+ * Removes the given events from the cache
+ * @param eventName the event name to remove cached events from
+ */
+export function removeFromCache(eventName: string) {
+  cache = cache.filter((event) => event.event !== eventName);
+}
+
+/**
  * Saves the cache to disk
  * @param location the file location to save the cache to (optional)
  */
