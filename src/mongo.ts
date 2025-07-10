@@ -415,7 +415,7 @@ export async function getIndividualTrades(
     return [];
   }
 
-  const filter = { server: serverUID },
+  const filter = { server: serverUID, phase: "done" },
     projection: { trades?: { $elemMatch: any } } = {};
 
   // sender filter
