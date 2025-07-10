@@ -455,7 +455,7 @@ export async function getIndividualTrades(
   const cursor = trades.find(filter, { projection }),
     result: Trade["trades"] = [];
   for await (const doc of cursor) {
-    if (doc.trades[0].song) result.push(doc.trades[0]);
+    if (doc?.trades?.[0]?.song) result.push(doc.trades[0]);
   }
 
   return result;
