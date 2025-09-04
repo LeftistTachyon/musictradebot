@@ -50,6 +50,19 @@ export function generateTradeName() {
 }
 
 /**
+ * Shuffles a given array
+ * @param array the array to shuffle
+ */
+function shuffleArray(array: unknown[]) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = randomInt(i + 1);
+    const temp = array[i];
+    array[i] = array[j];
+    array[j] = temp;
+  }
+}
+
+/**
  * Creates a new default trade from the given server.
  * The phase 1 deadline is rounded down before being used.
  *
@@ -68,10 +81,14 @@ export function createTrade(
     .filter((user) => user.optedIn)
     .map((user) => user.uid);
 
-  // create random trade graph
+  // initialize memory
   const fromUnchosen = users.slice(),
     toUnchosen = users.slice(),
     trades: { from: Long; to: Long }[] = [];
+  shuffleArray(fromUnchosen);
+  shuffleArray(toUnchosen);
+
+  // create random trade graph
   while (fromUnchosen.length > 2) {
     let fromIdx: number, toIdx: number;
     do {
