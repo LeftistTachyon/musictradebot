@@ -316,14 +316,14 @@ export async function fetchTrade(name: string) {
 }
 
 /**
- * Finds all trades that are associated with the given server
+ * Finds all active trades that are associated with the given server
  *
  * @param server the server to find all trade names for
- * @returns all names of trades in the given server
+ * @returns all names of active trades in the given server
  */
-export async function fetchTradeNames(server: Long) {
+export async function fetchActiveTradeNames(server: Long) {
   return await trades
-    .find({ server, end: { $gt: new Date() } })
+    .find({ server, end: { $gt: new Date() }, phase: { $ne: "done" } })
     .map((trade) => trade.name)
     .toArray();
 }

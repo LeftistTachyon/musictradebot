@@ -26,7 +26,7 @@ import {
   addTrade,
   fetchServerUser,
   fetchTrade,
-  fetchTradeNames,
+  fetchActiveTradeNames,
   fetchUser,
   getLatestTrade,
   getServer,
@@ -112,7 +112,9 @@ const trade: DiscordCommand = {
 
     // only name is autocompleted
     const focusedValue = interaction.options.getFocused();
-    const tradeNames = await fetchTradeNames(new Long(interaction.guildId));
+    const tradeNames = await fetchActiveTradeNames(
+      new Long(interaction.guildId)
+    );
     if (focusedValue.length) {
       const filtered = filter(tradeNames, focusedValue);
 
