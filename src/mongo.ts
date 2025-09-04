@@ -461,6 +461,21 @@ export async function getIndividualTrades(
   return result;
 }
 
+/**
+ * Find the latest trade (sorted by beginning date) in a given server (`null` if none exist)
+ *
+ * @param server the server to find the latest trade for
+ * @returns the latest trade in the given server, if it exists (`null` is returned if none exist)
+ */
+export async function getLatestTrade(server: Long) {
+  const trade = await trades.findOne(
+    { server },
+    { sort: { start: -1 }, limit: 1 }
+  );
+
+  return trade;
+}
+
 // no delete, as these will be retained perpetually
 
 // ! =================== EVENTS CRUD ==================== !

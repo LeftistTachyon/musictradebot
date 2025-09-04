@@ -28,6 +28,7 @@ import {
   fetchTrade,
   fetchTradeNames,
   fetchUser,
+  getLatestTrade,
   getServer,
   setStage,
 } from "../mongo";
@@ -167,7 +168,11 @@ async function tradeStart(
   const deadline = interaction.options.getInteger("deadline", true);
 
   // create and add trade object
-  const trade: Trade = createTrade(server, deadline);
+  const trade: Trade = createTrade(
+    server,
+    deadline,
+    await getLatestTrade(new Long(interaction.guildId))
+  );
   while (await fetchTrade(trade.name)) trade.name = generateTradeName(); // avoid collisions
   console.log("New trade created:", trade.name);
 

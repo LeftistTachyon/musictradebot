@@ -55,9 +55,14 @@ export function generateTradeName() {
  *
  * @param server the server to generate a trade for
  * @param duration the duration (in days) that phase 1 of the trade should last
+ * @param previousTrade the previous trade in this server
  * @returns the generated trade
  */
-export function createTrade(server: Server, duration: number): Trade {
+export function createTrade(
+  server: Server,
+  duration: number,
+  previousTrade: Trade | null
+): Trade {
   // find participating users
   const users = server.users
     .filter((user) => user.optedIn)
@@ -68,17 +73,23 @@ export function createTrade(server: Server, duration: number): Trade {
     toUnchosen = users.slice(),
     trades: { from: Long; to: Long }[] = [];
   while (fromUnchosen.length > 2) {
-    let fromIdx, toIdx;
+    let fromIdx: number, toIdx: number;
     do {
       fromIdx = randomInt(fromUnchosen.length);
       toIdx = randomInt(toUnchosen.length);
-    } while (fromUnchosen[fromIdx] === toUnchosen[toIdx]);
+    } while (
+      fromUnchosen[fromIdx] === toUnchosen[toIdx] &&
+      previousTrade?.trades.find(
+        (edge) => edge.from === fromUnchosen[fromIdx] && toUnchosen[toIdx]
+      )
+    );
 
     trades.push({
       from: fromUnchosen.splice(fromIdx, 1)[0],
       to: toUnchosen.splice(toIdx, 1)[0],
     });
   }
+
   // ensure no lone wolf at end
   const included = toUnchosen.filter((a) => fromUnchosen.includes(a)),
     excluded = toUnchosen.filter((a) => !fromUnchosen.includes(a));
