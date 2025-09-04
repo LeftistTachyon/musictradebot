@@ -78,7 +78,7 @@ export function createTrade(
       fromIdx = randomInt(fromUnchosen.length);
       toIdx = randomInt(toUnchosen.length);
     } while (
-      fromUnchosen[fromIdx] === toUnchosen[toIdx] &&
+      fromUnchosen[fromIdx] === toUnchosen[toIdx] ||
       previousTrade?.trades.find(
         (edge) => edge.from === fromUnchosen[fromIdx] && toUnchosen[toIdx]
       )
